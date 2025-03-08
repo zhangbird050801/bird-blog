@@ -3,6 +3,15 @@ spring:
     multipart:
       max-file-size: 2MB
       max-request-size: 5MB
+  profiles:
+    active: dev
+#  main:
+#    allow-circular-references: true
+#  datasource:
+#    driver-class-name: ${birdblog.datasource.driver-class-name}
+#    url: jdbc:mysql://${birdblog.datasource.host}:${birdblog.datasource.port}/${birdblog.datasource.database}
+#    username: ${birdblog.datasource.username}
+#    password: ${birdblog.datasource.password}
 
 springdoc:
   swagger-ui:
@@ -17,3 +26,10 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+birdblog:
+  alioss:
+    endpoint: ${birdblog.alioss.endpoint}
+    bucket-name: ${birdblog.alioss.bucket-name}
+    region: ${birdblog.alioss.region}
+
