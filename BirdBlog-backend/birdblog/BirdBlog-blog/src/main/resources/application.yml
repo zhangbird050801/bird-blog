@@ -1,0 +1,15 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/birdblog
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+springdoc:
+  group-configs:
+    - group: blog-api
+      paths-to-match: /api/**
+      packages-to-scan: com.birdblog.blog.controller
