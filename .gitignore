@@ -1,1 +1,15 @@
 .idea/
+*.iml
+.DS_Store
+
+target/
+logs/
+*.log
+
+.env
+.env.*
+
+**/application*.yml
+
+!**/application-example.yml
+!**/application-sample.yml
