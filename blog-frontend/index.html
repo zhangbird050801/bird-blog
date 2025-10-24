@@ -13,6 +13,20 @@
 <body>
   <div id="app"></div>
   <script type="module" src="/src/main.js"></script>
+  <!-- Ribbon.js 彩带背景 -->
+  <script>
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.setAttribute('size', '90');
+        script.setAttribute('alpha', '0.6');
+        script.setAttribute('zIndex', '-1');
+        script.src = '/ribbon.min.js';
+        document.body.appendChild(script);
+      }, 200);
+    });
+  </script>
 </body>
 
 </html>

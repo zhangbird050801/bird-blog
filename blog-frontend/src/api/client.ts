@@ -19,7 +19,15 @@ import {
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api').replace(/\/$/, '')
 
+// 是否使用 Mock 数据（开发模式默认使用）
+const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  // 如果启用 Mock，直接抛出错误让 catch 处理
+  if (USE_MOCK) {
+    throw new Error('使用 Mock 数据')
+  }
+  
   const url = `${API_BASE}${path}`
   const response = await fetch(url, {
     headers: {

@@ -40,7 +40,8 @@ const activeFilters = computed(() => {
 })
 
 async function load() {
-  await Promise.all([
+  // 并行加载所有数据，不需要等待
+  Promise.all([
     articleState.run(() =>
       fetchArticles({
         page: 1,
@@ -52,7 +53,9 @@ async function load() {
     ),
     categoriesState.run(() => fetchCategories()),
     tagsState.run(() => fetchTags()),
-  ])
+  ]).catch(err => {
+    console.error('数据加载失败:', err)
+  })
 }
 
 onMounted(load)
@@ -69,7 +72,7 @@ watch(
   <div class="home-view">
     <section class="hero-section">
       <BlogHero
-        backgroundImage="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=650&fit=crop"
+        backgroundImage="/src/assets/wallhaven-yqxqv7.jpg"
         title="BirdBlog"
         subtitle="探索技术，分享知识"
       />
@@ -94,26 +97,37 @@ watch(
           </LgCard>
           
           <!-- 最新文章 -->
-          <LgCard v-if="latestSidebarArticles.length" class="sidebar-card" padding="md">
+          <LgCard class="sidebar-card" padding="md">
             <section class="sidebar-section">
               <h3 class="sidebar-title">最新文章</h3>
-              <LatestPostsList :articles="latestSidebarArticles" />
+              <div v-if="articleState.loading.value" class="skeleton-sidebar">
+                <div v-for="i in 3" :key="i" class="skeleton-item"></div>
+              </div>
+              <LatestPostsList v-else-if="latestSidebarArticles.length" :articles="latestSidebarArticles" />
             </section>
           </LgCard>
           
           <!-- 分类列表 -->
-          <LgCard v-if="categoriesList.length" class="sidebar-card" padding="md">
+          <LgCard class="sidebar-card" padding="md">
             <section class="sidebar-section">
               <h3 class="sidebar-title">分类</h3>
-              <CategoryList :categories="categoriesList" />
+              <div v-if="categoriesState.loading.value" class="skeleton-sidebar">
+                <div v-for="i in 3" :key="i" class="skeleton-item"></div>
+              </div>
+              <CategoryList v-else-if="categoriesList.length" :categories="categoriesList" />
             </section>
           </LgCard>
           
           <!-- 标签云 -->
-          <LgCard v-if="tagsList.length" class="sidebar-card" padding="md">
+          <LgCard class="sidebar-card" padding="md">
             <section class="sidebar-section">
               <h3 class="sidebar-title">标签</h3>
-              <TagCloud :tags="tagsList" />
+              <div v-if="tagsState.loading.value" class="skeleton-sidebar">
+                <div class="skeleton-tags">
+                  <div v-for="i in 6" :key="i" class="skeleton-tag"></div>
+                </div>
+              </div>
+              <TagCloud v-else-if="tagsList.length" :tags="tagsList" />
             </section>
           </LgCard>
         </aside>
@@ -142,7 +156,7 @@ watch(
 
 <style scoped>
 .home-view {
-  background: #f5f5f5;
+  background: transparent;
   min-height: 100vh;
 }
 
@@ -320,6 +334,24 @@ watch(
     rgba(255, 255, 255, 0.2), 
     rgba(255, 255, 255, 0.35), 
     rgba(255, 255, 255, 0.2));
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* 侧边栏骨架屏 */
+.skeleton-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-item {
+  height: 60px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, 
+    rgba(100, 100, 100, 0.1), 
+    rgba(100, 100, 100, 0.2), 
+    rgba(100, 100, 100, 0.1));
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
 }

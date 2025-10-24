@@ -44,7 +44,6 @@ function onSearchSubmit() {
         </span>
         <span class="brand__text">
           <strong>BirdBlog</strong>
-          <span>流动质感博客</span>
         </span>
       </a>
 
