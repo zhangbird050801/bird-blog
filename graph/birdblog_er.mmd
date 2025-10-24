@@ -1,0 +1,153 @@
+
+erDiagram
+    sys_user ||--o{ bg_article : writes
+    bg_category ||--o{ bg_article : categorizes
+    bg_article ||--o{ bg_comment : has
+    sys_user ||--o{ bg_comment : leaves
+    bg_article ||--o{ bg_article_tag : tags
+    bg_tag ||--o{ bg_article_tag : "tagged in"
+    sys_user ||--o{ sys_user_role : assigned
+    sys_role ||--o{ sys_user_role : aggregates
+    sys_role ||--o{ sys_role_menu : controls
+    sys_menu ||--o{ sys_role_menu : includes
+
+    sys_user {
+        BIGINT id PK
+        VARCHAR username
+        VARCHAR nick_name
+        VARCHAR password_hash
+        TINYINT type
+        TINYINT status
+        VARCHAR email
+        VARCHAR phone
+        TINYINT sex
+        VARCHAR avatar
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    sys_role {
+        BIGINT id PK
+        VARCHAR role_name
+        VARCHAR role_key
+        INT role_sort
+        TINYINT status
+        VARCHAR remark
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    sys_menu {
+        BIGINT id PK
+        VARCHAR menu_name
+        BIGINT parent_id FK
+        INT order_num
+        VARCHAR path
+        VARCHAR component
+        TINYINT is_frame
+        CHAR menu_type
+        TINYINT visible
+        TINYINT status
+        VARCHAR perms
+        VARCHAR icon
+        VARCHAR remark
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    sys_user_role {
+        BIGINT user_id PK,FK
+        BIGINT role_id PK,FK
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    sys_role_menu {
+        BIGINT role_id PK,FK
+        BIGINT menu_id PK,FK
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    bg_category {
+        BIGINT id PK
+        VARCHAR name
+        BIGINT pid FK
+        VARCHAR description
+        TINYINT status
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    bg_tag {
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR remark
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    bg_article {
+        BIGINT id PK
+        VARCHAR title
+        VARCHAR slug UK
+        VARCHAR summary
+        LONGTEXT content
+        BIGINT category_id FK
+        BIGINT author_id FK
+        VARCHAR thumbnail
+        BIT is_top
+        TINYINT status
+        BIT is_comment
+        BIGINT view_count
+        BIGINT like_count
+        BIGINT comment_count
+        DATETIME published_time
+        DATETIME pinned_time
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    bg_article_tag {
+        BIGINT article_id PK,FK
+        BIGINT tag_id PK,FK
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    bg_comment {
+        BIGINT id PK
+        TINYINT type
+        BIGINT article_id FK
+        BIGINT root_id FK
+        BIGINT parent_id FK
+        BIGINT from_user_id FK
+        BIGINT to_user_id FK
+        VARCHAR content
+        TINYINT status
+        BIGINT like_count
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
+
+    bg_link {
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR logo
+        VARCHAR description
+        VARCHAR address
+        TINYINT status
+        DATETIME create_time
+        DATETIME update_time
+        BIT deleted
+    }
