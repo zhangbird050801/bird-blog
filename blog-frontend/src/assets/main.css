@@ -73,6 +73,22 @@ body.dark .lg-frosted-icon {
   clear: both;
 }
 
+.lg-glass {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+body.dark .lg-glass {
+  background: rgba(39, 39, 39, 0.75) !important;
+}
+
+.nav-wrapper {
+  background: rgba(40, 42, 44, 0.75) !important;
+}
+
+body.dark .nav-wrapper {
+  background: rgba(26, 26, 46, 0.7) !important;
+}
+
 /* UI标签 */
 .ui.label {
   border-color: var(--sg-primary);
