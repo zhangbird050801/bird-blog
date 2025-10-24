@@ -6,27 +6,25 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
+  plugins: [vue(), vueDevTools()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-
   server: {
-    host: '127.0.0.1', port: 3000,
+    host: '127.0.0.1',
+    port: 5173,
     proxy: {
-      // 获取路径中包含 /api 的请求
       '/api': {
-        // 后台服务所在源
-        target: 'http://127.0.0.1:8000/',
+        target: 'http://localhost:8080',
         changeOrigin: true,
-        rewrite: (path)=>path.replace(/^\/api/,"")
-      }
-    }
-  }
+      },
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './tests/setup.ts',
+  },
 })
-
