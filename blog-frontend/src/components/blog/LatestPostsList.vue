@@ -91,13 +91,13 @@ body.dark .latest-posts__item {
 }
 
 .latest-posts__title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
 }
 
 .latest-posts__date {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(15, 23, 42, 0.6);
 }
 

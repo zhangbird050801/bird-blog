@@ -3,9 +3,9 @@ import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import AppNavbar from '@/components/layout/AppNavbar.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import BackToTop from '@/components/blog/BackToTop.vue'
 import { useTheme } from '@/composables/useTheme'
 
-// 通过统一主题钩子在应用初始化时同步 body 状态
 const { applyStoredTheme } = useTheme()
 
 onMounted(() => {
@@ -20,6 +20,7 @@ onMounted(() => {
       <RouterView />
     </main>
     <AppFooter />
+    <BackToTop />
   </div>
 </template>
 
@@ -28,11 +29,17 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  gap: clamp(24px, 4vw, 40px);
 }
 
 main {
   flex: 1;
   width: 100%;
+  padding-top: 60px;
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-top: 70px; 
+  }
 }
 </style>

@@ -36,6 +36,7 @@ const props = defineProps<{
   background: rgba(255, 255, 255, 0.22);
   border: 1px solid rgba(255, 255, 255, 0.32);
   color: var(--lg-text-primary);
+  font-size: 15px;
   transition:
     background-color 0.3s ease,
     color 0.3s ease,
@@ -61,7 +62,7 @@ body.dark .category-list a {
 }
 
 .category-list__count {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--lg-text-secondary);
 }
 

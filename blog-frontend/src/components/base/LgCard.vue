@@ -27,6 +27,7 @@ const props = withDefaults(defineProps<{
   flex-direction: column;
   gap: 18px;
   color: var(--lg-text-primary);
+  overflow: visible;
 }
 
 .lg-card--interactive {
@@ -35,6 +36,7 @@ const props = withDefaults(defineProps<{
 
 .lg-card--pad-none {
   padding: 0;
+  gap: 0;
 }
 
 .lg-card--pad-xs {

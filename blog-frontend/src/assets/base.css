@@ -1,38 +1,84 @@
+/* 字体声明 */
+@font-face {
+  font-family: 'HYTMR';
+  src: url('./fonts/HYTMR-55.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --lg-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  --lg-font-family: 'HYTMR', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, 'STHeiti', Helvetica, sans-serif;
+  
+  /* 圆角尺寸 */
+  --lg-radius-sm: 5px;
+  --lg-radius-md: 10px;
+  --lg-radius-lg: 15px;
   --lg-radius-2xl: 28px;
   --lg-radius-full: 9999px;
+  
+  --sg-primary: #97dffd;
+  --sg-secondary: #64609E;
+  --sg-dark: #48456D;
+  --sg-background: #efefef;
+  --sg-card-bg: #ffffff;
+  --sg-text: #444444;
+  --sg-text-light: #555555;
+  --sg-border: #dddddd;
+  
+  /* Liquid Glass毛玻璃效果 */
   --lg-glass-bg: rgba(255, 255, 255, 0.38);
   --lg-glass-bg-strong: rgba(255, 255, 255, 0.55);
   --lg-glass-stroke: rgba(255, 255, 255, 0.35);
-  --lg-shadow-soft: 0 30px 60px -40px rgba(15, 23, 42, 0.65);
+  
+  /* 阴影效果 */
+  --lg-shadow-soft: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  --lg-shadow-hover: 0 15px 30px rgba(0, 0, 0, 0.1);
   --lg-shadow-strong: 0 40px 80px -45px rgba(15, 23, 42, 0.75);
-  --lg-text-primary: #0b1526;
-  --lg-text-secondary: rgba(11, 21, 38, 0.7);
+  
+  /* 文字颜色 */
+  --lg-text-primary: var(--sg-text);
+  --lg-text-secondary: var(--sg-text-light);
   --lg-text-inverse: rgba(255, 255, 255, 0.9);
-  --lg-accent: #4f7cff;
-  --lg-accent-soft: rgba(79, 124, 255, 0.25);
+  
+  /* 主题色 */
+  --lg-accent: var(--sg-primary);
+  --lg-accent-secondary: var(--sg-secondary);
+  --lg-accent-dark: var(--sg-dark);
+  --lg-accent-soft: rgba(151, 223, 253, 0.25);
   --lg-success: #2dd4bf;
   --lg-danger: #f87171;
-  --lg-bg-root: radial-gradient(circle at top left, #e0f1ff 0%, #f8f9ff 40%, #f4f6ff 100%);
+  
+  /* 背景渐变 */
+  --lg-bg-root: var(--sg-background);
   --lg-border-glass: 1px solid rgba(255, 255, 255, 0.28);
+  
+  /* 过渡动画 */
   --lg-transition: 260ms cubic-bezier(0.22, 1, 0.36, 1);
-  --lg-focus-ring: 0 0 0 3px rgba(79, 124, 255, 0.35);
+  --lg-transition-fast: 200ms ease-in-out;
+  --lg-focus-ring: 0 0 0 3px rgba(151, 223, 253, 0.35);
+  
   color-scheme: light;
 }
 
 body.dark {
+  --sg-background: #1a1a2e;
+  --sg-card-bg: rgba(40, 42, 44, 0.9);
+  --sg-text: rgba(244, 247, 255, 0.96);
+  --sg-text-light: rgba(226, 232, 240, 0.75);
+  
   --lg-glass-bg: rgba(30, 41, 59, 0.55);
   --lg-glass-bg-strong: rgba(30, 41, 59, 0.72);
   --lg-glass-stroke: rgba(148, 163, 184, 0.25);
-  --lg-shadow-soft: 0 30px 60px -30px rgba(15, 23, 42, 0.85);
+  --lg-shadow-soft: 0 2px 4px 0 rgba(0, 0, 0, 0.3), 0 3px 2px -2px rgba(0, 0, 0, 0.4), 0 1px 8px 0 rgba(0, 0, 0, 0.25);
+  --lg-shadow-hover: 0 15px 30px rgba(0, 0, 0, 0.3);
   --lg-shadow-strong: 0 40px 80px -28px rgba(15, 23, 42, 0.95);
-  --lg-text-primary: rgba(244, 247, 255, 0.96);
-  --lg-text-secondary: rgba(226, 232, 240, 0.75);
+  --lg-text-primary: var(--sg-text);
+  --lg-text-secondary: var(--sg-text-light);
   --lg-text-inverse: rgba(12, 17, 28, 0.95);
   --lg-accent: #7aa2ff;
   --lg-accent-soft: rgba(122, 162, 255, 0.35);
-  --lg-bg-root: radial-gradient(circle at top left, #111827 0%, #11142b 45%, #080c1c 100%);
+  --lg-bg-root: var(--sg-background);
   color-scheme: dark;
 }
 
@@ -48,12 +94,14 @@ html, body {
   background: var(--lg-bg-root);
   color: var(--lg-text-primary);
   line-height: 1.6;
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
 }
 
 body {
   position: relative;
   overflow-x: hidden;
+  width: 100%;
   transition: background 420ms ease, color 200ms ease;
 }
 
@@ -61,28 +109,9 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -2;
-  background: inherit;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
   z-index: -1;
-  background: radial-gradient(circle at 20% 20%, rgba(79, 124, 255, 0.18), transparent 55%),
-              radial-gradient(circle at 80% 10%, rgba(111, 208, 255, 0.18), transparent 50%),
-              radial-gradient(circle at 50% 80%, rgba(45, 212, 191, 0.22), transparent 60%);
-  filter: blur(48px);
-  opacity: 0.85;
+  background: inherit;
   pointer-events: none;
-}
-
-body.dark::after {
-  background: radial-gradient(circle at 20% 20%, rgba(122, 162, 255, 0.22), transparent 50%),
-              radial-gradient(circle at 75% 15%, rgba(56, 189, 248, 0.18), transparent 50%),
-              radial-gradient(circle at 55% 75%, rgba(45, 212, 191, 0.25), transparent 60%);
-  opacity: 0.7;
 }
 
 a {

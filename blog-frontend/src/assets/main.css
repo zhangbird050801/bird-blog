@@ -5,19 +5,22 @@
   min-height: 100vh;
 }
 
+/* 主容器 */
 .lg-container {
-  width: min(1080px, 80vw);
-  margin: 0 auto;
-  padding: clamp(28px, 4vw, 48px) 0 clamp(80px, 8vw, 120px);
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
+/* Liquid Glass 毛玻璃效果 */
 .lg-glass {
   background: var(--lg-glass-bg);
-  border-radius: var(--lg-radius-2xl);
+  border-radius: var(--lg-radius-sm);
   backdrop-filter: blur(28px) saturate(165%) contrast(115%);
   border: var(--lg-border-glass);
-  box-shadow: none;
+  box-shadow: var(--lg-shadow-soft);
   transition: background var(--lg-transition);
+  overflow: visible; /* 允许内容溢出，特别是头像等元素 */
 }
 
 .lg-title {
@@ -59,60 +62,68 @@ body.dark .lg-frosted-icon {
   border: 0;
 }
 
-.hero-grid {
-  display: grid;
-  gap: clamp(20px, 2vw, 32px);
+/* 通用工具类 */
+.text-center {
+  text-align: center;
 }
 
-@media (min-width: 1024px) {
-  .hero-grid {
-    grid-template-columns: 3fr 2fr;
-  }
-}
-
-.main-grid {
-  display: grid;
-  gap: clamp(28px, 3vw, 40px);
-}
-
-@media (min-width: 1100px) {
-  .main-grid {
-    grid-template-columns: 3fr 1.2fr;
-  }
-}
-
-.glass-scroll {
-  position: relative;
-  overflow: auto;
-  border-radius: var(--lg-radius-2xl);
-  mask-image: linear-gradient(to bottom, transparent, black 12px, black calc(100% - 12px), transparent);
-}
-
-.glass-scroll::before,
-.glass-scroll::after {
+.clearfix::after {
   content: '';
-  position: sticky;
+  display: table;
+  clear: both;
+}
+
+/* UI标签 */
+.ui.label {
+  border-color: var(--sg-primary);
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 
+              0 3px 1px -2px rgba(0, 0, 0, 0.2), 
+              0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  background-color: var(--sg-primary);
+  margin: 5px 0 15px 2px;
+  font-size: 14px;
+  position: relative;
+  left: -32px;
+  border-radius: 0 4px 4px 0;
+  padding: 7px 11.2px 7px 32px;
+  display: inline-block;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.ui.label::after {
+  position: absolute;
+  content: '';
+  top: 100%;
   left: 0;
-  right: 0;
-  height: 28px;
-  pointer-events: none;
-  z-index: 2;
+  border-top: 0 solid transparent;
+  border-right-width: 1em;
+  border-right-color: var(--sg-dark);
+  border-right-style: solid;
+  border-bottom: 1em solid transparent;
+  border-left: 0 solid transparent;
+  width: 0;
+  height: 0;
 }
 
-.glass-scroll::before {
-  top: 0;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+.ui.label a {
+  color: #fff;
+  line-height: 100%;
 }
 
-.glass-scroll::after {
-  bottom: 0;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.8), transparent);
+.ui.label:hover {
+  background-color: var(--sg-secondary);
+  transform: translateX(2px);
 }
 
-body.dark .glass-scroll::before {
-  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), transparent);
-}
-
-body.dark .glass-scroll::after {
-  background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent);
+/* 移动端隐藏标签尾巴 */
+@media screen and (max-width: 800px) {
+  .ui.label {
+    left: -18px !important;
+    padding-left: 18px !important;
+  }
+  
+  .ui.label::after {
+    border: none !important;
+  }
 }

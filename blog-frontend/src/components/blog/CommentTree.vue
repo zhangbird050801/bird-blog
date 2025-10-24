@@ -9,8 +9,10 @@ const props = defineProps<{
 
 <template>
   <section class="comment-tree">
-    <h2>评论</h2>
-    <p v-if="!props.comments.length" class="comment-tree__empty">期待你的想法，成为首位评论者。</p>
+    <p v-if="!props.comments.length" class="comment-tree__empty">
+      <i class="fa fa-comment-o"></i>
+      暂无评论，期待你的想法
+    </p>
     <ol v-else class="comment-tree__list">
       <CommentTreeNode v-for="comment in props.comments" :key="comment.id" :comment="comment" />
     </ol>
@@ -21,18 +23,28 @@ const props = defineProps<{
 .comment-tree {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .comment-tree__list {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
 }
 
 .comment-tree__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px;
   color: var(--lg-text-secondary);
+  font-size: 14px;
+}
+
+.comment-tree__empty i {
+  font-size: 18px;
+  color: var(--sg-primary);
 }
 </style>

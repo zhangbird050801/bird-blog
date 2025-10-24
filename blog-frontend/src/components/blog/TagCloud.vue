@@ -30,7 +30,7 @@ const props = defineProps<{
   border-radius: var(--lg-radius-full);
   background: rgba(79, 124, 255, 0.16);
   color: var(--lg-accent);
-  font-size: 13px;
+  font-size: 14px;
   transition:
     background-color 0.3s ease,
     color 0.3s ease,
@@ -42,7 +42,7 @@ const props = defineProps<{
 
 .tag-cloud__count {
   color: var(--lg-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .tag-cloud a:hover {

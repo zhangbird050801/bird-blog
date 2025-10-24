@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
-  tone?: 'accent' | 'neutral'
+  tone?: 'accent' | 'primary' | 'neutral'
 }>(), {
   tone: 'accent',
 })
@@ -27,6 +27,12 @@ const props = withDefaults(defineProps<{
   color: var(--lg-accent);
 }
 
+.lg-badge--primary {
+  background: var(--sg-primary);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .lg-badge--neutral {
   background: rgba(148, 163, 184, 0.18);
   color: var(--lg-text-secondary);
@@ -35,5 +41,9 @@ const props = withDefaults(defineProps<{
 body.dark .lg-badge--neutral {
   background: rgba(148, 163, 184, 0.28);
   color: var(--lg-text-inverse);
+}
+
+body.dark .lg-badge--primary {
+  background: var(--sg-secondary);
 }
 </style>

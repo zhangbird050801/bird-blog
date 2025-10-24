@@ -10,7 +10,7 @@ export const mockArticles: ArticleDetail[] = [
     summary: '拆解 BirdBlog 哲学，打造具备沉浸感的博客体验。',
     content:
       '<p>BirdBlog 设计系统源自 visionOS 的深度质感，将玻璃材质与动态光影融合。本文分享如何在 Web 上复刻这份体验，包括变量体系、动效节奏与组件结构设计。</p>',
-    thumbnail: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+    thumbnail: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
     publishedAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 2).toISOString(),
     categoryName: '探索',
     tags: ['BirdBlog', '设计'],

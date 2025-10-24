@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import FeaturedHero from '@/components/blog/FeaturedHero.vue'
+import BlogHero from '@/components/blog/BlogHero.vue'
 import ArticleList from '@/components/blog/ArticleList.vue'
 import CategoryList from '@/components/blog/CategoryList.vue'
 import TagCloud from '@/components/blog/TagCloud.vue'
@@ -18,16 +18,15 @@ const articleState = useAsyncData<{ total: number; items: ArticleSummary[] }>()
 const categoriesState = useAsyncData<Category[]>()
 const tagsState = useAsyncData<Tag[]>()
 
-const heroArticle = computed(() => articleState.data.value?.items?.[0] ?? null)
-const listArticles = computed(() => {
-  const items = articleState.data.value?.items ?? []
-  return heroArticle.value ? items.slice(1) : items
-})
+const listArticles = computed(() => articleState.data.value?.items ?? [])
 
 const latestSidebarArticles = computed(() => {
   const items = articleState.data.value?.items ?? []
   return items.slice(0, 5)
 })
+
+const categoriesList = computed(() => categoriesState.data.value ?? [])
+const tagsList = computed(() => tagsState.data.value ?? [])
 
 const activeFilters = computed(() => {
   const filters: string[] = []
@@ -45,7 +44,7 @@ async function load() {
     articleState.run(() =>
       fetchArticles({
         page: 1,
-        size: 6,
+        size: 10,
         q: route.query.q?.toString(),
         category: route.query.category ? Number(route.query.category) : undefined,
         tag: route.query.tag ? Number(route.query.tag) : undefined,
@@ -68,101 +67,227 @@ watch(
 
 <template>
   <div class="home-view">
-    <section v-if="heroArticle">
-      <FeaturedHero :article="heroArticle" />
+    <section class="hero-section">
+      <BlogHero
+        backgroundImage="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=650&fit=crop"
+        title="BirdBlog"
+        subtitle="探索技术，分享知识"
+      />
     </section>
 
-    <section class="main-grid" id="archive">
-      <div class="content-column">
-        <p v-if="activeFilters.length" class="section-header__filters" role="status">
-          当前筛选：{{ activeFilters.join(' · ') }}
-        </p>
-
-        <div v-if="articleState.loading.value" class="skeleton-list" aria-label="加载中">
-          <div v-for="index in 3" :key="index" class="skeleton-card"></div>
-        </div>
-        <ArticleList v-else :articles="listArticles" />
-      </div>
-
-      <aside class="sidebar">
-        <LgCard
-          v-if="latestSidebarArticles.length"
-          class="sidebar-card"
-          padding="lg"
-        >
-          <section class="sidebar-section">
-            <h3>最新文章</h3>
-            <p class="sidebar-section__subtitle">即时掌握 BirdBlog 动态</p>
-            <LatestPostsList :articles="latestSidebarArticles" />
-          </section>
-        </LgCard>
-
-        <LgCard class="sidebar-card" padding="lg">
-          <section class="sidebar-section">
-            <h3>作者</h3>
-            <p class="sidebar-section__subtitle">探索 BirdBlog 背后的灵感</p>
+    <div class="container">
+      <section class="main-grid">
+        <!-- 个人信息卡片 -->
+        <aside class="sidebar-left">
+          <LgCard class="profile-card" padding="none">
             <AuthorCard />
-          </section>
-        </LgCard>
-
-        <LgCard class="sidebar-card" padding="lg">
-          <section class="sidebar-section">
-            <h3>分类导航</h3>
-            <p class="sidebar-section__subtitle">按主题快速定位文章</p>
-            <CategoryList :categories="categoriesState.data.value ?? []" />
-          </section>
-        </LgCard>
-
-        <LgCard class="sidebar-card" padding="lg">
-          <section class="sidebar-section">
-            <h3>标签云</h3>
-            <p class="sidebar-section__subtitle">BirdBlog 关键词地图</p>
-            <div class="glass-scroll">
-              <TagCloud :tags="tagsState.data.value ?? []" />
+          </LgCard>
+          
+          <!-- 公告卡片 -->
+          <LgCard class="notice-card" padding="md">
+            <div class="notice-header">
+              <i class="fa fa-bullhorn"></i>
+              公告
             </div>
-          </section>
-        </LgCard>
-      </aside>
-    </section>
+            <p class="notice-content">大三在读萌新，欢迎一起学习</p>
+            <p class="notice-contact">交流QQ: 2944006086</p>
+          </LgCard>
+          
+          <!-- 最新文章 -->
+          <LgCard v-if="latestSidebarArticles.length" class="sidebar-card" padding="md">
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">最新文章</h3>
+              <LatestPostsList :articles="latestSidebarArticles" />
+            </section>
+          </LgCard>
+          
+          <!-- 分类列表 -->
+          <LgCard v-if="categoriesList.length" class="sidebar-card" padding="md">
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">分类</h3>
+              <CategoryList :categories="categoriesList" />
+            </section>
+          </LgCard>
+          
+          <!-- 标签云 -->
+          <LgCard v-if="tagsList.length" class="sidebar-card" padding="md">
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">标签</h3>
+              <TagCloud :tags="tagsList" />
+            </section>
+          </LgCard>
+        </aside>
+
+        <div class="content-area">
+          <p v-if="activeFilters.length" class="filter-info" role="status">
+            当前筛选：{{ activeFilters.join(' · ') }}
+          </p>
+
+          <!-- 加载中显示骨架屏 -->
+          <div v-if="articleState.loading.value" class="skeleton-list" aria-label="加载中">
+            <div v-for="index in 3" :key="index" class="skeleton-card"></div>
+          </div>
+          <!-- 加载完成显示文章列表 -->
+          <ArticleList v-else-if="listArticles.length" :articles="listArticles" />
+          <!-- 无数据提示 -->
+          <div v-else class="empty-state">
+            <i class="fa fa-inbox"></i>
+            <p>暂无文章</p>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .home-view {
-  display: grid;
-  gap: clamp(32px, 4vw, 44px);
-  padding-inline: clamp(18px, 4vw, 56px);
+  background: #f5f5f5;
+  min-height: 100vh;
 }
 
-.section-header {
+.hero-section {
+  margin-top: -60px;
+  margin-bottom: 40px;
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px 120px;
+}
+
+.main-grid {
   display: grid;
+  gap: 30px;
+  grid-template-columns: 280px 1fr;
+}
+
+@media (max-width: 992px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-left {
+    order: 2;
+  }
+  
+  .content-area {
+    order: 1;
+  }
+}
+
+.sidebar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+
+.profile-card {
+  border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0;
+  overflow: visible !important;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  box-shadow: 0 8px 24px rgba(80, 204, 213, 0.3), 0 0 0 2px rgba(80, 204, 213, 0.5) !important;
+}
+
+.notice-card {
+  background: var(--sg-card-bg);
+  border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0;
+  transition: all 0.3s ease;
+}
+
+.notice-card:hover {
+  box-shadow: 0 8px 24px rgba(80, 204, 213, 0.3), 0 0 0 2px rgba(80, 204, 213, 0.5) !important;
+}
+
+.notice-header {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--lg-text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.section-header__filters {
-  margin: 4px 0 0;
-  color: var(--lg-text-secondary);
-  font-size: 14px;
+.notice-header i {
+  color: #f4692c;
 }
 
-.content-column {
+.notice-content {
+  font-size: 15px;
+  color: var(--lg-text-secondary);
+  margin: 0 0 8px;
+  line-height: 1.6;
+}
+
+.notice-contact {
+  font-size: 14px;
+  color: var(--lg-text-secondary);
+  margin: 0;
+}
+
+.sidebar-card {
+  background: var(--sg-card-bg);
+  border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0;
+  box-shadow: var(--lg-shadow-soft);
+  transition: all 0.3s ease;
+}
+
+.sidebar-card:hover {
+  box-shadow: 0 8px 24px rgba(80, 204, 213, 0.3), 0 0 0 2px rgba(80, 204, 213, 0.5) !important;
+}
+
+.sidebar-section {
   display: grid;
-  gap: clamp(24px, 3vw, 32px);
+  gap: 16px;
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lg-text-primary);
+  margin: 0;
+}
+
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-info {
+  margin: 4px 0 0;
+  color: var(--lg-text-secondary);
+  font-size: 15px;
+  padding: 10px 15px;
+  background: rgba(151, 223, 253, 0.1);
+  border-left: 3px solid var(--sg-primary);
+  border-radius: var(--lg-radius-sm);
+  grid-column: 1 / -1;
 }
 
 .sidebar {
   display: grid;
-  gap: clamp(12px, 1.8vw, 20px);
+  gap: 20px;
+  align-content: start;
 }
 
 .sidebar-card {
-  display: grid;
-  gap: 14px;
-  transition: box-shadow 0.3s ease;
+  background: var(--sg-card-bg);
+  border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0;
+  box-shadow: var(--lg-shadow-soft);
+  transition: all 0.3s ease;
 }
 
 .sidebar-card:hover {
-  box-shadow: 0 0 0 3px #50ccd5;
+  box-shadow: 0 8px 24px rgba(80, 204, 213, 0.3), 0 0 0 2px rgba(80, 204, 213, 0.5) !important;
 }
 
 .sidebar-section {
@@ -170,39 +295,17 @@ watch(
   gap: 14px;
 }
 
-.sidebar-section h3 {
+.sidebar-title {
   margin: 0;
-  font-size: 16px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--lg-text-secondary);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--lg-text-primary);
 }
 
-.sidebar-section__subtitle {
+.sidebar-subtitle {
   margin: 0;
   font-size: 13px;
   color: var(--lg-text-secondary);
-}
-
-.hero-note__points {
-  display: grid;
-  gap: 18px;
-}
-
-@media (min-width: 768px) {
-  .hero-note__points {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.hero-note h2 {
-  margin-top: 0;
-}
-
-.hero-note p {
-  margin: 0;
-  color: var(--lg-text-secondary);
-  font-size: 15px;
 }
 
 .skeleton-list {
@@ -212,17 +315,82 @@ watch(
 
 .skeleton-card {
   height: 200px;
-  border-radius: var(--lg-radius-2xl);
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.2));
-  animation: pulse 1.6s ease-in-out infinite;
+  border-radius: var(--lg-radius-sm);
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.2), 
+    rgba(255, 255, 255, 0.35), 
+    rgba(255, 255, 255, 0.2));
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.6;
+.skeleton-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skeleton-tag {
+  width: 80px;
+  height: 28px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.2), 
+    rgba(255, 255, 255, 0.35), 
+    rgba(255, 255, 255, 0.2));
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
   }
-  50% {
-    opacity: 1;
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--lg-text-secondary);
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: var(--sg-primary);
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-state p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 800px) {
+  .container {
+    max-width: 100% !important;
+  }
+  
+  .main-grid {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 500px) {
+  .hero-section {
+    margin-top: 0;
+  }
+  
+  .container {
+    padding: 0 5px;
   }
 }
 </style>
