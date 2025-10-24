@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2025-02-15T11:06:00",
+  "analysisMethod": "Manual reasoning due to sequential-thinking tool unavailable (记录在 operations-log.md)",
+  "questions": [
+    {
+      "priority": "high",
+      "question": "用户所说的 run 是运行 blog-frontend、admin-frontend 还是后端模块？期望输出或验证标准是什么？"
+    },
+    {
+      "priority": "high",
+      "question": "What REST API endpoints (URL, payload shape) will the backend expose for blog posts, categories, tags, and comments?"
+    },
+    {
+      "priority": "high",
+      "question": "How should the Vue project be migrated to TypeScript (tsconfig setup, component script lang, Vite config updates)?"
+    },
+    {
+      "priority": "medium",
+      "question": "What content structure and layout sections are required to emulate the Butterfly theme while respecting Liquid Glass guidelines?"
+    },
+    {
+      "priority": "medium",
+      "question": "Which backend modules should host the blog APIs (BirdBlog-blog vs BirdBlog-admin) and how will cross-origin requests be handled?"
+    },
+    {
+      "priority": "low",
+      "question": "Are there existing shared components or utility styles within admin-frontend that should be reused?"
+    }
+  ]
+}

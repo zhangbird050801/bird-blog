@@ -1,0 +1,23 @@
+{
+  "requestDate": "2025-02-14",
+  "requester": "user",
+  "workspace": "blog-frontend",
+  "summary": "Implement a Liquid Glass design system inspired front-end for blog with TypeScript Vue setup and integrate it with BirdBlog backend APIs.",
+  "objectives": [
+    "Design and build a TypeScript-based front-end in blog-frontend folder using Liquid Glass component library.",
+    "Create blog UI similar to hexo butterfly theme / birdyweb.top while adhering to Liquid Glass philosophy.",
+    "Implement comprehensive UI component library covering specified 50 components in single HTML/CSS/TS (or Vue) context.",
+    "Wire up front-end with existing BirdBlog backend for CRUD operations (posts, categories, etc.)."
+  ],
+  "constraints": [
+    "Follow AGENTS.md instructions prioritizing standard ecosystem reuse and removing security-focused code.",
+    "Prefer TypeScript for front-end implementation.",
+    "Generate responsive, accessible (WCAG 2.2) UI with dark mode toggle.",
+    "Maintain Liquid Glass rounded radius rules (rounded-2xl, rounded-full)."
+  ],
+  "openQuestions": [
+    "Exact backend API endpoints and data models currently available are unknown.",
+    "No UX assets beyond reference; need to infer layout sections.",
+    "Requirement for deployment or build scripts not clarified."
+  ]
+}
