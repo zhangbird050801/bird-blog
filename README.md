@@ -26,6 +26,8 @@ BirdBlog
 | 后端 | Spring Boot 3、Java 17、MyBatis Plus | 多模块结构，`BirdBlog-blog` 提供博客 API，`BirdBlog-admin` 负责后台管理。
 | 数据层 | MySQL（参考 `BirdBlog-backend/sql`） | 提供文章、分类、标签、评论等表结构。
 
+## admin-frontend
+
 ## 前端目录说明（`blog-frontend`）
 
 ```
