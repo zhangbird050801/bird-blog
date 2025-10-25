@@ -13,3 +13,5 @@ logs/
 
 !**/application-example.yml
 !**/application-sample.yml
+
+.codex/
