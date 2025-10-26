@@ -1,5 +1,6 @@
 package com.birdy.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -38,13 +39,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         Page<Article> page = new Page<>(1, 10);
         page(page, queryWrapper);
 
-        List<HotArticleVO> res = page.getRecords().stream()
-                .map(article -> {
-                    HotArticleVO vo = new HotArticleVO();
-                    BeanUtils.copyProperties(article, vo);
-                    return vo;
-                })
-                .toList();
+//        List<HotArticleVO> res = page.getRecords().stream()
+//                .map(article -> {
+//                    HotArticleVO vo = new HotArticleVO();
+//                    BeanUtils.copyProperties(article, vo);
+//                    return vo;
+//                })
+//                .toList();
+        List<HotArticleVO> res = BeanUtil.copyToList(page.getRecords(), HotArticleVO.class);
 
         return CommonResult.success(res);
     }
