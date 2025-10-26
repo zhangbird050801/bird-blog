@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.birdy.constants.SysConstants.ARTICLE_STATUS_RELEASE;
+
 /**
 * @author birdy
 * @description 针对表【bg_article(文章表)】的数据库操作Service实现
@@ -28,8 +30,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     public CommonResult hot() {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
 
-        // status 状态为 0 -> 已发布
-        queryWrapper.eq(Article::getStatus, 0);
+        // status 状态为已发布
+        queryWrapper.eq(Article::getStatus, ARTICLE_STATUS_RELEASE);
         // view_count 浏览量降序
         queryWrapper.orderByDesc(Article::getViewCount);
         // 10 条
