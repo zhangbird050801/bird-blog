@@ -1,5 +1,6 @@
 package com.birdy.service;
 
+import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.Article;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -10,4 +11,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface ArticleService extends IService<Article> {
 
+    CommonResult hot();
 }
