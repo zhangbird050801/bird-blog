@@ -9,6 +9,7 @@ export interface CommentNode {
   author: string
   content: string
   createdAt?: string
+  userAgent?: string
   replies: CommentNode[]
 }
 
