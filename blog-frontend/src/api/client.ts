@@ -42,6 +42,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>
 }
 
+type CommonResult<T> = {
+  code: number
+  msg?: string
+  data?: T
+}
+
 export async function fetchArticles(query: ArticleQuery = {}): Promise<PagedResponse<ArticleSummary>> {
   const params = new URLSearchParams()
   if (query.page) params.set('page', String(query.page))
@@ -115,5 +121,37 @@ export async function fetchComments(articleId: number): Promise<CommentNode[]> {
       throw error
     }
     return getMockComments(articleId)
+  }
+}
+
+export async function fetchHotArticles(limit = 5): Promise<ArticleSummary[]> {
+  type HotArticleVO = {
+    id: number
+    slug: string
+    title: string
+    viewCount?: number
+    thumbnail?: string
+  }
+  try {
+    const res = await request<CommonResult<HotArticleVO[]>>('/article/hot')
+    const list = res.data ?? []
+    return list
+      .slice(0, limit)
+      .map((item) => ({
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        summary: '',
+        thumbnail: item.thumbnail,
+        viewCount: item.viewCount,
+        tags: [],
+      }))
+  } catch (error) {
+    // Fallback to mock: sort by viewCount desc and take top N
+    const items = [...mockArticles]
+      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+      .slice(0, limit)
+      .map(mapToSummary)
+    return items
   }
 }

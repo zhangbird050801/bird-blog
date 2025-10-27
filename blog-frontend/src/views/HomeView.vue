@@ -8,7 +8,7 @@ import TagCloud from '@/components/blog/TagCloud.vue'
 import AuthorCard from '@/components/blog/AuthorCard.vue'
 import LatestPostsList from '@/components/blog/LatestPostsList.vue'
 import LgCard from '@/components/base/LgCard.vue'
-import { fetchArticles, fetchCategories, fetchTags } from '@/api/client'
+import { fetchArticles, fetchCategories, fetchTags, fetchHotArticles } from '@/api/client'
 import type { ArticleSummary, Category, Tag } from '@/api/types'
 import { useAsyncData } from '@/composables/useAsyncData'
 
@@ -17,6 +17,7 @@ const route = useRoute()
 const articleState = useAsyncData<{ total: number; items: ArticleSummary[] }>()
 const categoriesState = useAsyncData<Category[]>()
 const tagsState = useAsyncData<Tag[]>()
+const hotArticlesState = useAsyncData<ArticleSummary[]>()
 
 const listArticles = computed(() => articleState.data.value?.items ?? [])
 
@@ -27,6 +28,7 @@ const latestSidebarArticles = computed(() => {
 
 const categoriesList = computed(() => categoriesState.data.value ?? [])
 const tagsList = computed(() => tagsState.data.value ?? [])
+const hotArticlesList = computed(() => hotArticlesState.data.value ?? [])
 
 const activeFilters = computed(() => {
   const filters: string[] = []
@@ -53,6 +55,7 @@ async function load() {
     ),
     categoriesState.run(() => fetchCategories()),
     tagsState.run(() => fetchTags()),
+    hotArticlesState.run(() => fetchHotArticles(5)),
   ]).catch(err => {
     console.error('数据加载失败:', err)
   })
@@ -128,6 +131,17 @@ watch(
                 </div>
               </div>
               <TagCloud v-else-if="tagsList.length" :tags="tagsList" />
+            </section>
+          </LgCard>
+
+          <!-- 热门文章 -->
+          <LgCard class="sidebar-card" padding="md">
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">热门文章</h3>
+              <div v-if="hotArticlesState.loading.value" class="skeleton-sidebar">
+                <div v-for="i in 3" :key="i" class="skeleton-item"></div>
+              </div>
+              <LatestPostsList v-else-if="hotArticlesList.length" :articles="hotArticlesList" />
             </section>
           </LgCard>
         </aside>
