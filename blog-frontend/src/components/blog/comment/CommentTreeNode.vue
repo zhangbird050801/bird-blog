@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CommentNode } from '@/api/types'
+import type { CommentNode } from '@/api'
 
 defineOptions({
   name: 'CommentTreeNode',

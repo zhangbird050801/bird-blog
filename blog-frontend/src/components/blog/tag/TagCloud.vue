@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Tag } from '@/api/types'
+import type { Tag } from '@/api'
 
 const props = defineProps<{
   tags: Tag[]

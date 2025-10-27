@@ -3,7 +3,7 @@ import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import AppNavbar from '@/components/layout/AppNavbar.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
-import BackToTop from '@/components/blog/BackToTop.vue'
+import BackToTop from '@/components/blog/common/BackToTop.vue'
 import SnowfallEffect from '@/components/effects/SnowfallEffect.vue'
 import { useTheme } from '@/composables/useTheme'
 

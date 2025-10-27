@@ -9,6 +9,9 @@ logs/
 .env
 .env.*
 
+!admin-frontend/.env
+!admin-frontend/.env.*
+
 **/application*.yml
 
 !**/application-example.yml

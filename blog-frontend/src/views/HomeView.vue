@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import BlogHero from '@/components/blog/BlogHero.vue'
-import ArticleList from '@/components/blog/ArticleList.vue'
-import CategoryList from '@/components/blog/CategoryList.vue'
-import TagCloud from '@/components/blog/TagCloud.vue'
-import AuthorCard from '@/components/blog/AuthorCard.vue'
-import LatestPostsList from '@/components/blog/LatestPostsList.vue'
+import BlogHero from '@/components/blog/common/BlogHero.vue'
+import ArticleList from '@/components/blog/article/ArticleList.vue'
+import CategoryList from '@/components/blog/category/CategoryList.vue'
+import TagCloud from '@/components/blog/tag/TagCloud.vue'
+import AuthorCard from '@/components/blog/common/AuthorCard.vue'
+import LatestPostsList from '@/components/blog/article/LatestPostsList.vue'
 import LgCard from '@/components/base/LgCard.vue'
-import { fetchArticles, fetchCategories, fetchTags, fetchHotArticles } from '@/api/client'
-import type { ArticleSummary, Category, Tag } from '@/api/types'
+import { fetchArticles, fetchCategories, fetchTags, fetchHotArticles } from '@/api'
+import type { ArticleSummary, Category, Tag } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
 
 const route = useRoute()

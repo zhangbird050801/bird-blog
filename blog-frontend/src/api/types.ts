@@ -1,52 +1,15 @@
-export interface ArticleSummary {
-  id: number
-  title: string
-  slug: string
-  summary: string
-  thumbnail?: string
-  publishedAt?: string
-  categoryName?: string
-  tags: string[]
-  viewCount?: number
-  likeCount?: number
-}
+/**
+ * API 通用类型定义
+ * 
+ * 注意：各业务模块的具体类型定义已迁移到对应的 API 文件中：
+ * - 文章相关类型：article.ts
+ * - 分类相关类型：category.ts
+ * - 标签相关类型：tag.ts
+ * - 评论相关类型：comment.ts
+ * 
+ * 本文件仅保留跨模块共享的通用类型定义
+ */
 
-export interface ArticleDetail extends ArticleSummary {
-  content: string
-  commentCount?: number
-}
+// 目前暂无跨模块共享的通用类型
+// 如有需要可在此添加
 
-export interface Category {
-  id: number
-  name: string
-  slug?: string
-  description?: string
-  articleCount?: number
-}
-
-export interface Tag {
-  id: number
-  name: string
-  articleCount?: number
-}
-
-export interface CommentNode {
-  id: number
-  author: string
-  content: string
-  createdAt?: string
-  replies: CommentNode[]
-}
-
-export interface PagedResponse<T> {
-  total: number
-  items: T[]
-}
-
-export interface ArticleQuery {
-  page?: number
-  size?: number
-  category?: number
-  tag?: number
-  q?: string
-}

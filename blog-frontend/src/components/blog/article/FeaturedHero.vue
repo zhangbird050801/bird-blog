@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleSummary } from '@/api/types'
+import type { ArticleSummary } from '@/api'
 import LgCard from '@/components/base/LgCard.vue'
 import LgBadge from '@/components/base/LgBadge.vue'
 import LgButton from '@/components/base/LgButton.vue'

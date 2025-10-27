@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Category } from '@/api/types'
+import type { Category } from '@/api'
 
 const props = defineProps<{
   categories: Category[]

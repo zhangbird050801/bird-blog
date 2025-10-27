@@ -1,4 +1,7 @@
-import type { ArticleDetail, ArticleSummary, Category, CommentNode, Tag } from './types'
+import type { ArticleDetail, ArticleSummary } from './article'
+import type { Category } from './category'
+import type { Tag } from './tag'
+import type { CommentNode } from './comment'
 
 const now = new Date()
 

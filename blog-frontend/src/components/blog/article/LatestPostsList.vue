@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleSummary } from '@/api/types'
+import type { ArticleSummary } from '@/api'
 
 const props = defineProps<{
   articles: ArticleSummary[]
