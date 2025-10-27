@@ -1,5 +1,7 @@
 # AGENTS.md — Codex 工作操作手册
 
+ Always reply in Chinese!!!
+
 本文件面向 Codex AI，定义其职责与操作规范。
 
 ## 0. 角色定位与职责边界
