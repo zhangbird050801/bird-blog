@@ -17,7 +17,7 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://localhost:8888',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         // 代理转发时去掉 /api
         rewrite: (path) => path.replace(/^\/api/, ''),
