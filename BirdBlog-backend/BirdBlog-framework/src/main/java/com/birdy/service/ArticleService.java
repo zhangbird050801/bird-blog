@@ -12,4 +12,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface ArticleService extends IService<Article> {
 
     CommonResult hot();
+
+    CommonResult list(Long categoryId, int pageNum, int pageSize);
 }

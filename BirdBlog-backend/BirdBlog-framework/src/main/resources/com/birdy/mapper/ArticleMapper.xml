@@ -34,4 +34,43 @@
         view_count,like_count,comment_count,published_time,pinned_time,
         creator,create_time,updater,update_time,deleted
     </sql>
+
+    <!-- ArticleVO 结果映射，包含分类名称 -->
+    <resultMap id="ArticleVOResultMap" type="com.birdy.domain.vo.ArticleVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="slug" column="slug" />
+        <result property="summary" column="summary" />
+        <result property="categoryName" column="category_name" />
+        <result property="thumbnail" column="thumbnail" />
+        <result property="viewCount" column="view_count" />
+        <result property="likeCount" column="like_count" />
+        <result property="publishedTime" column="published_time" />
+    </resultMap>
+
+    <!-- 分页查询文章列表 -->
+    <select id="selectArticleVOPage" resultMap="ArticleVOResultMap">
+        SELECT 
+            a.id,
+            a.title,
+            a.slug,
+            a.summary,
+            c.name AS category_name,
+            a.thumbnail,
+            a.view_count,
+            a.like_count,
+            a.published_time
+        FROM bg_article a
+        LEFT JOIN bg_category c ON a.category_id = c.id
+        <where>
+            <if test="categoryId != null">
+                AND a.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                AND a.status = #{status}
+            </if>
+            AND a.deleted = 0
+        </where>
+        ORDER BY a.is_top DESC, a.published_time DESC
+    </select>
 </mapper>

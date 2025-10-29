@@ -21,4 +21,16 @@ public class ArticleController {
     public CommonResult hot() {
         return articleService.hot();
     }
+
+    /**
+     * 获取文章列表
+     * @param categoryId 分类id
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @return
+     */
+    @GetMapping("/list")
+    public CommonResult list(Long categoryId, int pageNum, int pageSize) {
+        return articleService.list(categoryId, pageNum, pageSize);
+    }
 }

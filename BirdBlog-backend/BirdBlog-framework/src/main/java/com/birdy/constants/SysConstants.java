@@ -10,5 +10,9 @@ public class SysConstants {
     public static final int ARTICLE_STATUS_RELEASE = 0;
     // 文章状态为草稿
     public static final int ARTICLE_STATUS_DRAFT = 1;
+    // 热门文章查询分页常量
+    public static final int HOT_ARTICLE_PAGE_NUM = 1;
+    public static final int HOT_ARTICLE_PAGE_SIZE = 5;
+    // 分类状态为正常
     public static final int CATEGORY_STATUS_ENABLE = 0;
 }

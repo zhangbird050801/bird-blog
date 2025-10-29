@@ -6,16 +6,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.Article;
+import com.birdy.domain.vo.ArticleVO;
 import com.birdy.domain.vo.HotArticleVO;
 import com.birdy.service.ArticleService;
 import com.birdy.mapper.ArticleMapper;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.birdy.constants.SysConstants.ARTICLE_STATUS_RELEASE;
+import static com.birdy.constants.SysConstants.*;
 
 /**
 * @author birdy
@@ -26,6 +26,8 @@ import static com.birdy.constants.SysConstants.ARTICLE_STATUS_RELEASE;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     implements ArticleService{
 
+    @Autowired
+    private ArticleMapper articleMapper;
 
     @Override
     public CommonResult hot() {
@@ -36,7 +38,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         // view_count 浏览量降序
         queryWrapper.orderByDesc(Article::getViewCount);
         // 10 条
-        Page<Article> page = new Page<>(1, 10);
+        Page<Article> page = new Page<>(HOT_ARTICLE_PAGE_NUM, HOT_ARTICLE_PAGE_SIZE);
         page(page, queryWrapper);
 
 //        List<HotArticleVO> res = page.getRecords().stream()
@@ -47,6 +49,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 //                })
 //                .toList();
         List<HotArticleVO> res = BeanUtil.copyToList(page.getRecords(), HotArticleVO.class);
+
+        return CommonResult.success(res);
+    }
+
+    @Override
+    public CommonResult list(Long categoryId, int pageNum, int pageSize) {
+        Page<ArticleVO> page = new Page<>(pageNum, pageSize);
+        List<ArticleVO> res = articleMapper.selectArticleVOPage(page, categoryId, ARTICLE_STATUS_RELEASE).getRecords();
 
         return CommonResult.success(res);
     }
