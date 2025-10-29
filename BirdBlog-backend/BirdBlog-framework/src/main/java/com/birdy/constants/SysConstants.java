@@ -18,4 +18,12 @@ public class SysConstants {
     public static final int LATEST_ARTICLE_PAGE_SIZE = 3;
     // 分类状态为正常
     public static final int CATEGORY_STATUS_ENABLE = 0;
+
+    //友链审核状态：0已审核通过, 1审核不通过, 2未审核
+    public static final int LINK_STATUS_ENABLE = 0;
+    public static final int LINK_STATUS_DISABLE = 1;
+    public static final int LINK_STATUS_PENDING = 2;
+
+
+
 }
