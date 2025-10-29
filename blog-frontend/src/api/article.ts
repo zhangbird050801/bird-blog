@@ -1,5 +1,61 @@
 import { getMockArticle, mapToSummary, mockArticles } from './mockData'
-import { get, type ApiResponse } from './http'
+import { get, type ApiResponse, handleApiResponse } from './http'
+
+/**
+ * ArticleVO
+ */
+interface ArticleVO {
+  id: number
+  title: string
+  slug: string
+  summary: string
+  categoryName?: string
+  thumbnail?: string
+  viewCount?: number
+  likeCount?: number
+  publishedTime?: string
+}
+
+/**
+ * 分页结果
+ */
+interface PageResultVO<T> {
+  total: number
+  rows: T[]
+  pageNum: number
+  pageSize: number
+  totalPages: number
+}
+
+/**
+ * ArticleDetailVO
+ */
+interface ArticleDetailVO {
+  id: number
+  title: string
+  slug: string
+  summary: string
+  content: string
+  categoryId?: number
+  categoryName?: string
+  thumbnail?: string
+  viewCount?: number
+  likeCount?: number
+  commentCount?: number
+  isComment?: boolean
+  publishedTime?: string
+}
+
+/**
+ * 后端返回的热门文章 VO
+ */
+interface HotArticleVO {
+  id: number
+  slug: string
+  title: string
+  viewCount?: number
+  thumbnail?: string
+}
 
 /**
  * 文章摘要信息
@@ -44,34 +100,61 @@ export interface PagedResponse<T> {
   items: T[]
 }
 
-/**
- * 热门文章 VO（后端返回）
- */
-interface HotArticleVO {
-  id: number
-  slug: string
-  title: string
-  viewCount?: number
-  thumbnail?: string
+
+function convertToArticleSummary(vo: ArticleVO): ArticleSummary {
+  return {
+    id: vo.id,
+    title: vo.title,
+    slug: vo.slug,
+    summary: vo.summary,
+    thumbnail: vo.thumbnail,
+    publishedAt: vo.publishedTime,
+    categoryName: vo.categoryName,
+    tags: [], // 后端列表接口暂不返回标签
+    viewCount: vo.viewCount,
+    likeCount: vo.likeCount,
+  }
 }
 
+function convertToArticleDetail(vo: ArticleDetailVO): ArticleDetail {
+  return {
+    id: vo.id,
+    title: vo.title,
+    slug: vo.slug,
+    summary: vo.summary,
+    content: vo.content,
+    thumbnail: vo.thumbnail,
+    publishedAt: vo.publishedTime,
+    categoryName: vo.categoryName,
+    tags: [], // 后端详情接口暂不返回标签
+    viewCount: vo.viewCount,
+    likeCount: vo.likeCount,
+    commentCount: vo.commentCount,
+  }
+}
 
 /**
- * 获取文章列表
+ * 获取文章列表（分页）
  * @param query 查询参数（分页、筛选等）
  */
 export async function fetchArticles(query: ArticleQuery = {}): Promise<PagedResponse<ArticleSummary>> {
-  const params = new URLSearchParams()
-  if (query.page) params.set('page', String(query.page))
-  if (query.size) params.set('size', String(query.size))
-  if (query.category) params.set('category', String(query.category))
-  if (query.tag) params.set('tag', String(query.tag))
-  if (query.q) params.set('q', query.q)
-  const path = `/articles${params.size ? `?${params.toString()}` : ''}`
-  
   try {
-    return await get<PagedResponse<ArticleSummary>>(path)
+    // /article/list?categoryId=xxx&pageNum=1&pageSize=20
+    const params = new URLSearchParams()
+    if (query.category) params.set('categoryId', String(query.category))
+    params.set('pageNum', String(query.page ?? 1))
+    params.set('pageSize', String(query.size ?? 20))
+    
+    const path = `/article/list?${params.toString()}`
+    const response = await get<ApiResponse<PageResultVO<ArticleVO>>>(path)
+    const pageResult = handleApiResponse(response)
+    
+    return {
+      total: pageResult.total,
+      items: pageResult.rows.map(convertToArticleSummary),
+    }
   } catch (error) {
+    console.warn('文章列表接口调用失败，使用 Mock 数据:', error)
     // 使用 Mock 数据
     const filtered = mockArticles.filter((article) => {
       let match = true
@@ -91,7 +174,7 @@ export async function fetchArticles(query: ArticleQuery = {}): Promise<PagedResp
       return match
     })
     const page = query.page ?? 1
-    const size = query.size ?? filtered.length
+    const size = query.size ?? 20
     const start = (page - 1) * size
     const items = filtered.slice(start, start + size).map(mapToSummary)
     return { total: filtered.length, items }
@@ -99,16 +182,19 @@ export async function fetchArticles(query: ArticleQuery = {}): Promise<PagedResp
 }
 
 /**
- * 获取文章详情
- * @param slug 文章唯一标识
+ * 获取文章详情（智能识别 ID 或 slug）
+ * @param idOrSlug 文章ID（纯数字）或 slug
  */
-export async function fetchArticleDetail(slug: string): Promise<ArticleDetail> {
+export async function fetchArticleDetail(idOrSlug: string): Promise<ArticleDetail> {
   try {
-    return await get<ArticleDetail>(`/articles/${slug}`)
+    const response = await get<ApiResponse<ArticleDetailVO>>(`/article/${idOrSlug}`)
+    const detail = handleApiResponse(response)
+    return convertToArticleDetail(detail)
   } catch (error) {
-    const article = getMockArticle(slug)
+    console.warn('文章详情接口调用失败，使用 Mock 数据:', error)
+    const article = getMockArticle(idOrSlug)
     if (!article) {
-      throw error
+      throw new Error(`文章不存在: ${idOrSlug}`)
     }
     return article
   }
@@ -120,8 +206,8 @@ export async function fetchArticleDetail(slug: string): Promise<ArticleDetail> {
  */
 export async function fetchHotArticles(limit = 5): Promise<ArticleSummary[]> {
   try {
-    const res = await get<ApiResponse<HotArticleVO[]>>('/article/hot')
-    const list = res.data ?? []
+    const response = await get<ApiResponse<HotArticleVO[]>>('/article/hot')
+    const list = handleApiResponse(response)
     return list
       .slice(0, limit)
       .map((item) => ({
@@ -134,6 +220,7 @@ export async function fetchHotArticles(limit = 5): Promise<ArticleSummary[]> {
         tags: [],
       }))
   } catch (error) {
+    console.warn('热门文章接口调用失败，使用 Mock 数据:', error)
     // 使用 Mock 数据：按浏览量倒序取前 N 篇
     const items = [...mockArticles]
       .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))

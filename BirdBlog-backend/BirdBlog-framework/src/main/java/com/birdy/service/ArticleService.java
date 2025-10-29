@@ -5,6 +5,7 @@ import com.birdy.domain.entity.Article;
 import com.birdy.domain.vo.ArticleDetailVO;
 import com.birdy.domain.vo.ArticleVO;
 import com.birdy.domain.vo.HotArticleVO;
+import com.birdy.domain.vo.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public interface ArticleService extends IService<Article> {
      * @param pageNum 页码
      * @param pageSize 每页数量
      */
-    CommonResult<List<ArticleVO>> list(Long categoryId, int pageNum, int pageSize);
+    CommonResult<PageResult<ArticleVO>> list(Long categoryId, int pageNum, int pageSize);
 
     /**
      * 获取文章详情（通过ID）
@@ -38,7 +39,7 @@ public interface ArticleService extends IService<Article> {
     CommonResult<ArticleDetailVO> getDetail(Long id);
 
     /**
-     * 获取文章详情（通过 slug，SEO友好）
+     * 获取文章详情
      * 
      * @param slug URL别名
      */

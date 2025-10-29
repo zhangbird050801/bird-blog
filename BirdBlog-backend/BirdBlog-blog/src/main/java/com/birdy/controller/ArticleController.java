@@ -4,6 +4,7 @@ import com.birdy.domain.CommonResult;
 import com.birdy.domain.vo.ArticleDetailVO;
 import com.birdy.domain.vo.ArticleVO;
 import com.birdy.domain.vo.HotArticleVO;
+import com.birdy.domain.vo.PageResult;
 import com.birdy.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +37,7 @@ public class ArticleController {
      * @return 文章列表
      */
     @GetMapping("/list")
-    public CommonResult<List<ArticleVO>> list(Long categoryId, int pageNum, int pageSize) {
+    public CommonResult<PageResult<ArticleVO>> list(Long categoryId, int pageNum, int pageSize) {
         return articleService.list(categoryId, pageNum, pageSize);
     }
 

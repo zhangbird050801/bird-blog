@@ -9,6 +9,7 @@ import com.birdy.domain.entity.Article;
 import com.birdy.domain.vo.ArticleDetailVO;
 import com.birdy.domain.vo.ArticleVO;
 import com.birdy.domain.vo.HotArticleVO;
+import com.birdy.domain.vo.PageResult;
 import com.birdy.enums.HttpCodeEnum;
 import com.birdy.service.ArticleService;
 import com.birdy.mapper.ArticleMapper;
@@ -56,11 +57,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public CommonResult<List<ArticleVO>> list(Long categoryId, int pageNum, int pageSize) {
+    public CommonResult<PageResult<ArticleVO>> list(Long categoryId, int pageNum, int pageSize) {
         Page<ArticleVO> page = new Page<>(pageNum, pageSize);
-        List<ArticleVO> res = articleMapper.selectArticleVOPage(page, categoryId, ARTICLE_STATUS_RELEASE).getRecords();
-
-        return CommonResult.success(res);
+        Page<ArticleVO> result = articleMapper.selectArticleVOPage(page, categoryId, ARTICLE_STATUS_RELEASE);
+        
+        // 封装分页结果
+        PageResult<ArticleVO> pageResult = new PageResult<>(
+            result.getTotal(),
+            result.getRecords(),
+            pageNum,
+            pageSize
+        );
+        
+        return CommonResult.success(pageResult);
     }
 
     @Override

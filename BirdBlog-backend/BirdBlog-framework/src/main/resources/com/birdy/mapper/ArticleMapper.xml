@@ -71,7 +71,9 @@
             </if>
             AND a.deleted = 0
         </where>
-        ORDER BY a.is_top DESC, a.published_time DESC
+        ORDER BY 
+            CASE WHEN a.is_top = 1 THEN 0 ELSE 1 END,
+            a.published_time DESC
     </select>
 
     <!-- ArticleDetailVO -->

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import BlogHero from '@/components/blog/common/BlogHero.vue'
 import ArticleList from '@/components/blog/article/ArticleList.vue'
 import CategoryList from '@/components/blog/category/CategoryList.vue'
@@ -8,18 +8,25 @@ import TagCloud from '@/components/blog/tag/TagCloud.vue'
 import AuthorCard from '@/components/blog/common/AuthorCard.vue'
 import LatestPostsList from '@/components/blog/article/LatestPostsList.vue'
 import LgCard from '@/components/base/LgCard.vue'
+import LgButton from '@/components/base/LgButton.vue'
 import { fetchArticles, fetchCategories, fetchTags, fetchHotArticles } from '@/api'
 import type { ArticleSummary, Category, Tag } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
 
 const route = useRoute()
+const router = useRouter()
 
 const articleState = useAsyncData<{ total: number; items: ArticleSummary[] }>()
 const categoriesState = useAsyncData<Category[]>()
 const tagsState = useAsyncData<Tag[]>()
 const hotArticlesState = useAsyncData<ArticleSummary[]>()
 
+const currentPage = ref(1)
+const pageSize = 20
+
 const listArticles = computed(() => articleState.data.value?.items ?? [])
+const totalArticles = computed(() => articleState.data.value?.total ?? 0)
+const totalPages = computed(() => Math.ceil(totalArticles.value / pageSize))
 
 const latestSidebarArticles = computed(() => {
   const items = articleState.data.value?.items ?? []
@@ -41,24 +48,51 @@ const activeFilters = computed(() => {
   return filters
 })
 
-async function load() {
-  // 并行加载所有数据，不需要等待
+async function loadArticles() {
+  await articleState.run(() =>
+    fetchArticles({
+      page: currentPage.value,
+      size: pageSize,
+      q: route.query.q?.toString(),
+      category: route.query.category ? Number(route.query.category) : undefined,
+      tag: route.query.tag ? Number(route.query.tag) : undefined,
+    })
+  )
+}
+
+async function loadSidebarData() {
   Promise.all([
-    articleState.run(() =>
-      fetchArticles({
-        page: 1,
-        size: 10,
-        q: route.query.q?.toString(),
-        category: route.query.category ? Number(route.query.category) : undefined,
-        tag: route.query.tag ? Number(route.query.tag) : undefined,
-      })
-    ),
     categoriesState.run(() => fetchCategories()),
     tagsState.run(() => fetchTags()),
     hotArticlesState.run(() => fetchHotArticles(5)),
   ]).catch(err => {
-    console.error('数据加载失败:', err)
+    console.error('侧边栏数据加载失败:', err)
   })
+}
+
+async function load() {
+  // 从路由参数获取页码
+  const page = route.query.page ? Number(route.query.page) : 1
+  currentPage.value = page
+  
+  // 并行加载所有数据
+  await Promise.all([
+    loadArticles(),
+    loadSidebarData()
+  ])
+}
+
+function handlePageChange(page: number) {
+  currentPage.value = page
+  // 更新 URL 参数
+  router.push({
+    query: {
+      ...route.query,
+      page: page > 1 ? String(page) : undefined
+    }
+  })
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 onMounted(load)
@@ -161,6 +195,41 @@ watch(
           <div v-else class="empty-state">
             <i class="fa fa-inbox"></i>
             <p>暂无文章</p>
+          </div>
+
+          <!-- 分页组件 -->
+          <div v-if="totalPages > 1 && !articleState.loading.value" class="pagination">
+            <LgButton
+              variant="ghost"
+              size="sm"
+              :disabled="currentPage <= 1"
+              @click="handlePageChange(currentPage - 1)"
+            >
+              <i class="fa fa-chevron-left"></i>
+              上一页
+            </LgButton>
+
+            <div class="page-numbers">
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                class="page-number"
+                :class="{ active: page === currentPage }"
+                @click="handlePageChange(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <LgButton
+              variant="ghost"
+              size="sm"
+              :disabled="currentPage >= totalPages"
+              @click="handlePageChange(currentPage + 1)"
+            >
+              下一页
+              <i class="fa fa-chevron-right"></i>
+            </LgButton>
           </div>
         </div>
       </section>
@@ -417,6 +486,48 @@ watch(
 .empty-state p {
   font-size: 16px;
   margin: 0;
+}
+
+/* 分页样式 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+  padding: 20px 0;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+.page-number {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--lg-text-secondary);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-number:hover {
+  background: rgba(80, 204, 213, 0.2);
+  border-color: var(--sg-primary);
+  color: var(--lg-text-primary);
+}
+
+.page-number.active {
+  background: var(--sg-primary);
+  border-color: var(--sg-primary);
+  color: #000;
+  font-weight: 600;
 }
 
 /* 移动端适配 */
