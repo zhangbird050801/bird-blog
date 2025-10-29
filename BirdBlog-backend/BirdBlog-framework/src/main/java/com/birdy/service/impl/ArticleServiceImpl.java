@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.Article;
-import com.birdy.domain.vo.ArticleDetailVO;
-import com.birdy.domain.vo.ArticleVO;
-import com.birdy.domain.vo.HotArticleVO;
-import com.birdy.domain.vo.PageResult;
+import com.birdy.domain.vo.*;
 import com.birdy.enums.HttpCodeEnum;
 import com.birdy.service.ArticleService;
 import com.birdy.mapper.ArticleMapper;
@@ -101,6 +98,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
         articleMapper.incrementViewCount(articleDetail.getId());
         return CommonResult.success(articleDetail);
+    }
+
+    @Override
+    public CommonResult<List<LatestArticleVO>> latest() {
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getStatus, ARTICLE_STATUS_RELEASE);
+        queryWrapper.orderByDesc(Article::getPublishedTime);
+        Page<Article> page = new Page<>(LATEST_ARTICLE_PAGE_NUM, LATEST_ARTICLE_PAGE_SIZE);
+        page(page, queryWrapper);
+
+        List<LatestArticleVO> res = BeanUtil.copyToList(page.getRecords(), LatestArticleVO.class);
+
+        return CommonResult.success(res);
     }
 }
 

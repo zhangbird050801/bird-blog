@@ -22,7 +22,7 @@ public class ArticleVO {
     private String title;
 
     /**
-     * URL别名（便于SEO）
+     * URL别名
      */
     private String slug;
 
@@ -30,6 +30,11 @@ public class ArticleVO {
      * 摘要
      */
     private String summary;
+
+    /**
+     * 是否置顶
+     */
+    private Boolean isTop;
 
     /**
      * 分类名称

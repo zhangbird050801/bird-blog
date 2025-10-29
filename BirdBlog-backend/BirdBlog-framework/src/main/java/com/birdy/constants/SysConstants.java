@@ -13,6 +13,9 @@ public class SysConstants {
     // 热门文章查询分页常量
     public static final int HOT_ARTICLE_PAGE_NUM = 1;
     public static final int HOT_ARTICLE_PAGE_SIZE = 5;
+    // 最新文章查询分页常量
+    public static final int LATEST_ARTICLE_PAGE_NUM = 1;
+    public static final int LATEST_ARTICLE_PAGE_SIZE = 3;
     // 分类状态为正常
     public static final int CATEGORY_STATUS_ENABLE = 0;
 }

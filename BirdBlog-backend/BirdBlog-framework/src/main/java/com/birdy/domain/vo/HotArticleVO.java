@@ -19,7 +19,7 @@ public class HotArticleVO {
     private Long id;
 
     /**
-     * URL别名（便于SEO）
+     * URL别名
      */
     private String slug;
 

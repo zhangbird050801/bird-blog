@@ -43,6 +43,7 @@
         <result property="summary" column="summary" />
         <result property="categoryName" column="category_name" />
         <result property="thumbnail" column="thumbnail" />
+        <result property="isTop" column="is_top" />
         <result property="viewCount" column="view_count" />
         <result property="likeCount" column="like_count" />
         <result property="publishedTime" column="published_time" />
@@ -57,6 +58,7 @@
             a.summary,
             c.name AS category_name,
             a.thumbnail,
+            a.is_top,
             a.view_count,
             a.like_count,
             a.published_time
@@ -72,7 +74,7 @@
             AND a.deleted = 0
         </where>
         ORDER BY 
-            CASE WHEN a.is_top = 1 THEN 0 ELSE 1 END,
+            a.is_top DESC,
             a.published_time DESC
     </select>
 

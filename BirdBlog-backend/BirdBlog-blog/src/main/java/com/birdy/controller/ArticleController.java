@@ -1,10 +1,7 @@
 package com.birdy.controller;
 
 import com.birdy.domain.CommonResult;
-import com.birdy.domain.vo.ArticleDetailVO;
-import com.birdy.domain.vo.ArticleVO;
-import com.birdy.domain.vo.HotArticleVO;
-import com.birdy.domain.vo.PageResult;
+import com.birdy.domain.vo.*;
 import com.birdy.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,5 +54,14 @@ public class ArticleController {
         } else {
             return articleService.getDetailBySlug(idOrSlug);
         }
+    }
+
+    /**
+     * 获取最新文章
+     * @return 最新文章列表 3 篇
+     */
+    @GetMapping("/latest")
+    public CommonResult<List<LatestArticleVO>> latest() {
+        return articleService.latest();
     }
 }

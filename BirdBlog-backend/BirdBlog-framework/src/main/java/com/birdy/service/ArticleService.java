@@ -2,10 +2,7 @@ package com.birdy.service;
 
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.Article;
-import com.birdy.domain.vo.ArticleDetailVO;
-import com.birdy.domain.vo.ArticleVO;
-import com.birdy.domain.vo.HotArticleVO;
-import com.birdy.domain.vo.PageResult;
+import com.birdy.domain.vo.*;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -44,4 +41,10 @@ public interface ArticleService extends IService<Article> {
      * @param slug URL别名
      */
     CommonResult<ArticleDetailVO> getDetailBySlug(String slug);
+
+    /**
+     * 获取最新文章
+     * @return 最新文章 3 篇
+     */
+    CommonResult<List<LatestArticleVO>> latest();
 }
