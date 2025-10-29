@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
 import LgIconButton from '@/components/base/LgIconButton.vue'
 import LgInput from '@/components/base/LgInput.vue'
+import { fetchCategories } from '@/api'
+import type { Category } from '@/api'
 
 const search = ref('')
 const router = useRouter()
 const route = useRoute()
 const { theme, toggleTheme } = useTheme()
+const categories = ref<Category[]>([])
+const showCategoryMenu = ref(false)
+const categoryDropdownRef = ref<HTMLElement | null>(null)
 
 // 提供简单导航跳转
 const navItems = [
@@ -17,10 +22,51 @@ const navItems = [
   { name: '关于', path: '/#about' },
 ]
 
+// 加载分类数据
+async function loadCategories() {
+  try {
+    categories.value = await fetchCategories()
+  } catch (error) {
+    console.error('加载分类失败:', error)
+  }
+}
+
+// 切换分类菜单显示状态
+function toggleCategoryMenu(event: Event) {
+  event.stopPropagation()
+  showCategoryMenu.value = !showCategoryMenu.value
+}
+
+// 关闭分类菜单
+function closeCategoryMenu() {
+  showCategoryMenu.value = false
+}
+
+// 点击外部关闭菜单
+function handleClickOutside(event: MouseEvent) {
+  if (categoryDropdownRef.value && !categoryDropdownRef.value.contains(event.target as Node)) {
+    closeCategoryMenu()
+  }
+}
+
+// 检查分类是否被激活
+function isCategoryActive(categoryId: number): boolean {
+  return route.query.category === String(categoryId)
+}
+
 function onSearchSubmit() {
   if (!search.value.trim()) return
   router.push({ path: '/', query: { q: search.value } })
 }
+
+onMounted(() => {
+  loadCategories()
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
@@ -56,6 +102,43 @@ function onSearchSubmit() {
         >
           {{ item.name }}
         </a>
+        
+        <!-- 分类下拉菜单 -->
+        <div ref="categoryDropdownRef" class="category-dropdown">
+          <button
+            class="nav-link category-trigger"
+            @click="toggleCategoryMenu"
+            aria-haspopup="true"
+            :aria-expanded="showCategoryMenu"
+          >
+            分类
+            <svg
+              class="dropdown-icon"
+              :class="{ 'dropdown-icon--open': showCategoryMenu }"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              width="16"
+              height="16"
+            >
+              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+            </svg>
+          </button>
+          
+          <div v-show="showCategoryMenu" class="category-menu" role="menu">
+            <a
+              v-for="category in categories"
+              :key="category.id"
+              :href="`/?category=${category.id}`"
+              :class="['category-item', isCategoryActive(category.id) ? 'category-item--active' : '']"
+              role="menuitem"
+              @click="closeCategoryMenu"
+            >
+              <span>{{ category.name }}</span>
+              <span v-if="category.count" class="category-count">{{ category.count }}</span>
+            </a>
+            <div v-if="!categories.length" class="category-empty">暂无分类</div>
+          </div>
+        </div>
       </nav>
 
       <div class="nav-actions">
@@ -188,7 +271,107 @@ body.dark .nav-wrapper {
 }
 
 .nav-link--active {
-  /* border-bottom-color: var(--sg-primary); */
+  border-bottom-color: var(--sg-primary);
+}
+
+/* 分类下拉菜单容器 */
+.category-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* 分类触发按钮 */
+.category-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* 下拉图标 */
+.dropdown-icon {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-icon--open {
+  transform: rotate(180deg);
+}
+
+/* 分类下拉菜单 */
+.category-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 180px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: rgba(40, 42, 44, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  padding: 8px 0;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+body.dark .category-menu {
+  background: rgba(26, 26, 46, 0.95);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 分类菜单项 */
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  gap: 8px;
+}
+
+.category-item:hover {
+  background: rgba(80, 204, 213, 0.2);
+  padding-left: 20px;
+}
+
+.category-item--active {
+  background: rgba(80, 204, 213, 0.3);
+  color: var(--sg-primary);
+  font-weight: 600;
+}
+
+.category-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.category-item--active .category-count {
+  background: rgba(80, 204, 213, 0.3);
+  color: var(--sg-primary);
+}
+
+.category-empty {
+  padding: 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
 }
 
 /* 右侧操作区 */
