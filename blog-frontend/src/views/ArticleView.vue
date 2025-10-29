@@ -12,6 +12,9 @@ import RelatedArticles from '@/components/blog/article/RelatedArticles.vue'
 import { fetchArticleDetail, fetchComments } from '@/api'
 import type { ArticleDetailVO, CommentNode } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { useMarkdown } from '@/composables/useMarkdown'
+// import 'highlight.js/styles/atom-one-dark.css' // 代码高亮样式主题
+import '../assets/atom-one-dark.css' 
 
 const props = defineProps<{ slug: string }>()
 const route = useRoute()
@@ -19,6 +22,14 @@ const route = useRoute()
 const articleState = useAsyncData<ArticleDetailVO>()
 const commentsState = useAsyncData<CommentNode[]>()
 const showDonate = ref(false)
+const { render: renderMarkdown } = useMarkdown()
+
+// 渲染后的 Markdown 内容
+const renderedContent = computed(() => {
+  const content = articleState.data.value?.content
+  if (!content) return ''
+  return renderMarkdown(content)
+})
 
 // Mock数据：上一篇/下一篇
 const prevArticle = ref({
@@ -127,7 +138,7 @@ watch(
           </figure>
 
           <!-- 文章内容 -->
-          <div class="article-main__body markdown-body" v-html="articleState.data.value.content"></div>
+          <div class="article-main__body markdown-body" v-html="renderedContent"></div>
           
           <!-- 标签暂时隐藏，等后端提供标签接口 -->
           <!-- <div class="article-main__tags" v-if="articleState.data.value.tags?.length">
@@ -488,30 +499,115 @@ html {
 }
 
 .article-main__body :deep(pre) {
-  background: #f6f8fa;
-  border-radius: 8px;
-  padding: 16px;
+  background: #282c34;
+  border-radius: 12px;
+  padding: 20px;
   overflow-x: auto;
-  margin: 16px 0;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.article-main__body :deep(pre::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent);
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+}
+
+/* 代码块装饰点（模拟 macOS 窗口控制按钮） */
+.article-main__body :deep(pre::after) {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  width: 12px;
+  height: 12px;
+  background: #ff5f56;
+  border-radius: 50%;
+  box-shadow: 
+    20px 0 0 #ffbd2e,
+    40px 0 0 #27c93f;
 }
 
 body.dark .article-main__body :deep(pre) {
-  background: rgba(255, 255, 255, 0.05);
+  background: #1e1e1e;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .article-main__body :deep(pre code) {
   background: transparent;
   padding: 0;
-  color: inherit;
+  color: #abb2bf;
+  display: block;
+  line-height: 1.6;
+  font-size: 14px;
+  padding-top: 12px; /* 为装饰点留出空间 */
+}
+
+/* 代码高亮特殊样式 */
+.article-main__body :deep(.hljs) {
+  padding: 0;
+  background: transparent;
+}
+
+.article-main__body :deep(pre.hljs) {
+  padding: 20px;
+}
+
+/* 优化行内代码和代码块的对比 */
+.article-main__body :deep(p code),
+.article-main__body :deep(li code),
+.article-main__body :deep(td code) {
+  background: rgba(151, 223, 253, 0.15);
+  border: 1px solid rgba(151, 223, 253, 0.3);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  color: var(--sg-secondary);
+  white-space: nowrap;
+}
+
+body.dark .article-main__body :deep(p code),
+body.dark .article-main__body :deep(li code),
+body.dark .article-main__body :deep(td code) {
+  background: rgba(151, 223, 253, 0.1);
+  border-color: rgba(151, 223, 253, 0.2);
 }
 
 .article-main__body :deep(blockquote) {
-  margin: 16px 0;
-  padding: 0 1em;
+  margin: 20px 0;
+  padding: 16px 20px;
   color: var(--lg-text-secondary);
   border-left: 4px solid var(--sg-primary);
+  background: rgba(151, 223, 253, 0.08);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  position: relative;
+}
+
+.article-main__body :deep(blockquote::before) {
+  content: '"';
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  font-size: 48px;
+  color: var(--sg-primary);
+  opacity: 0.2;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+body.dark .article-main__body :deep(blockquote) {
   background: rgba(151, 223, 253, 0.05);
-  border-radius: 4px;
 }
 
 .article-main__body :deep(ul),
@@ -526,22 +622,51 @@ body.dark .article-main__body :deep(pre) {
 
 .article-main__body :deep(table) {
   width: 100%;
-  border-collapse: collapse;
-  margin: 16px 0;
-  overflow-x: auto;
-  display: block;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 20px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 15px;
 }
 
 .article-main__body :deep(table th),
 .article-main__body :deep(table td) {
-  padding: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 12px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
   text-align: left;
 }
 
 .article-main__body :deep(table th) {
-  background: rgba(151, 223, 253, 0.1);
+  background: linear-gradient(135deg, rgba(151, 223, 253, 0.15), rgba(151, 223, 253, 0.08));
   font-weight: 600;
+  color: var(--lg-text-primary);
+  border-bottom: 2px solid var(--sg-primary);
+}
+
+.article-main__body :deep(table tr) {
+  transition: background-color 0.2s ease;
+}
+
+.article-main__body :deep(table tbody tr:hover) {
+  background: rgba(151, 223, 253, 0.05);
+}
+
+.article-main__body :deep(table tbody tr:nth-child(even)) {
+  background: rgba(148, 163, 184, 0.02);
+}
+
+body.dark .article-main__body :deep(table) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark .article-main__body :deep(table th) {
+  background: linear-gradient(135deg, rgba(151, 223, 253, 0.1), rgba(151, 223, 253, 0.05));
+}
+
+body.dark .article-main__body :deep(table tbody tr:nth-child(even)) {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .article-main__body :deep(img) {
