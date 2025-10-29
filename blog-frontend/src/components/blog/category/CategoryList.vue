@@ -11,7 +11,7 @@ const props = defineProps<{
     <li v-for="category in props.categories" :key="category.id">
       <a :href="`/?category=${category.id}`">
         <span>{{ category.name }}</span>
-        <span class="category-list__count">{{ category.articleCount ?? 0 }}</span>
+        <span class="category-list__count">{{ category.count ?? 0 }}</span>
       </a>
     </li>
   </ul>

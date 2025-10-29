@@ -10,7 +10,7 @@ export interface Category {
   slug?: string
   description?: string
   /** 分类下的文章数量(后端暂不返回,前端显示为0) */
-  articleCount?: number
+  count?: number
 }
 
 /**
