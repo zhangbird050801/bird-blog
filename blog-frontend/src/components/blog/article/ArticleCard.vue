@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { ArticleSummary } from '@/api'
+import type { ArticleVO } from '@/api'
 import LgCard from '@/components/base/LgCard.vue'
 import LgBadge from '@/components/base/LgBadge.vue'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  article: ArticleSummary
+  article: ArticleVO
 }>()
 
 const publishedLabel = computed(() => {
-  if (!props.article.publishedAt) return '最新'
-  return new Date(props.article.publishedAt).toLocaleDateString(undefined, {
+  if (!props.article.publishedTime) return '最新'
+  return new Date(props.article.publishedTime).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -27,7 +27,14 @@ const publishedLabel = computed(() => {
       <div class="article-card__content">
         <div class="article-card__meta">
           <div class="article-card__topline">
-            <LgBadge tone="primary">{{ article.categoryName ?? '未分类' }}</LgBadge>
+            <div class="article-card__badges">
+              <LgBadge v-if="article.isTop" tone="accent" class="top-badge" title="置顶">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" />
+                </svg>
+              </LgBadge>
+              <LgBadge tone="primary">{{ article.categoryName ?? '未分类' }}</LgBadge>
+            </div>
             <span class="article-card__date">{{ publishedLabel }}</span>
           </div>
           <h2 class="article-card__title">
@@ -35,9 +42,7 @@ const publishedLabel = computed(() => {
           </h2>
           <p class="article-card__summary">{{ article.summary }}</p>
           <div class="article-card__footer">
-            <div class="article-card__tags" aria-label="标签">
-              <span v-for="tag in article.tags" :key="tag">#{{ tag }}</span>
-            </div>
+            <!-- 标签信息暂时隐藏，等后端提供标签接口 -->
             <div class="article-card__metrics">
               <span aria-label="阅读量"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 4.5c4.5 0 8.5 3.229 9.5 7.5-1 4.271-5 7.5-9.5 7.5S1.5 16.271.5 12c1-4.271 5-7.5 9.5-7.5zm0 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm0-2.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>{{ article.viewCount ?? 0 }}</span>
               <span aria-label="点赞"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M9.999 5.889 9.518 5.04C8.523 3.316 6.659 2.222 4.64 2.222 2.074 2.222 0 4.295 0 6.862c0 1.247.495 2.445 1.373 3.323L10 18l8.628-7.815A4.704 4.704 0 0 0 20 6.862c0-2.567-2.074-4.64-4.641-4.64-2.02 0-3.883 1.094-4.878 2.818l-.482.849z"/></svg>{{ article.likeCount ?? 0 }}</span>
@@ -119,8 +124,33 @@ const publishedLabel = computed(() => {
 .article-card__topline {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   font-size: 15px;
+}
+
+.article-card__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-badge {
+  background: transparent !important;
+  color: #f87171 !important;
+  padding: 0 4px !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: auto;
+}
+
+.top-badge svg {
+  display: block;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(248, 113, 113, 0.4));
 }
 
 .article-card__date {

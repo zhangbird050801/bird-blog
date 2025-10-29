@@ -10,13 +10,13 @@ import ReadingProgress from '@/components/blog/article/ReadingProgress.vue'
 import ArticleNavigation from '@/components/blog/article/ArticleNavigation.vue'
 import RelatedArticles from '@/components/blog/article/RelatedArticles.vue'
 import { fetchArticleDetail, fetchComments } from '@/api'
-import type { ArticleDetail, CommentNode } from '@/api'
+import type { ArticleDetailVO, CommentNode } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
 
 const props = defineProps<{ slug: string }>()
 const route = useRoute()
 
-const articleState = useAsyncData<ArticleDetail>()
+const articleState = useAsyncData<ArticleDetailVO>()
 const commentsState = useAsyncData<CommentNode[]>()
 const showDonate = ref(false)
 
@@ -36,30 +36,33 @@ const nextArticle = ref({
 // Mock数据：相关推荐
 const relatedArticles = ref([
   {
+    id: 101,
     slug: 'linux-bandit',
     title: 'Linux | Bandit 练习',
     thumbnail: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=250&fit=crop',
     categoryName: 'Linux',
-    publishedAt: '2025-04-13'
+    publishedTime: '2025-04-13'
   },
   {
+    id: 102,
     slug: 'linux-debian-gnome',
     title: 'Linux | Debian | 更换 Gnome 至 Xfce4',
     thumbnail: 'https://images.unsplash.com/photo-1640158615573-cd28feb1bf4e?w=400&h=250&fit=crop',
     categoryName: 'Linux',
-    publishedAt: '2024-08-23'
+    publishedTime: '2024-08-23'
   },
   {
+    id: 103,
     slug: 'linux-ubuntu-lts',
     title: 'Linux | 安装并配置 Ubuntu 22.04 LTS',
     thumbnail: 'https://images.unsplash.com/photo-1640552435388-a54879e72b28?w=400&h=250&fit=crop',
     categoryName: 'Linux',
-    publishedAt: '2024-05-24'
+    publishedTime: '2024-05-24'
   }
 ])
 
 const publishDate = computed(() => {
-  const value = articleState.data.value?.publishedAt
+  const value = articleState.data.value?.publishedTime
   if (!value) return ''
   return new Date(value).toLocaleDateString(undefined, {
     year: 'numeric',
@@ -126,10 +129,10 @@ watch(
           <!-- 文章内容 -->
           <div class="article-main__body markdown-body" v-html="articleState.data.value.content"></div>
           
-          <!-- 标签 -->
-          <div class="article-main__tags" v-if="articleState.data.value.tags?.length">
+          <!-- 标签暂时隐藏，等后端提供标签接口 -->
+          <!-- <div class="article-main__tags" v-if="articleState.data.value.tags?.length">
             <span v-for="tag in articleState.data.value.tags" :key="tag">#{{ tag }}</span>
-          </div>
+          </div> -->
 
           <!-- 版权声明 -->
           <div class="article-main__footer">

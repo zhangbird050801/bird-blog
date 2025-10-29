@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import type { ArticleSummary } from '@/api'
+import type { ArticleVO } from '@/api'
 import LgCard from '@/components/base/LgCard.vue'
 import LgBadge from '@/components/base/LgBadge.vue'
 import LgButton from '@/components/base/LgButton.vue'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  article: ArticleSummary
+  article: ArticleVO
 }>()
 
 const publishedLabel = computed(() => {
-  if (!props.article.publishedAt) return '最新发布'
-  const date = new Date(props.article.publishedAt)
+  if (!props.article.publishedTime) return '最新发布'
+  const date = new Date(props.article.publishedTime)
   return date.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -37,10 +37,8 @@ const publishedLabel = computed(() => {
             查看归档
           </LgButton>
         </div>
-        <div class="hero-card__tags" aria-label="文章标签">
-          <span v-for="tag in article.tags" :key="tag" class="hero-card__tag">
-            #{{ tag }}
-          </span>
+        <!-- 标签信息暂时隐藏，等后端提供标签接口 -->
+        <div class="hero-card__tags" aria-label="文章标签" style="display: none;">
         </div>
       </div>
       <div class="hero-card__visual">

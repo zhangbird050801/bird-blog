@@ -9,17 +9,18 @@ import AuthorCard from '@/components/blog/common/AuthorCard.vue'
 import LatestPostsList from '@/components/blog/article/LatestPostsList.vue'
 import LgCard from '@/components/base/LgCard.vue'
 import LgButton from '@/components/base/LgButton.vue'
-import { fetchArticles, fetchCategories, fetchTags, fetchHotArticles } from '@/api'
-import type { ArticleSummary, Category, Tag } from '@/api'
+import { fetchArticles, fetchCategories, fetchTags, fetchLatestArticles, fetchHotArticles } from '@/api'
+import type { ArticleVO, LatestArticleVO, HotArticleVO, Category, Tag } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
 
 const route = useRoute()
 const router = useRouter()
 
-const articleState = useAsyncData<{ total: number; items: ArticleSummary[] }>()
+const articleState = useAsyncData<{ total: number; items: ArticleVO[] }>()
 const categoriesState = useAsyncData<Category[]>()
 const tagsState = useAsyncData<Tag[]>()
-const hotArticlesState = useAsyncData<ArticleSummary[]>()
+const latestArticlesState = useAsyncData<LatestArticleVO[]>()
+const hotArticlesState = useAsyncData<HotArticleVO[]>()
 
 const currentPage = ref(1)
 const pageSize = 20
@@ -28,14 +29,13 @@ const listArticles = computed(() => articleState.data.value?.items ?? [])
 const totalArticles = computed(() => articleState.data.value?.total ?? 0)
 const totalPages = computed(() => Math.ceil(totalArticles.value / pageSize))
 
-const latestSidebarArticles = computed(() => {
-  const items = articleState.data.value?.items ?? []
-  return items.slice(0, 5)
-})
+// 最新文章
+const latestArticlesList = computed(() => latestArticlesState.data.value ?? [])
+// 热门文章
+const hotArticlesList = computed(() => hotArticlesState.data.value ?? [])
 
 const categoriesList = computed(() => categoriesState.data.value ?? [])
 const tagsList = computed(() => tagsState.data.value ?? [])
-const hotArticlesList = computed(() => hotArticlesState.data.value ?? [])
 
 const activeFilters = computed(() => {
   const filters: string[] = []
@@ -64,6 +64,7 @@ async function loadSidebarData() {
   Promise.all([
     categoriesState.run(() => fetchCategories()),
     tagsState.run(() => fetchTags()),
+    latestArticlesState.run(() => fetchLatestArticles()),
     hotArticlesState.run(() => fetchHotArticles(5)),
   ]).catch(err => {
     console.error('侧边栏数据加载失败:', err)
@@ -137,10 +138,21 @@ watch(
           <LgCard class="sidebar-card" padding="md">
             <section class="sidebar-section">
               <h3 class="sidebar-title">最新文章</h3>
-              <div v-if="articleState.loading.value" class="skeleton-sidebar">
+              <div v-if="latestArticlesState.loading.value" class="skeleton-sidebar">
                 <div v-for="i in 3" :key="i" class="skeleton-item"></div>
               </div>
-              <LatestPostsList v-else-if="latestSidebarArticles.length" :articles="latestSidebarArticles" />
+              <LatestPostsList v-else-if="latestArticlesList.length" :articles="latestArticlesList" />
+            </section>
+          </LgCard>
+
+          <!-- 热门文章 -->
+          <LgCard class="sidebar-card" padding="md">
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">热门文章</h3>
+              <div v-if="hotArticlesState.loading.value" class="skeleton-sidebar">
+                <div v-for="i in 5" :key="i" class="skeleton-item"></div>
+              </div>
+              <LatestPostsList v-else-if="hotArticlesList.length" :articles="hotArticlesList" />
             </section>
           </LgCard>
           
@@ -168,16 +180,7 @@ watch(
             </section>
           </LgCard>
 
-          <!-- 热门文章 -->
-          <LgCard class="sidebar-card" padding="md">
-            <section class="sidebar-section">
-              <h3 class="sidebar-title">热门文章</h3>
-              <div v-if="hotArticlesState.loading.value" class="skeleton-sidebar">
-                <div v-for="i in 3" :key="i" class="skeleton-item"></div>
-              </div>
-              <LatestPostsList v-else-if="hotArticlesList.length" :articles="hotArticlesList" />
-            </section>
-          </LgCard>
+          
         </aside>
 
         <div class="content-area">

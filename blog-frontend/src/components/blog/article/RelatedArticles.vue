@@ -1,10 +1,8 @@
 <script setup lang="ts">
-interface RelatedArticle {
-  slug: string
-  title: string
-  thumbnail?: string
+import type { ArticleCardInfo } from '@/api'
+
+interface RelatedArticle extends ArticleCardInfo {
   categoryName?: string
-  publishedAt?: string
 }
 
 defineProps<{
@@ -48,9 +46,9 @@ const formatDate = (dateString?: string) => {
               <i class="fa fa-folder-o"></i>
               {{ article.categoryName }}
             </span>
-            <span v-if="article.publishedAt" class="related-date">
+            <span v-if="article.publishedTime" class="related-date">
               <i class="fa fa-calendar-o"></i>
-              {{ formatDate(article.publishedAt) }}
+              {{ formatDate(article.publishedTime) }}
             </span>
           </div>
         </div>

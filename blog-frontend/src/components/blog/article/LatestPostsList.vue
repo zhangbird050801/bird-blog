@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { ArticleSummary } from '@/api'
+import type { HotArticleVO, LatestArticleVO } from '@/api'
 
 const props = defineProps<{
-  articles: ArticleSummary[]
+  articles: (HotArticleVO | LatestArticleVO)[]
 }>()
 
 const fallbackImage = 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=160&q=60'
@@ -17,8 +17,8 @@ const fallbackImage = 'https://images.unsplash.com/photo-1521737604893-d14cc237f
         </div>
         <div class="latest-posts__meta">
           <span class="latest-posts__title">{{ article.title }}</span>
-          <time v-if="article.publishedAt" :datetime="article.publishedAt" class="latest-posts__date">
-            {{ new Date(article.publishedAt).toLocaleDateString() }}
+          <time v-if="'publishedTime' in article && article.publishedTime" :datetime="article.publishedTime" class="latest-posts__date">
+            {{ new Date(article.publishedTime).toLocaleDateString() }}
           </time>
         </div>
       </a>

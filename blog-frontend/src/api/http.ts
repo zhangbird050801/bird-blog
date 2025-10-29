@@ -1,10 +1,5 @@
 /**
- * HTTP 请求工具模块
- * 封装统一的请求逻辑、后端响应格式处理、错误处理等
- */
-
-/**
- * 后端统一响应格式
+ * 统一响应格式
  */
 export interface ApiResponse<T = any> {
   code: number

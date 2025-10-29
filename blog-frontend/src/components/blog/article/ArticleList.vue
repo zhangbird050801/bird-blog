@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { ArticleSummary } from '@/api'
+import type { ArticleVO } from '@/api'
 import ArticleCard from './ArticleCard.vue'
 
 defineProps<{
-  articles: ArticleSummary[]
+  articles: ArticleVO[]
 }>()
 </script>
 

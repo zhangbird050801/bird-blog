@@ -1,15 +1,7 @@
-/**
- * API 通用类型定义
- * 
- * 注意：各业务模块的具体类型定义已迁移到对应的 API 文件中：
- * - 文章相关类型：article.ts
- * - 分类相关类型：category.ts
- * - 标签相关类型：tag.ts
- * - 评论相关类型：comment.ts
- * 
- * 本文件仅保留跨模块共享的通用类型定义
- */
-
-// 目前暂无跨模块共享的通用类型
-// 如有需要可在此添加
-
+export interface PageResultVO<T> {
+	total: number
+	rows: T[]
+	pageNum: number
+	pageSize: number
+	totalPages: number
+}

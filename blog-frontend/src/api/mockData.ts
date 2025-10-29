@@ -1,11 +1,11 @@
-import type { ArticleDetail, ArticleSummary } from './article'
+import type { ArticleDetailVO } from './article'
 import type { Category } from './category'
 import type { Tag } from './tag'
 import type { CommentNode } from './comment'
 
 const now = new Date()
 
-export const mockArticles: ArticleDetail[] = [
+export const mockArticles: ArticleDetailVO[] = [
   {
     id: 1,
     title: 'BirdBlog 博客界面设计心法',
@@ -14,9 +14,8 @@ export const mockArticles: ArticleDetail[] = [
     content:
       '<p>BirdBlog 设计系统源自 visionOS 的深度质感，将玻璃材质与动态光影融合。本文分享如何在 Web 上复刻这份体验，包括变量体系、动效节奏与组件结构设计。</p>',
     thumbnail: '/src/assets/wallhaven-1qppz3.png',
-    publishedAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+    publishedTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 2).toISOString(),
     categoryName: '探索',
-    tags: ['BirdBlog', '设计'],
     viewCount: 3200,
     likeCount: 420,
     commentCount: 6,
@@ -29,9 +28,8 @@ export const mockArticles: ArticleDetail[] = [
     content:
       '<p>组合式 API 能够拆分语义模块，配合 TypeScript 可读性更高。本文展示文章数据获取、暗色模式切换与滚动动画等场景。</p>',
     thumbnail: '/src/assets/wallhaven-d8633m.jpg',
-    publishedAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    publishedTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 5).toISOString(),
     categoryName: '教程',
-    tags: ['Vue3', 'BirdBlog'],
     viewCount: 2100,
     likeCount: 188,
     commentCount: 4,
@@ -44,9 +42,8 @@ export const mockArticles: ArticleDetail[] = [
     content:
       '<p>通过使用 will-change、适度的滤镜强度与延迟渲染策略，可以让 BirdBlog 既有质感又不牺牲性能。</p>',
     thumbnail: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 9).toISOString(),
+    publishedTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 9).toISOString(),
     categoryName: '探索',
-    tags: ['性能', 'BirdBlog'],
     viewCount: 1560,
     likeCount: 156,
     commentCount: 3,
@@ -59,9 +56,8 @@ export const mockArticles: ArticleDetail[] = [
     content:
       '<p>本文介绍条件类型、映射类型、infer 关键字等高级特性，帮助你写出更优雅的类型代码。</p>',
     thumbnail: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 12).toISOString(),
+    publishedTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 12).toISOString(),
     categoryName: '教程',
-    tags: ['TypeScript', '前端'],
     viewCount: 1890,
     likeCount: 245,
     commentCount: 8,
@@ -74,9 +70,8 @@ export const mockArticles: ArticleDetail[] = [
     content:
       '<p>CSS Grid 是现代网页布局的利器，本文通过实例演示如何构建响应式网格系统。</p>',
     thumbnail: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 15).toISOString(),
+    publishedTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 15).toISOString(),
     categoryName: '教程',
-    tags: ['CSS', '布局'],
     viewCount: 2340,
     likeCount: 312,
     commentCount: 12,
@@ -89,9 +84,8 @@ export const mockArticles: ArticleDetail[] = [
     content:
       '<p>涵盖资源加载优化、渲染性能提升、代码分割等多个方面的实用技巧。</p>',
     thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
-    publishedAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 18).toISOString(),
+    publishedTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 18).toISOString(),
     categoryName: '探索',
-    tags: ['性能', '前端'],
     viewCount: 2890,
     likeCount: 387,
     commentCount: 15,
@@ -99,9 +93,9 @@ export const mockArticles: ArticleDetail[] = [
 ]
 
 export const mockCategories: Category[] = [
-  { id: 1, name: '探索', slug: 'explore', description: '探索自然与科技灵感', articleCount: 8 },
-  { id: 2, name: '教程', slug: 'tutorial', description: '前端与设计技巧', articleCount: 5 },
-  { id: 3, name: '思考', slug: 'insight', description: '记录创作背后的洞见', articleCount: 3 },
+  { id: 1, name: '探索', slug: 'explore', description: '探索自然与科技灵感', count: 8 },
+  { id: 2, name: '教程', slug: 'tutorial', description: '前端与设计技巧', count: 5 },
+  { id: 3, name: '思考', slug: 'insight', description: '记录创作背后的洞见', count: 3 },
 ]
 
 export const mockTags: Tag[] = [
@@ -141,19 +135,14 @@ export const mockComments: Record<number, CommentNode[]> = {
   ],
 }
 
-export function getMockArticle(slug: string): ArticleDetail | undefined {
+export function getMockArticle(slug: string): ArticleDetailVO | undefined {
   return mockArticles.find((article) => article.slug === slug)
 }
 
-export function getMockArticleById(id: number): ArticleDetail | undefined {
+export function getMockArticleById(id: number): ArticleDetailVO | undefined {
   return mockArticles.find((article) => article.id === id)
 }
 
 export function getMockComments(articleId: number): CommentNode[] {
   return mockComments[articleId] ?? []
-}
-
-export function mapToSummary(article: ArticleDetail): ArticleSummary {
-  const { content: _content, commentCount, ...summary } = article
-  return summary
 }
