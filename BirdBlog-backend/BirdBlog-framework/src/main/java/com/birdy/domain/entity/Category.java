@@ -42,6 +42,11 @@ public class Category {
     private Integer status;
 
     /**
+     * 分类文章数量
+     */
+    private int count;
+
+    /**
      * 创建者
      */
     private String creator;
@@ -65,6 +70,7 @@ public class Category {
      * 是否删除
      */
     private Boolean deleted;
+
 
     @Override
     public boolean equals(Object that) {

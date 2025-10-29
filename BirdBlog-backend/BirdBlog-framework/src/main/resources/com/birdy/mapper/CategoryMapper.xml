@@ -10,6 +10,7 @@
             <result property="pid" column="pid" />
             <result property="description" column="description" />
             <result property="status" column="status" />
+            <result property="count" column="count" />
             <result property="creator" column="creator" />
             <result property="createTime" column="create_time" />
             <result property="updater" column="updater" />
