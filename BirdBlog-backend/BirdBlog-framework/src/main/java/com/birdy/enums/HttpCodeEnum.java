@@ -22,7 +22,12 @@ public enum HttpCodeEnum {
     PHONE_NUMBER_EXIST(502,"手机号已存在"),
     EMAIL_EXIST(503, "邮箱已存在"),
     REQUIRE_USERNAME(504, "必需填写用户名"),
-    LOGIN_ERROR(505,"用户名或密码错误");
+    LOGIN_ERROR(505,"用户名或密码错误"),
+    
+    // 文章相关错误码
+    ARTICLE_NOT_FOUND(404, "文章不存在或已下架"),
+    ARTICLE_ID_NOT_NULL(400, "文章ID不能为空"),
+    ARTICLE_SLUG_NOT_NULL(400, "文章slug不能为空");
 
     private final int code;
     private final String msg;

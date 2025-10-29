@@ -3,6 +3,7 @@ package com.birdy.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.birdy.domain.entity.Article;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.birdy.domain.vo.ArticleDetailVO;
 import com.birdy.domain.vo.ArticleVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -25,6 +26,30 @@ public interface ArticleMapper extends BaseMapper<Article> {
     Page<ArticleVO> selectArticleVOPage(Page<ArticleVO> page, 
                                          @Param("categoryId") Long categoryId, 
                                          @Param("status") Integer status);
+
+    /**
+     * 根据文章ID查询文章详情
+     *
+     * @param id 文章ID
+     * @return 文章详情VO
+     */
+    ArticleDetailVO selectArticleDetailById(@Param("id") Long id);
+
+    /**
+     * 根据 slug 查询文章详情
+     *
+     * @param slug URL别名
+     * @return 文章详情VO
+     */
+    ArticleDetailVO selectArticleDetailBySlug(@Param("slug") String slug);
+
+    /**
+     * 增加文章浏览量
+     *
+     * @param id 文章ID
+     * @return 影响行数
+     */
+    int incrementViewCount(@Param("id") Long id);
 }
 
 

@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.Article;
+import com.birdy.domain.vo.ArticleDetailVO;
 import com.birdy.domain.vo.ArticleVO;
 import com.birdy.domain.vo.HotArticleVO;
+import com.birdy.enums.HttpCodeEnum;
 import com.birdy.service.ArticleService;
 import com.birdy.mapper.ArticleMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     private ArticleMapper articleMapper;
 
     @Override
-    public CommonResult hot() {
+    public CommonResult<List<HotArticleVO>> hot() {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
 
         // status 状态为已发布
@@ -54,11 +56,42 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public CommonResult list(Long categoryId, int pageNum, int pageSize) {
+    public CommonResult<List<ArticleVO>> list(Long categoryId, int pageNum, int pageSize) {
         Page<ArticleVO> page = new Page<>(pageNum, pageSize);
         List<ArticleVO> res = articleMapper.selectArticleVOPage(page, categoryId, ARTICLE_STATUS_RELEASE).getRecords();
 
         return CommonResult.success(res);
+    }
+
+    @Override
+    public CommonResult<ArticleDetailVO> getDetail(Long id) {
+        if (id == null || id <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+
+        ArticleDetailVO articleDetail = articleMapper.selectArticleDetailById(id);
+        if (articleDetail == null) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        // 增加浏览量
+        articleMapper.incrementViewCount(id);
+        return CommonResult.success(articleDetail);
+    }
+
+    @Override
+    public CommonResult<ArticleDetailVO> getDetailBySlug(String slug) {
+        if (slug == null || slug.trim().isEmpty()) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_SLUG_NOT_NULL);
+        }
+
+        ArticleDetailVO articleDetail = articleMapper.selectArticleDetailBySlug(slug);
+        if (articleDetail == null) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        articleMapper.incrementViewCount(articleDetail.getId());
+        return CommonResult.success(articleDetail);
     }
 }
 
