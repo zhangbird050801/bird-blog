@@ -1,13 +1,20 @@
 package com.birdy.domain.entity;
 
 import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 分类表
  * @TableName bg_category
  */
+@TableName(value ="bg_category")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Category {
     /**
      * 分类ID
