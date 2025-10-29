@@ -12,6 +12,8 @@ logs/
 !admin-frontend/.env
 !admin-frontend/.env.*
 
+!blog-frontend/.env.*
+
 **/application*.yml
 
 !**/application-example.yml
