@@ -10,5 +10,5 @@ public class SysConstants {
     public static final int ARTICLE_STATUS_RELEASE = 0;
     // 文章状态为草稿
     public static final int ARTICLE_STATUS_DRAFT = 1;
-    public static final String STATUS_RELEASE = "0";
+    public static final int CATEGORY_STATUS_ENABLE = 0;
 }
