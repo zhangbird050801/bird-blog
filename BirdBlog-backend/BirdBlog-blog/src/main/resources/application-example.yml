@@ -11,6 +11,10 @@ spring:
     multipart:
       max-file-size: 2MB
       max-request-size: 5MB
+  security:
+    user:
+      name: admin # 自定义用户名
+      password: admin123 # 自定义密码
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
