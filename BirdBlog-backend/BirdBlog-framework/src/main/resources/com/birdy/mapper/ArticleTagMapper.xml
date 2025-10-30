@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.birdy.mapper.ArticleTagMapper">
+
+    <resultMap id="BaseResultMap" type="com.birdy.domain.entity.ArticleTag">
+            <id property="articleId" column="article_id" />
+            <id property="tagId" column="tag_id" />
+            <result property="creator" column="creator" />
+            <result property="createTime" column="create_time" />
+            <result property="updater" column="updater" />
+            <result property="updateTime" column="update_time" />
+            <result property="deleted" column="deleted" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        article_id,tag_id,creator,create_time,updater,update_time,
+        deleted
+    </sql>
+</mapper>
