@@ -8,9 +8,14 @@ const props = defineProps<{
 
 <template>
   <div class="tag-cloud" aria-label="标签云">
-    <a v-for="tag in props.tags" :key="tag.id" :href="`/?tag=${tag.id}`">
+    <a 
+      v-for="tag in props.tags" 
+      :key="tag.id" 
+      :href="`/?tag=${tag.id}`"
+      :title="tag.remark || tag.name"
+    >
       #{{ tag.name }}
-      <span class="tag-cloud__count">({{ tag.articleCount ?? 0 }})</span>
+      <span v-if="tag.articleCount !== undefined" class="tag-cloud__count">({{ tag.articleCount }})</span>
     </a>
   </div>
 </template>

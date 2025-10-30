@@ -15,6 +15,7 @@ export interface ArticleVO {
   likeCount?: number
   publishedTime?: string
   isTop?: boolean
+  tags?: Array<{ id: number; name: string; remark?: string }>
 }
 
 /**

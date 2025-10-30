@@ -2,11 +2,15 @@
 import type { ArticleVO } from '@/api'
 import LgCard from '@/components/base/LgCard.vue'
 import LgBadge from '@/components/base/LgBadge.vue'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { fetchArticleTags, type Tag } from '@/api'
 
 const props = defineProps<{
   article: ArticleVO
 }>()
+
+const tags = ref<Tag[]>([])
+const tagsLoading = ref(false)
 
 const publishedLabel = computed(() => {
   if (!props.article.publishedTime) return '最新'
@@ -15,6 +19,27 @@ const publishedLabel = computed(() => {
     month: 'short',
     day: 'numeric',
   })
+})
+
+// 加载文章标签
+async function loadTags() {
+  if (props.article.tags) {
+    tags.value = props.article.tags
+    return
+  }
+  
+  tagsLoading.value = true
+  try {
+    tags.value = await fetchArticleTags(props.article.id)
+  } catch (error) {
+    console.error('加载文章标签失败:', error)
+  } finally {
+    tagsLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadTags()
 })
 </script>
 
@@ -42,7 +67,21 @@ const publishedLabel = computed(() => {
           </h2>
           <p class="article-card__summary">{{ article.summary }}</p>
           <div class="article-card__footer">
-            <!-- 标签信息暂时隐藏，等后端提供标签接口 -->
+            <!-- 标签区域 -->
+            <div class="article-card__tags">
+              <template v-if="!tagsLoading && tags.length > 0">
+                <span 
+                  v-for="tag in tags" 
+                  :key="tag.id" 
+                  class="article-tag"
+                  :title="tag.remark || tag.name"
+                >
+                  #{{ tag.name }}
+                </span>
+              </template>
+              <span v-else-if="tagsLoading" class="article-tags-loading">加载中...</span>
+            </div>
+            <!-- 浏览量和点赞 -->
             <div class="article-card__metrics">
               <span aria-label="阅读量"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M10 4.5c4.5 0 8.5 3.229 9.5 7.5-1 4.271-5 7.5-9.5 7.5S1.5 16.271.5 12c1-4.271 5-7.5 9.5-7.5zm0 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm0-2.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>{{ article.viewCount ?? 0 }}</span>
               <span aria-label="点赞"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M9.999 5.889 9.518 5.04C8.523 3.316 6.659 2.222 4.64 2.222 2.074 2.222 0 4.295 0 6.862c0 1.247.495 2.445 1.373 3.323L10 18l8.628-7.815A4.704 4.704 0 0 0 20 6.862c0-2.567-2.074-4.64-4.641-4.64-2.02 0-3.883 1.094-4.878 2.818l-.482.849z"/></svg>{{ article.likeCount ?? 0 }}</span>
@@ -206,23 +245,57 @@ const publishedLabel = computed(() => {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
+  flex: 1;
 }
 
-.article-card__tags span {
-  color: var(--sg-primary);
+.article-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--lg-radius-full);
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-size: 13px;
   font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.article-tag:hover {
+  background: rgba(16, 185, 129, 0.2);
+  transform: translateY(-1px);
+}
+
+.article-tags-loading {
+  color: var(--lg-text-secondary);
+  font-size: 13px;
+  font-style: italic;
 }
 
 .article-card__metrics {
   display: inline-flex;
   gap: 14px;
   align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.article-card__metrics span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--lg-text-secondary);
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.article-card__metrics span:hover {
+  color: var(--sg-secondary);
 }
 
 .article-card__metrics svg {
   width: 16px;
   height: 16px;
-  margin-right: 4px;
-  vertical-align: middle;
+  flex-shrink: 0;
 }
 </style>
