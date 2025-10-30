@@ -23,6 +23,11 @@ public enum HttpCodeEnum {
     EMAIL_EXIST(503, "邮箱已存在"),
     REQUIRE_USERNAME(504, "必需填写用户名"),
     LOGIN_ERROR(505,"用户名或密码错误"),
+
+    USER_BANNED(507, "账号已被停用"),
+
+    // 验证码相关错误码
+    CAPTCHA_ERROR_OR_EXPIRE(506, "验证码错误或已过期"),
     
     // 文章相关错误码
     ARTICLE_NOT_FOUND(404, "文章不存在或已下架"),

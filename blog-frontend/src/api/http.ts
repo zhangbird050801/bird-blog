@@ -18,6 +18,9 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, ''
  */
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
+const _env = import.meta.env as any
+const TOKEN_KEY = _env.VITE_TOKEN_KEY || 'blog_token'
+
 /**
  * HTTP 请求配置选项
  */
@@ -56,7 +59,7 @@ export async function request<T = any>(
 
   // 如果需要认证，添加 token（可根据实际情况调整）
   if (auth) {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem(TOKEN_KEY)
     if (token) {
       requestHeaders['Authorization'] = `Bearer ${token}`
     }

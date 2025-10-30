@@ -1,0 +1,30 @@
+package com.birdy.service;
+
+import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.LoginRequest;
+import com.birdy.domain.vo.LoginVO;
+
+/**
+ * 登录 Service 接口
+ *
+ * @author Birdy
+ * @date 2025/10/30
+ * @description 用户登录认证服务
+ */
+public interface LoginService {
+
+    /**
+     * 用户登录
+     *
+     * @param loginRequest 登录请求参数
+     * @return 登录结果(包含 Token 和用户信息)
+     */
+    CommonResult<LoginVO> login(LoginRequest loginRequest);
+
+    /**
+     * 用户退出登录
+     *
+     * @return 退出结果
+     */
+    CommonResult<Void> logout();
+}

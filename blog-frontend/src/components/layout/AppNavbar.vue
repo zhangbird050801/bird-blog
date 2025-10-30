@@ -2,8 +2,12 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
+import { useAuth } from '@/composables/useAuth'
+import { logout } from '@/api'
 import LgIconButton from '@/components/base/LgIconButton.vue'
 import LgInput from '@/components/base/LgInput.vue'
+import LgButton from '@/components/base/LgButton.vue'
+import LoginModal from '@/components/blog/common/LoginModal.vue'
 import { fetchCategories } from '@/api'
 import type { Category } from '@/api'
 
@@ -11,9 +15,17 @@ const search = ref('')
 const router = useRouter()
 const route = useRoute()
 const { theme, toggleTheme } = useTheme()
+const { isLoggedIn, userInfo, clearAuth } = useAuth()
 const categories = ref<Category[]>([])
 const showCategoryMenu = ref(false)
 const categoryDropdownRef = ref<HTMLElement | null>(null)
+
+// 登录弹窗
+const showLoginModal = ref(false)
+
+// 用户菜单
+const showUserMenu = ref(false)
+const userMenuRef = ref<HTMLElement | null>(null)
 
 // 提供简单导航跳转
 const navItems = [
@@ -46,6 +58,47 @@ function closeCategoryMenu() {
 function handleClickOutside(event: MouseEvent) {
   if (categoryDropdownRef.value && !categoryDropdownRef.value.contains(event.target as Node)) {
     closeCategoryMenu()
+  }
+  if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
+    closeUserMenu()
+  }
+}
+
+// 切换用户菜单
+function toggleUserMenu(event: Event) {
+  event.stopPropagation()
+  showUserMenu.value = !showUserMenu.value
+}
+
+// 关闭用户菜单
+function closeUserMenu() {
+  showUserMenu.value = false
+}
+
+// 打开登录弹窗
+function openLoginModal() {
+  showLoginModal.value = true
+}
+
+// 登录成功回调
+function handleLoginSuccess() {
+  console.log('登录成功，准备刷新页面')
+  // 延迟一点刷新，让用户看到成功提示
+  setTimeout(() => {
+    window.location.reload()
+  }, 500)
+}
+
+// 退出登录
+async function handleLogout() {
+  try {
+    await logout()
+  } catch (error) {
+    console.error('退出登录失败:', error)
+  } finally {
+    clearAuth()
+    closeUserMenu()
+    router.push('/')
   }
 }
 
@@ -173,8 +226,43 @@ onBeforeUnmount(() => {
             />
           </svg>
         </LgIconButton>
+
+        <!-- 未登录：显示登录按钮 -->
+        <LgButton v-if="!isLoggedIn" variant="primary" size="sm" @click="openLoginModal">
+          登录
+        </LgButton>
+
+        <!-- 已登录：显示用户菜单 -->
+        <div v-else ref="userMenuRef" class="user-menu-container">
+          <button class="user-avatar" @click="toggleUserMenu" :aria-expanded="showUserMenu">
+            <img :src="userInfo?.avatar || '/default-avatar.png'" :alt="userInfo?.nickName" />
+          </button>
+
+          <div v-show="showUserMenu" class="user-menu">
+            <div class="user-info">
+              <img :src="userInfo?.avatar || '/default-avatar.png'" :alt="userInfo?.nickName" class="user-info-avatar" />
+              <div class="user-info-text">
+                <div class="user-info-name">{{ userInfo?.nickName }}</div>
+                <div class="user-info-email">{{ userInfo?.email }}</div>
+              </div>
+            </div>
+            <div class="user-menu-divider"></div>
+            <button class="user-menu-item" @click="handleLogout">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  fill="currentColor"
+                  d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z"
+                />
+              </svg>
+              退出登录
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- 登录弹窗 -->
+    <LoginModal v-model:show="showLoginModal" @success="handleLoginSuccess" />
   </header>
 </template>
 
@@ -403,6 +491,126 @@ body.dark .category-menu {
 
 .nav-actions :deep(.lg-icon-button:hover) {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* 用户菜单容器 */
+.user-menu-container {
+  position: relative;
+}
+
+/* 用户头像按钮 */
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0;
+}
+
+.user-avatar:hover {
+  border-color: var(--sg-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 用户下拉菜单 */
+.user-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 240px;
+  background: rgba(40, 42, 44, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  padding: 12px 0;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+body.dark .user-menu {
+  background: rgba(26, 26, 46, 0.95);
+}
+
+/* 用户信息 */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.user-info-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-info-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-info-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-info-email {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 分隔线 */
+.user-menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+/* 菜单项 */
+.user-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.user-menu-item:hover {
+  background: rgba(231, 76, 60, 0.2);
+  padding-left: 20px;
+}
+
+.user-menu-item svg {
+  flex-shrink: 0;
 }
 
 /* 移动端适配 */

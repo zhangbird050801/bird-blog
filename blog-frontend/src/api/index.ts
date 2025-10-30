@@ -15,5 +15,15 @@ export {
 export { fetchCategories, type Category } from './category'
 export { fetchTags, type Tag } from './tag'
 export { fetchComments, type CommentNode } from './comment'
+export { 
+  fetchCaptcha, 
+  login, 
+  logout,
+  type CaptchaResponse,
+  type LoginRequest,
+  type LoginResponse,
+  type UserInfo,
+} from './auth'
 export { default as http, type ApiResponse } from './http'
+
 
