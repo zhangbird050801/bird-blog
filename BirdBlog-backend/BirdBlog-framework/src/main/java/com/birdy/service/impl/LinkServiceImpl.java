@@ -24,7 +24,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
     implements LinkService{
 
     @Override
-    public CommonResult getAllLink() {
+    public CommonResult<List<LinkVO>> getAllLink() {
         //查询所以审核通过的友链
         LambdaQueryWrapper<Link> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Link::getStatus, SysConstants.LINK_STATUS_ENABLE);
