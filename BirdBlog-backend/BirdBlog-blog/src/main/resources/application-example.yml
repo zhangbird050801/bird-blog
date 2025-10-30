@@ -32,6 +32,14 @@ spring:
           max-idle: 8
           # 连接池中的最小空闲连接
           min-idle: 0
+
+# JWT 配置
+jwt:
+  # JWT 密钥(Base64 编码)
+  secret-key: YourSecretKey
+  # Token 有效期(毫秒) 24小时
+  ttl: 86400000
+
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
