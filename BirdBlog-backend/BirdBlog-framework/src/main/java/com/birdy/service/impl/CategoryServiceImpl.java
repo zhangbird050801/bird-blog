@@ -34,8 +34,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
     @Autowired
     private ArticleService articleService;
     @Override
-    public CommonResult get() {
-        //查询articals：状态为已发布的（status为0）
+    public CommonResult<List<CategoryVO>> get() {
+        //查询articles：状态为已发布的（status为0）
         LambdaQueryWrapper<Article> articlesWrapper = new LambdaQueryWrapper<>();
         articlesWrapper.eq(Article::getStatus, SysConstants.ARTICLE_STATUS_RELEASE);
         List<Article> list = articleService.list(articlesWrapper);

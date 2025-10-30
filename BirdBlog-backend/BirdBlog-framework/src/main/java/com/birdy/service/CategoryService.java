@@ -3,6 +3,9 @@ package com.birdy.service;
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.Category;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.birdy.domain.vo.CategoryVO;
+
+import java.util.List;
 
 /**
 * @author Young
@@ -11,5 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface CategoryService extends IService<Category> {
 
-    CommonResult get();
+    CommonResult<List<CategoryVO>> get();
 }

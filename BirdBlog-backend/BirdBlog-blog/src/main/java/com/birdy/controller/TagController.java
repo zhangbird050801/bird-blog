@@ -27,7 +27,7 @@ public class TagController {
      * @return 标签列表
      */
     @GetMapping("/list")
-    public CommonResult<?> getAllTags() {
+    public CommonResult<List<TagVO>> getAllTags() {
         return tagService.getAllTags();
     }
 
@@ -37,7 +37,7 @@ public class TagController {
      * @return 标签列表
      */
     @GetMapping("/article/{articleId}")
-    public CommonResult<?> getTagsByArticleId(@PathVariable("articleId") Long articleId) {
+    public CommonResult<List<TagVO>> getTagsByArticleId(@PathVariable("articleId") Long articleId) {
         return tagService.getTagsByArticleId(articleId);
     }
 }
