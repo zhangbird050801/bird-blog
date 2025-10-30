@@ -62,7 +62,8 @@ public class SecurityConfig {
                     "/article/**",
                     "/category/**",
                     "/tag/**",
-                    "/comment/**"
+                    "/comment/**",
+                    "/link/**"
                 ).permitAll()
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()
