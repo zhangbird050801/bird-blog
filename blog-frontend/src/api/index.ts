@@ -15,6 +15,7 @@ export {
 export { fetchCategories, type Category } from './category'
 export { fetchTags, type Tag } from './tag'
 export { fetchComments, type CommentNode } from './comment'
+export { fetchLinks, type Link } from './link'
 export { 
   fetchCaptcha, 
   login, 

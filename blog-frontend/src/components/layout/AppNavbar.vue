@@ -8,6 +8,7 @@ import LgIconButton from '@/components/base/LgIconButton.vue'
 import LgInput from '@/components/base/LgInput.vue'
 import LgButton from '@/components/base/LgButton.vue'
 import LoginModal from '@/components/blog/common/LoginModal.vue'
+import LinkModal from '@/components/blog/common/LinkModal.vue'
 import { fetchCategories } from '@/api'
 import type { Category } from '@/api'
 
@@ -23,6 +24,9 @@ const categoryDropdownRef = ref<HTMLElement | null>(null)
 // 登录弹窗
 const showLoginModal = ref(false)
 
+// 友链弹窗
+const showLinkModal = ref(false)
+
 // 用户菜单
 const showUserMenu = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
@@ -33,6 +37,11 @@ const navItems = [
   { name: '归档', path: '/#archive' },
   { name: '关于', path: '/#about' },
 ]
+
+// 打开友链弹窗
+function openLinkModal() {
+  showLinkModal.value = true
+}
 
 // 加载分类数据
 async function loadCategories() {
@@ -192,6 +201,11 @@ onBeforeUnmount(() => {
             <div v-if="!categories.length" class="category-empty">暂无分类</div>
           </div>
         </div>
+
+        <!-- 友链按钮 -->
+        <button class="nav-link" @click="openLinkModal">
+          友链
+        </button>
       </nav>
 
       <div class="nav-actions">
@@ -263,6 +277,9 @@ onBeforeUnmount(() => {
 
     <!-- 登录弹窗 -->
     <LoginModal v-model:show="showLoginModal" @success="handleLoginSuccess" />
+    
+    <!-- 友链弹窗 -->
+    <LinkModal :show="showLinkModal" @close="showLinkModal = false" />
   </header>
 </template>
 
@@ -376,6 +393,15 @@ body.dark .nav-wrapper {
   background: none;
   border: none;
   cursor: pointer;
+}
+
+/* 友链按钮 - 确保与其他导航按钮样式一致 */
+.nav-link[type="button"],
+button.nav-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 /* 下拉图标 */
