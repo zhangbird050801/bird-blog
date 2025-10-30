@@ -43,10 +43,11 @@ const classes = computed(() => [
 .lg-button {
   position: relative;
   display: inline-flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: var(--lg-radius-full);
+  border-radius: 8px;
   border: 1px solid transparent;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -55,6 +56,8 @@ const classes = computed(() => [
   text-decoration: none;
   color: inherit;
   min-width: 0;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
 }
 
 .lg-button:focus-visible {
