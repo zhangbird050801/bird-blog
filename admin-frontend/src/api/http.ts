@@ -114,7 +114,7 @@ class HttpClient {
 
 // 创建 HTTP 客户端实例
 const http = new HttpClient({
-  baseURL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:8989',
+  baseURL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json;charset=UTF-8'

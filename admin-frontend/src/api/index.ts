@@ -55,17 +55,46 @@ export const menuApi = {
   },
 
   /**
-   * 获取菜单列表(树形)
+   * 获取菜单树形列表（用于菜单管理页面）
+   * @param params 查询参数
    */
-  getMenuList(): Promise<MenuItem[]> {
-    return http.get('/menus')
+  getMenuTree(params?: { name?: string; status?: number }): Promise<MenuItem[]> {
+    return http.get('/menus', { params })
   },
 
   /**
-   * 获取菜单详情
+   * 获取菜单下拉选项（用于选择父菜单）
+   */
+  getMenuOptions(): Promise<Array<{ value: number; label: string; children?: any[] }>> {
+    return http.get('/menus/options')
+  },
+
+  /**
+   * 获取菜单详情（用于编辑表单）
    */
   getMenuDetail(id: number): Promise<MenuItem> {
-    return http.get(`/menus/${id}`)
+    return http.get(`/menus/${id}/form`)
+  },
+
+  /**
+   * 新增菜单
+   */
+  createMenu(data: any): Promise<void> {
+    return http.post('/menus', data)
+  },
+
+  /**
+   * 修改菜单
+   */
+  updateMenu(id: number, data: any): Promise<void> {
+    return http.put(`/menus/${id}`, data)
+  },
+
+  /**
+   * 删除菜单
+   */
+  deleteMenu(id: number): Promise<void> {
+    return http.delete(`/menus/${id}`)
   }
 }
 

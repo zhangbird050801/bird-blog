@@ -19,7 +19,7 @@ public class BirdBlogAdminApplication {
         SpringApplication.run(BirdBlogAdminApplication.class, args);
         System.out.println("========================================");
         System.out.println("BirdBlog 管理后台启动成功！");
-        System.out.println("访问地址: http://localhost:8989");
+        System.out.println("访问地址: http://localhost:9090");
         System.out.println("========================================");
     }
 }

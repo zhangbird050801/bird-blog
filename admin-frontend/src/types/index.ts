@@ -78,7 +78,36 @@ export interface MenuItem {
   perms?: string
   icon?: string
   remark?: string
+  createTime?: string
+  updateTime?: string
   children?: MenuItem[]
+}
+
+/**
+ * 菜单表单数据
+ */
+export interface MenuFormData {
+  id?: number
+  name: string
+  parentId: number | null
+  sort: number
+  path: string
+  component?: string
+  type: 'M' | 'C' | 'F'
+  visible: number
+  status: number
+  perm?: string
+  icon?: string
+  remark?: string
+}
+
+/**
+ * 菜单下拉选项
+ */
+export interface MenuOption {
+  value: number
+  label: string
+  children?: MenuOption[]
 }
 
 /**

@@ -13,11 +13,11 @@ module.exports = defineConfig({
     open: true,
     proxy: {
       '/auth': {
-        target: 'http://localhost:8989',
+        target: 'http://localhost:9090',
         changeOrigin: true
       },
       '/menus': {
-        target: 'http://localhost:8989',
+        target: 'http://localhost:9090',
         changeOrigin: true
       }
     }
