@@ -1,22 +1,16 @@
 <template>
-  <!-- 有子菜单的情况：title 中包含可点击链接 -->
+  <!-- 有子菜单的情况 -->
   <el-sub-menu v-if="hasChildren" :index="menuPath" :class="{ 'no-arrow': !!menu.component }">
     <template #title>
-      <!-- 只有在菜单有 component 时才渲染可点击的 router-link，目录类菜单只作为展开/收缩用 -->
-      <template v-if="menu.component">
-        <router-link :to="menuPath" class="submenu-link">
-          {{ menu.meta?.title }}
-        </router-link>
-      </template>
-      <template v-else>
-        <span class="submenu-link">{{ menu.meta?.title }}</span>
-      </template>
+      <component v-if="iconComponent" :is="iconComponent" class="menu-icon" />
+      <span v-else class="menu-icon-fallback">{{ fallbackLetter }}</span>
+      
+      <span class="menu-title">{{ menu.meta?.title }}</span>
     </template>
 
-    <!-- 渲染过滤后的子菜单 -->
     <menu-item
-      v-for="(child, index) in visibleChildren"
-      :key="index"
+      v-for="child in visibleChildren"
+      :key="child.path"
       :menu="child"
       :parent-path="menuPath"
     />
@@ -24,9 +18,10 @@
 
   <!-- 单个菜单项 -->
   <el-menu-item v-else :index="menuPath">
-    <template #title>
-      <router-link :to="menuPath" class="submenu-link">{{ menu.meta?.title }}</router-link>
-    </template>
+    <component v-if="iconComponent" :is="iconComponent" class="menu-icon" />
+    <span v-else class="menu-icon-fallback">{{ fallbackLetter }}</span>
+    
+    <template #title><span class="menu-title">{{ menu.meta?.title }}</span></template>
   </el-menu-item>
 </template>
 
@@ -34,7 +29,6 @@
 import { computed } from 'vue'
 import type { RouteData } from '@/types'
 
-// 递归组件需要显式定义组件名
 defineOptions({
   name: 'MenuItem'
 })
@@ -46,7 +40,6 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// 计算完整菜单路径（支持相对 path）
 const menuPath = computed(() => {
   const p = props.menu.path || ''
   if (p.startsWith('/')) return p
@@ -54,35 +47,89 @@ const menuPath = computed(() => {
   return `/${p}`
 })
 
-// 过滤掉按钮类型的子菜单（没有 component 且 path 为空或为按钮）
 const visibleChildren = computed(() => {
   const children = props.menu.children || []
   return children.filter(child => {
-    // 保留有 component 或有 path 的菜单项
     return !!(child.component || child.path)
   })
 })
 
-// 仅当存在可见子菜单时，才渲染子菜单结构
 const hasChildren = computed(() => visibleChildren.value.length > 0)
+
+// 图标名称映射表
+const iconMap: Record<string, string> = {
+  'homepage': 'HomeFilled',
+  'dashboard': 'DataLine',
+  'folder': 'Folder',
+  'file-text': 'Document',
+  'grid': 'Grid',
+  'tag': 'PriceTag',
+  'message-square': 'ChatDotSquare',
+  'link': 'Link',
+  'setting': 'Setting',
+  'tree-table': 'Menu'
+}
+
+const iconComponent = computed(() => {
+  const iconName = props.menu.meta?.icon || ''
+  if (!iconName || iconName === '#') return null
+  
+  if (iconMap[iconName]) {
+    return iconMap[iconName]
+  }
+  
+  const pascal = iconName.split(/[-_ ]+/).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('')
+  return pascal
+})
+
+const fallbackLetter = computed(() => {
+  const title = (props.menu.meta && props.menu.meta.title) || (props.menu.name as string) || ''
+  return title ? title.charAt(0).toUpperCase() : ''
+})
 </script>
 
 <style scoped>
-/* 让 router-link 在菜单中看起来像普通菜单项 */
-.submenu-link {
-  color: inherit;
-  display: flex;
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  display: inline-flex;
   align-items: center;
-  width: 100%;
-  height: 100%;
-  text-decoration: none;
-  transition: color 0.2s ease;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* 隐藏 el-sub-menu 的箭头指示（用于父级既有跳转目标时） */
-.no-arrow >>> .el-submenu__icon-arrow,
-.no-arrow >>> .el-submenu__title i,
-.no-arrow >>> .el-sub-menu__title__icon {
+:deep(.menu-icon svg) {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 回退字母图标样式 */
+.menu-icon-fallback {
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 500;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 菜单标题样式 */
+.menu-title {
+  margin-left: 12px;
+}
+
+.no-arrow :deep(.el-submenu__icon-arrow),
+.no-arrow :deep(.el-submenu__title i),
+.no-arrow :deep(.el-sub-menu__title__icon) {
   display: none !important;
 }
 </style>

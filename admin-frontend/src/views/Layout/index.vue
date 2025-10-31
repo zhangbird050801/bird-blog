@@ -3,11 +3,12 @@
     <!-- 侧边栏 -->
     <el-aside :width="isCollapse ? '64px' : '240px'" class="layout-aside">
       <div class="logo-container">
+        <!-- 始终显示小图标，收缩时隐藏文字 -->
         <img
-          v-if="!isCollapse"
           src="https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif"
           alt="Logo"
           class="logo"
+          :class="{ 'logo-collapsed': isCollapse }"
         />
         <h1 v-if="!isCollapse" class="title">BirdBlog</h1>
       </div>
@@ -286,6 +287,34 @@ async function handleLogout() {
   width: 32px;
   height: 32px;
   margin-right: 10px;
+}
+
+.logo-collapsed {
+  margin-right: 0 !important;
+}
+
+.logo-container {
+  gap: 8px;
+}
+
+.menu-icon {
+  margin-right: 8px;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.menu-icon-fallback {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 12px;
+  margin-right: 8px;
 }
 
 .title {
