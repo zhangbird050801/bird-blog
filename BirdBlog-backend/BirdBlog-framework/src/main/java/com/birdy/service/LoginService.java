@@ -27,4 +27,12 @@ public interface LoginService {
      * @return 退出结果
      */
     CommonResult<Void> logout();
+
+    /**
+     * 刷新访问令牌
+     *
+     * @param refreshToken 刷新令牌
+     * @return 新的访问令牌和刷新令牌
+     */
+    CommonResult<LoginVO> refreshToken(String refreshToken);
 }

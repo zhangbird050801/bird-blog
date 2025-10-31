@@ -17,9 +17,14 @@ import lombok.NoArgsConstructor;
 public class LoginVO {
 
     /**
-     * JWT Token
+     * 访问令牌(AccessToken)，有效期15分钟
      */
     private String token;
+
+    /**
+     * 刷新令牌(RefreshToken)，有效期7天
+     */
+    private String refreshToken;
 
     /**
      * 用户信息

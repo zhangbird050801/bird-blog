@@ -10,15 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 登录 Controller
+ * 管理后台认证 Controller
  *
  * @author Birdy
- * @date 2025/10/30
- * @description 用户登录认证接口
+ * @date 2025/10/31
+ * @description 管理后台用户登录认证接口
  */
 @RestController
 @RequestMapping("/auth")
-public class LoginController {
+public class AdminAuthController {
 
     @Autowired
     private LoginService loginService;
@@ -39,7 +39,7 @@ public class LoginController {
     }
 
     /**
-     * 用户登录
+     * 管理员登录
      *
      * @param loginRequest 登录请求参数
      * @return 登录结果(Token 和用户信息)
@@ -50,7 +50,7 @@ public class LoginController {
     }
 
     /**
-     * 用户退出登录
+     * 管理员退出登录
      *
      * @return 退出结果
      */

@@ -33,7 +33,11 @@ export interface UserInfo {
  * 登录响应
  */
 export interface LoginResponse {
+  /** 访问令牌(AccessToken)，有效期15分钟 */
   token: string
+  /** 刷新令牌(RefreshToken)，有效期7天 */
+  refreshToken: string
+  /** 用户信息 */
   userInfo: UserInfo
 }
 
@@ -78,6 +82,21 @@ export async function logout(): Promise<void> {
     handleApiResponse(response)
   } catch (error) {
     console.error('退出登录失败:', error)
+    throw error
+  }
+}
+
+/**
+ * 刷新 Token
+ */
+export async function refreshToken(refreshToken: string): Promise<LoginResponse> {
+  try {
+    const response = await request<ApiResponse<LoginResponse>>(`/auth/refresh-token?refreshToken=${refreshToken}`, {
+      method: 'POST',
+    })
+    return handleApiResponse(response)
+  } catch (error) {
+    console.error('刷新Token失败:', error)
     throw error
   }
 }

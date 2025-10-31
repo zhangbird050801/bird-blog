@@ -98,8 +98,8 @@ async function handleLogin() {
     
     console.log('登录 API 响应:', response)
     
-    // 保存登录信息
-    setAuth(response.token, response.userInfo)
+    // 保存登录信息（包含 token、refreshToken 和 userInfo）
+    setAuth(response.token, response.refreshToken, response.userInfo)
     
     // 显示成功提示
     toastMessage.value = '登录成功！'

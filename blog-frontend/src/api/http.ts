@@ -20,6 +20,15 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 const _env = import.meta.env as any
 const TOKEN_KEY = _env.VITE_TOKEN_KEY || 'blog_token'
+const REFRESH_TOKEN_KEY = _env.VITE_REFRESH_TOKEN_KEY || 'blog_refresh_token'
+
+// Token 刷新相关状态
+let isRefreshingToken = false
+let pendingRequests: Array<{
+  resolve: (value: any) => void
+  reject: (reason?: any) => void
+  retryRequest: () => Promise<any>
+}> = []
 
 /**
  * HTTP 请求配置选项
@@ -57,7 +66,7 @@ export async function request<T = any>(
     ...(headers as Record<string, string>),
   }
 
-  // 如果需要认证，添加 token（可根据实际情况调整）
+  // 如果需要认证，添加 token
   if (auth) {
     const token = localStorage.getItem(TOKEN_KEY)
     if (token) {
@@ -73,13 +82,103 @@ export async function request<T = any>(
 
   // 检查 HTTP 状态码
   if (!response.ok) {
+    // 如果是 401 未授权，尝试刷新 Token
+    if (response.status === 401 && auth && !path.includes('/auth/refresh-token')) {
+      return handleTokenRefresh(path, options)
+    }
     throw new Error(`HTTP 请求失败: ${response.status} ${response.statusText}`)
   }
 
   // 解析响应数据
   const result = await response.json()
 
+  // 检查业务状态码（如果响应中有 code 字段）
+  if (result.code === 401 && auth && !path.includes('/auth/refresh-token')) {
+    return handleTokenRefresh(path, options)
+  }
+
   return result as T
+}
+
+/**
+ * 处理 Token 刷新
+ */
+async function handleTokenRefresh<T>(path: string, options: RequestOptions): Promise<T> {
+  return new Promise((resolve, reject) => {
+    // 封装需要重试的请求
+    const retryRequest = () => request<T>(path, options)
+
+    // 将请求加入等待队列
+    pendingRequests.push({ resolve, reject, retryRequest })
+
+    // 如果没有正在刷新，则开始刷新流程
+    if (!isRefreshingToken) {
+      isRefreshingToken = true
+
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+      if (!refreshToken) {
+        // 没有 RefreshToken，直接跳转登录
+        rejectAllPendingRequests('没有刷新令牌，请重新登录')
+        isRefreshingToken = false
+        return
+      }
+
+      // 调用刷新 Token 接口
+      fetch(`${API_BASE}/auth/refresh-token?refreshToken=${refreshToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.code === 200 && result.data) {
+            // 刷新成功，更新 Token
+            const { token, refreshToken: newRefreshToken } = result.data
+            localStorage.setItem(TOKEN_KEY, token)
+            localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
+
+            // 重试所有等待的请求
+            retryAllPendingRequests()
+          } else {
+            // 刷新失败，清空队列并跳转登录
+            rejectAllPendingRequests('刷新令牌失败，请重新登录')
+          }
+        })
+        .catch(() => {
+          rejectAllPendingRequests('刷新令牌失败，请重新登录')
+        })
+        .finally(() => {
+          isRefreshingToken = false
+        })
+    }
+  })
+}
+
+/**
+ * 重试所有等待的请求
+ */
+function retryAllPendingRequests() {
+  pendingRequests.forEach(({ resolve, reject, retryRequest }) => {
+    retryRequest().then(resolve).catch(reject)
+  })
+  pendingRequests = []
+}
+
+/**
+ * 拒绝所有等待的请求
+ */
+function rejectAllPendingRequests(errorMsg: string) {
+  pendingRequests.forEach(({ reject }) => {
+    reject(new Error(errorMsg))
+  })
+  pendingRequests = []
+  
+  // 清除本地存储并提示用户
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(REFRESH_TOKEN_KEY)
+  console.warn(errorMsg)
+  // 可以在这里触发跳转到登录页的逻辑
 }
 
 /**

@@ -14,6 +14,7 @@ import com.birdy.service.LoginService;
 import com.birdy.utils.CaptchaUtil;
 import com.birdy.utils.JwtUtil;
 import com.birdy.utils.RedisUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -78,12 +79,15 @@ public class LoginServiceImpl implements LoginService {
             return CommonResult.error(HttpCodeEnum.USER_BANNED);
         }
 
-        // 6. 生成 JWT Token
+        // 6. 生成双 Token
         String userId = user.getId().toString();
-        String token = JwtUtil.createJWT(userId);
+        String accessToken = JwtUtil.createJWT(userId); // AccessToken: 默认15分钟
+        String refreshToken = JwtUtil.createRefreshToken(userId); // RefreshToken: 7天
 
-        // 7. 将用户信息存入 Redis(可选,用于后续验证和获取用户信息)
-        redisUtil.set("login:" + userId, JSON.toJSONString(user), jwtProperties.getTtl() / 1000);
+        // 7. 将用户信息和 RefreshToken 存入 Redis
+        long refreshTokenTtl = 7 * 24 * 60 * 60; // 7天(秒)
+        redisUtil.set("login:" + userId, JSON.toJSONString(user), refreshTokenTtl);
+        redisUtil.set("refresh:" + refreshToken, userId, refreshTokenTtl);
 
         // 8. 封装返回结果
         UserInfoVO userInfoVO = new UserInfoVO();
@@ -93,15 +97,102 @@ public class LoginServiceImpl implements LoginService {
         userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
         userInfoVO.setEmail(user.getEmail());
 
-        LoginVO loginVO = new LoginVO(token, userInfoVO);
+        LoginVO loginVO = new LoginVO();
+        loginVO.setToken(accessToken);
+        loginVO.setRefreshToken(refreshToken);
+        loginVO.setUserInfo(userInfoVO);
 
         return CommonResult.success(loginVO);
     }
 
     @Override
     public CommonResult<Void> logout() {
-        // TODO: 从 SecurityContextHolder 获取当前用户 ID,删除 Redis 中的用户信息
-        // 暂时返回成功
-        return CommonResult.success();
+        try {
+            // 1. 获取当前用户 ID
+            Long userId = com.birdy.utils.SecurityUtils.getUserId();
+            if (userId == null) {
+                return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
+            }
+
+            // 2. 从 Redis 删除用户信息
+            String loginKey = "login:" + userId;
+            redisUtil.delete(loginKey);
+
+            // 3. 将当前 AccessToken 加入黑名单(可选，防止 Token 被重用)
+            // 获取当前请求的 Token
+            org.springframework.web.context.request.ServletRequestAttributes attributes =
+                (org.springframework.web.context.request.ServletRequestAttributes)
+                org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                jakarta.servlet.http.HttpServletRequest request = attributes.getRequest();
+                String authHeader = request.getHeader("Authorization");
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    String token = authHeader.substring(7);
+                    // 将 Token 加入黑名单(有效期设置为原 Token 的剩余时间，这里简化为15分钟)
+                    long tokenTtl = jwtProperties.getTtl() / 1000; // 转换为秒
+                    redisUtil.set("blacklist:" + token, "1", tokenTtl);
+                }
+            }
+
+            return CommonResult.success();
+        } catch (Exception e) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR);
+        }
+    }
+
+    @Override
+    public CommonResult<LoginVO> refreshToken(String refreshToken) {
+        try {
+            // 1. 校验 RefreshToken 是否为空
+            if (!StringUtils.hasText(refreshToken)) {
+                return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
+            }
+
+            // 2. 解析 RefreshToken 获取用户 ID
+            Claims claims = JwtUtil.parseJWT(refreshToken);
+            String userId = claims.getSubject();
+
+            // 3. 验证 RefreshToken 是否在 Redis 中存在
+            String refreshKey = "refresh:" + refreshToken;
+            Object storedUserId = redisUtil.get(refreshKey);
+            if (storedUserId == null || !userId.equals(storedUserId.toString())) {
+                return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
+            }
+
+            // 4. 查询用户信息
+            User user = userMapper.selectById(Long.parseLong(userId));
+            if (user == null || user.getDeleted()) {
+                return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
+            }
+
+            // 5. 生成新的 AccessToken 和 RefreshToken
+            String newAccessToken = JwtUtil.createJWT(userId);
+            String newRefreshToken = JwtUtil.createRefreshToken(userId);
+
+            // 6. 删除旧的 RefreshToken，存储新的 RefreshToken
+            redisUtil.delete(refreshKey);
+            long refreshTokenTtl = 7 * 24 * 60 * 60; // 7天(秒)
+            redisUtil.set("refresh:" + newRefreshToken, userId, refreshTokenTtl);
+
+            // 7. 更新用户信息缓存
+            redisUtil.set("login:" + userId, JSON.toJSONString(user), refreshTokenTtl);
+
+            // 8. 封装返回结果
+            UserInfoVO userInfoVO = new UserInfoVO();
+            userInfoVO.setId(user.getId());
+            userInfoVO.setNickName(user.getNickName());
+            userInfoVO.setAvatar(user.getAvatar());
+            userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
+            userInfoVO.setEmail(user.getEmail());
+
+            LoginVO loginVO = new LoginVO();
+            loginVO.setToken(newAccessToken);
+            loginVO.setRefreshToken(newRefreshToken);
+            loginVO.setUserInfo(userInfoVO);
+
+            return CommonResult.success(loginVO);
+        } catch (Exception e) {
+            return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
+        }
     }
 }

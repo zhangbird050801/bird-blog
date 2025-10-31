@@ -100,6 +100,18 @@ public class JwtUtil {
     }
 
     /**
+     * 生成 RefreshToken (有效期7天)
+     *
+     * @param subject token 中要存放的数据
+     * @return RefreshToken 字符串
+     */
+    public static String createRefreshToken(String subject) {
+        // RefreshToken 有效期设置为 7 天
+        long refreshTokenTtl = 7 * 24 * 60 * 60 * 1000L; // 7天(毫秒)
+        return createJWT(subject, refreshTokenTtl);
+    }
+
+    /**
      * 解析 JWT
      *
      * @param jwt JWT 字符串
@@ -113,6 +125,18 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(jwt)
                 .getBody();
+    }
+
+    /**
+     * 检查 Token 是否在黑名单中
+     *
+     * @param token JWT token
+     * @return true=已失效, false=有效
+     */
+    public static boolean isTokenBlacklisted(String token) {
+        // 这里需要注入 RedisUtil,暂时返回 false
+        // 实际使用时需要从 Redis 查询 blacklist:{token}
+        return false;
     }
 
     /**

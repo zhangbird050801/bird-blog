@@ -1,13 +1,17 @@
 package com.birdy.config;
 
+import com.birdy.filter.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * Spring Security 配置类
@@ -19,6 +23,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     /**
      * 密码加密器
@@ -42,6 +49,10 @@ public class SecurityConfig {
         http
             // 禁用 CSRF 保护(开发环境可禁用,生产环境需根据实际情况启用)
             .csrf(AbstractHttpConfigurer::disable)
+            // 禁用 Session，使用无状态 JWT 认证
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             // 配置授权规则
             .authorizeHttpRequests(authorize -> authorize
                 // Swagger UI 相关端点放行
@@ -67,7 +78,9 @@ public class SecurityConfig {
                 ).permitAll()
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()
-            );
+            )
+            // 添加 JWT 认证过滤器，在 UsernamePasswordAuthenticationFilter 之前执行
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

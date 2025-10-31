@@ -7,10 +7,12 @@ import type { UserInfo } from '@/api'
 
 const _env = import.meta.env as any
 const TOKEN_KEY = _env.VITE_TOKEN_KEY || 'blog_token'
+const REFRESH_TOKEN_KEY = _env.VITE_REFRESH_TOKEN_KEY || 'blog_refresh_token'
 const USER_INFO_KEY = _env.VITE_USER_INFO_KEY || 'blog_user_info'
 
 // 全局状态
 const token = ref<string | null>(localStorage.getItem(TOKEN_KEY))
+const refreshToken = ref<string | null>(localStorage.getItem(REFRESH_TOKEN_KEY))
 const userInfo = ref<UserInfo | null>(getUserInfoFromStorage())
 
 /**
@@ -37,12 +39,14 @@ export function useAuth() {
   /**
    * 设置登录信息
    */
-  function setAuth(newToken: string, newUserInfo: UserInfo) {
+  function setAuth(newToken: string, newRefreshToken: string, newUserInfo: UserInfo) {
     token.value = newToken
+    refreshToken.value = newRefreshToken
     userInfo.value = newUserInfo
     
     // 保存到 localStorage
     localStorage.setItem(TOKEN_KEY, newToken)
+    localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
     localStorage.setItem(USER_INFO_KEY, JSON.stringify(newUserInfo))
   }
 
@@ -51,10 +55,12 @@ export function useAuth() {
    */
   function clearAuth() {
     token.value = null
+    refreshToken.value = null
     userInfo.value = null
     
     // 清除 localStorage
     localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
     localStorage.removeItem(USER_INFO_KEY)
   }
 
@@ -66,19 +72,40 @@ export function useAuth() {
   }
 
   /**
+   * 获取 RefreshToken
+   */
+  function getRefreshToken(): string | null {
+    return refreshToken.value
+  }
+
+  /**
    * 获取用户信息
    */
   function getUserInfo(): UserInfo | null {
     return userInfo.value
   }
 
+  /**
+   * 更新 Token（用于刷新令牌后更新）
+   */
+  function updateTokens(newToken: string, newRefreshToken: string) {
+    token.value = newToken
+    refreshToken.value = newRefreshToken
+    
+    localStorage.setItem(TOKEN_KEY, newToken)
+    localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
+  }
+
   return {
     isLoggedIn,
     token: computed(() => token.value),
+    refreshToken: computed(() => refreshToken.value),
     userInfo: computed(() => userInfo.value),
     setAuth,
     clearAuth,
     getToken,
+    getRefreshToken,
     getUserInfo,
+    updateTokens,
   }
 }
