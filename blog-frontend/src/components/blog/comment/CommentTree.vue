@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import type { CommentNode } from '@/api'
+import type { CommentVO } from '@/api'
 import CommentTreeNode from './CommentTreeNode.vue'
 
 const props = defineProps<{
-  comments: CommentNode[]
+  comments: CommentVO[]
+  articleId: number
 }>()
+
+const emit = defineEmits<{
+  refresh: []
+}>()
+
+function handleRefresh() {
+  emit('refresh')
+}
 </script>
 
 <template>
@@ -14,7 +23,13 @@ const props = defineProps<{
       暂无评论，期待你的想法
     </p>
     <ol v-else class="comment-tree__list">
-      <CommentTreeNode v-for="comment in props.comments" :key="comment.id" :comment="comment" />
+      <CommentTreeNode 
+        v-for="comment in props.comments" 
+        :key="comment.id" 
+        :comment="comment"
+        :article-id="props.articleId"
+        @refresh="handleRefresh"
+      />
     </ol>
   </section>
 </template>

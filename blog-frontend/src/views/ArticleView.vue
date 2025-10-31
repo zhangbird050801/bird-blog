@@ -5,12 +5,13 @@ import LgCard from '@/components/base/LgCard.vue'
 import LgBadge from '@/components/base/LgBadge.vue'
 import LgButton from '@/components/base/LgButton.vue'
 import CommentTree from '@/components/blog/comment/CommentTree.vue'
+import CommentInput from '@/components/blog/comment/CommentInput.vue'
 import ArticleToc from '@/components/blog/article/ArticleToc.vue'
 import ReadingProgress from '@/components/blog/article/ReadingProgress.vue'
 import ArticleNavigation from '@/components/blog/article/ArticleNavigation.vue'
 import RelatedArticles from '@/components/blog/article/RelatedArticles.vue'
 import { fetchArticleDetail, fetchComments } from '@/api'
-import type { ArticleDetailVO, CommentNode } from '@/api'
+import type { ArticleDetailVO, CommentVO } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { useMarkdown } from '@/composables/useMarkdown'
 // import 'highlight.js/styles/atom-one-dark.css' // 代码高亮样式主题
@@ -20,7 +21,7 @@ const props = defineProps<{ slug: string }>()
 const route = useRoute()
 
 const articleState = useAsyncData<ArticleDetailVO>()
-const commentsState = useAsyncData<CommentNode[]>()
+const commentsState = useAsyncData<CommentVO[]>()
 const showDonate = ref(false)
 const { render: renderMarkdown } = useMarkdown()
 
@@ -30,6 +31,14 @@ const renderedContent = computed(() => {
   if (!content) return ''
   return renderMarkdown(content)
 })
+
+// 刷新评论列表
+async function refreshComments() {
+  const articleId = articleState.data.value?.id
+  if (articleId) {
+    await commentsState.run(() => fetchComments(articleId))
+  }
+}
 
 // Mock数据：上一篇/下一篇
 const prevArticle = ref({
@@ -176,8 +185,29 @@ watch(
             <h3 class="comments-title">
               <i class="fa fa-comments-o"></i>
               评论
+              <span v-if="commentsState.data.value?.length" class="comments-count">
+                ({{ commentsState.data.value.length }})
+              </span>
             </h3>
-            <CommentTree :comments="commentsState.data.value ?? []" />
+
+            <!-- 评论输入框 -->
+            <div class="comments-input-wrapper">
+              <CommentInput
+                v-if="articleState.data.value"
+                :article-id="articleState.data.value.id"
+                @success="refreshComments"
+              />
+            </div>
+
+            <!-- 评论列表 -->
+            <div class="comments-list-wrapper">
+              <CommentTree 
+                v-if="articleState.data.value"
+                :comments="commentsState.data.value ?? []"
+                :article-id="articleState.data.value.id"
+                @refresh="refreshComments"
+              />
+            </div>
           </div>
         </LgCard>
       </div>
@@ -817,5 +847,39 @@ body.dark .article-main__body :deep(table tbody tr:nth-child(even)) {
 
 body.dark .article-loading {
   background: rgba(40, 42, 44, 0.6);
+}
+
+/* 评论区样式 */
+.comments-section {
+  margin-top: 40px;
+}
+
+.comments-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--lg-text-primary);
+  margin-bottom: 24px;
+}
+
+.comments-title i {
+  color: var(--sg-primary);
+  font-size: 26px;
+}
+
+.comments-count {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--lg-text-secondary);
+}
+
+.comments-input-wrapper {
+  margin-bottom: 32px;
+}
+
+.comments-list-wrapper {
+  margin-top: 24px;
 }
 </style>

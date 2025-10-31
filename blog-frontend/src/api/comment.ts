@@ -1,8 +1,8 @@
 import { getMockArticleById, getMockComments } from './mockData'
-import { get } from './http'
+import { get, post, handleApiResponse, type ApiResponse } from './http'
 
 /**
- * 评论节点（树形结构）
+ * 评论节点（树形结构）- 前端显示用
  */
 export interface CommentNode {
   id: number
@@ -14,17 +14,54 @@ export interface CommentNode {
 }
 
 /**
+ * 后端返回的评论VO
+ */
+export interface CommentVO {
+  id: number
+  articleId: number
+  rootId: number | null
+  content: string
+  fromUserId: number
+  fromUserName: string
+  fromUserAvatar: string | null
+  toUserId: number | null
+  toUserName: string | null
+  toUserAvatar: string | null
+  createTime: string
+  children: CommentVO[]
+}
+
+/**
+ * 添加评论请求
+ */
+export interface AddCommentRequest {
+  articleId: number
+  rootId?: number | null
+  parentId?: number | null
+  toUserId?: number | null
+  content: string
+}
+
+/**
  * 获取文章评论列表
  * @param articleId 文章ID
  */
-export async function fetchComments(articleId: number): Promise<CommentNode[]> {
+export async function fetchComments(articleId: number): Promise<CommentVO[]> {
   try {
-    return await get<CommentNode[]>(`/articles/${articleId}/comments`)
+    const response = await get<ApiResponse<CommentVO[]>>(`/comment/article/${articleId}`)
+    return handleApiResponse(response)
   } catch (error) {
-    const article = getMockArticleById(articleId)
-    if (!article) {
-      throw error
-    }
-    return getMockComments(articleId)
+    console.error('获取评论失败:', error)
+    // 返回空数组而不是 mock 数据
+    return []
   }
+}
+
+/**
+ * 添加评论
+ * @param request 评论请求
+ */
+export async function addComment(request: AddCommentRequest): Promise<void> {
+  const response = await post<ApiResponse<void>>('/comment/add', request, { auth: true })
+  handleApiResponse(response)
 }

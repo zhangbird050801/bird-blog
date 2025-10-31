@@ -1,13 +1,22 @@
 <script setup lang="ts">
-import type { CommentNode } from '@/api'
+import { ref } from 'vue'
+import type { CommentVO } from '@/api'
+import CommentInput from './CommentInput.vue'
 
 defineOptions({
   name: 'CommentTreeNode',
 })
 
 const props = defineProps<{
-  comment: CommentNode
+  comment: CommentVO
+  articleId: number
 }>()
+
+const emit = defineEmits<{
+  refresh: []
+}>()
+
+const showReplyInput = ref(false)
 
 // 生成随机头像颜色
 const getAvatarColor = (name: string) => {
@@ -20,31 +29,78 @@ const getAvatarColor = (name: string) => {
 const getInitial = (name: string) => {
   return name.charAt(0).toUpperCase()
 }
+
+// 获取头像 URL 或首字母
+const getAvatarDisplay = (avatar: string | null, name: string) => {
+  if (avatar && avatar.startsWith('http')) {
+    return { type: 'image', value: avatar }
+  }
+  return { type: 'initial', value: getInitial(name) }
+}
+
+// 格式化时间
+const formatTime = (time: string) => {
+  return new Date(time).toLocaleString('zh-CN', { 
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  })
+}
+
+// 点击回复按钮
+function handleReply() {
+  showReplyInput.value = !showReplyInput.value
+}
+
+// 回复成功
+function handleReplySuccess() {
+  showReplyInput.value = false
+  emit('refresh')
+}
+
+// 取消回复
+function handleReplyCancel() {
+  showReplyInput.value = false
+}
+
+// 子评论刷新
+function handleChildRefresh() {
+  emit('refresh')
+}
 </script>
 
 <template>
   <li class="comment-item">
     <div class="comment-main">
       <!-- 头像 -->
-      <div class="comment-avatar" :style="{ backgroundColor: getAvatarColor(props.comment.author) }">
-        {{ getInitial(props.comment.author) }}
+      <div 
+        v-if="getAvatarDisplay(props.comment.fromUserAvatar, props.comment.fromUserName).type === 'initial'"
+        class="comment-avatar" 
+        :style="{ backgroundColor: getAvatarColor(props.comment.fromUserName) }"
+      >
+        {{ getAvatarDisplay(props.comment.fromUserAvatar, props.comment.fromUserName).value }}
       </div>
+      <img 
+        v-else
+        :src="getAvatarDisplay(props.comment.fromUserAvatar, props.comment.fromUserName).value"
+        :alt="`${props.comment.fromUserName}的头像`"
+        class="comment-avatar comment-avatar--image"
+      />
       
       <div class="comment-content">
         <!-- 用户信息栏 -->
         <div class="comment-header">
-          <span class="comment-author">{{ props.comment.author }}</span>
-          <span class="comment-client" v-if="props.comment.userAgent">
-            {{ props.comment.userAgent }}
-          </span>
-          <time class="comment-time" v-if="props.comment.createdAt" :datetime="props.comment.createdAt">
-            {{ new Date(props.comment.createdAt).toLocaleString('zh-CN', { 
-              year: 'numeric', 
-              month: '2-digit', 
-              day: '2-digit', 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            }) }}
+          <span class="comment-author">{{ props.comment.fromUserName }}</span>
+          <template v-if="props.comment.toUserName">
+            <span class="comment-reply-arrow">
+              <i class="fa fa-angle-right"></i>
+            </span>
+            <span class="comment-author comment-author--to">{{ props.comment.toUserName }}</span>
+          </template>
+          <time class="comment-time" :datetime="props.comment.createTime">
+            {{ formatTime(props.comment.createTime) }}
           </time>
         </div>
         
@@ -53,17 +109,37 @@ const getInitial = (name: string) => {
         
         <!-- 操作按钮 -->
         <div class="comment-actions">
-          <button class="comment-reply-btn">
+          <button class="comment-reply-btn" @click="handleReply">
             <i class="fa fa-reply"></i>
-            回复
+            {{ showReplyInput ? '取消回复' : '回复' }}
           </button>
+        </div>
+
+        <!-- 回复输入框 -->
+        <div v-if="showReplyInput" class="comment-reply-input">
+          <CommentInput
+            :article-id="props.articleId"
+            :root-id="props.comment.rootId || props.comment.id"
+            :parent-id="props.comment.id"
+            :to-user-id="props.comment.fromUserId"
+            :to-user-name="props.comment.fromUserName"
+            placeholder="写下你的回复..."
+            @success="handleReplySuccess"
+            @cancel="handleReplyCancel"
+          />
         </div>
       </div>
     </div>
     
     <!-- 回复列表 -->
-    <ol v-if="props.comment.replies?.length" class="comment-replies">
-      <CommentTreeNode v-for="reply in props.comment.replies" :key="reply.id" :comment="reply" />
+    <ol v-if="props.comment.children?.length" class="comment-replies">
+      <CommentTreeNode 
+        v-for="reply in props.comment.children" 
+        :key="reply.id" 
+        :comment="reply"
+        :article-id="props.articleId"
+        @refresh="handleChildRefresh"
+      />
     </ol>
   </li>
 </template>
@@ -96,6 +172,10 @@ const getInitial = (name: string) => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.comment-avatar--image {
+  object-fit: cover;
+}
+
 .comment-content {
   flex: 1;
   min-width: 0;
@@ -114,6 +194,15 @@ const getInitial = (name: string) => {
   font-size: 14px;
   font-weight: 600;
   color: var(--lg-text-primary);
+}
+
+.comment-author--to {
+  color: var(--sg-primary);
+}
+
+.comment-reply-arrow {
+  color: var(--lg-text-tertiary);
+  font-size: 12px;
 }
 
 .comment-client {
@@ -168,6 +257,11 @@ const getInitial = (name: string) => {
 
 .comment-reply-btn i {
   font-size: 12px;
+}
+
+/* 回复输入框 */
+.comment-reply-input {
+  margin-top: 12px;
 }
 
 /* 回复列表 */
