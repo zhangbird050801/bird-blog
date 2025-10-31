@@ -2,7 +2,7 @@ import { getMockArticleById, getMockComments } from './mockData'
 import { get, post, handleApiResponse, type ApiResponse } from './http'
 
 /**
- * 评论节点（树形结构）- 前端显示用
+ * 评论节点（树形结构）
  */
 export interface CommentNode {
   id: number

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { CommentVO } from '@/api'
 import CommentInput from './CommentInput.vue'
+import { useMarkdown } from '@/composables/useMarkdown'
+import '../../../assets/atom-one-dark.css'
 
 defineOptions({
   name: 'CommentTreeNode',
@@ -17,6 +19,13 @@ const emit = defineEmits<{
 }>()
 
 const showReplyInput = ref(false)
+const { render: renderMarkdown } = useMarkdown()
+
+// 渲染评论内容为 Markdown
+const renderedContent = computed(() => {
+  if (!props.comment.content) return ''
+  return renderMarkdown(props.comment.content)
+})
 
 // 生成随机头像颜色
 const getAvatarColor = (name: string) => {
@@ -105,7 +114,7 @@ function handleChildRefresh() {
         </div>
         
         <!-- 评论内容 -->
-        <div class="comment-text">{{ props.comment.content }}</div>
+        <div class="comment-text markdown-body" v-html="renderedContent"></div>
         
         <!-- 操作按钮 -->
         <div class="comment-actions">
@@ -226,6 +235,180 @@ function handleChildRefresh() {
   color: var(--lg-text-primary);
   margin-bottom: 8px;
   word-wrap: break-word;
+}
+
+/* Markdown 内容样式（评论专用，更紧凑） */
+.comment-text.markdown-body :deep(p) {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.comment-text.markdown-body :deep(p:first-child) {
+  margin-top: 0;
+}
+
+.comment-text.markdown-body :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.comment-text.markdown-body :deep(h1),
+.comment-text.markdown-body :deep(h2),
+.comment-text.markdown-body :deep(h3),
+.comment-text.markdown-body :deep(h4),
+.comment-text.markdown-body :deep(h5),
+.comment-text.markdown-body :deep(h6) {
+  margin: 12px 0 8px;
+  font-weight: 600;
+  color: var(--lg-text-primary);
+}
+
+.comment-text.markdown-body :deep(h1) {
+  font-size: 18px;
+}
+
+.comment-text.markdown-body :deep(h2) {
+  font-size: 16px;
+}
+
+.comment-text.markdown-body :deep(h3),
+.comment-text.markdown-body :deep(h4),
+.comment-text.markdown-body :deep(h5),
+.comment-text.markdown-body :deep(h6) {
+  font-size: 14px;
+}
+
+.comment-text.markdown-body :deep(a) {
+  color: var(--sg-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.comment-text.markdown-body :deep(a:hover) {
+  color: var(--sg-secondary);
+  border-bottom-color: var(--sg-secondary);
+}
+
+.comment-text.markdown-body :deep(code) {
+  background: rgba(151, 223, 253, 0.15);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  color: var(--sg-secondary);
+}
+
+.comment-text.markdown-body :deep(pre) {
+  background: #282c34;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-x: auto;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comment-text.markdown-body :deep(pre::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent);
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+}
+
+/* 代码块装饰点（模拟 macOS 窗口控制按钮） */
+.comment-text.markdown-body :deep(pre::after) {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  width: 12px;
+  height: 12px;
+  background: #ff5f56;
+  border-radius: 50%;
+  box-shadow: 
+    20px 0 0 #ffbd2e,
+    40px 0 0 #27c93f;
+}
+
+body.dark .comment-text.markdown-body :deep(pre) {
+  background: #1e1e1e;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.comment-text.markdown-body :deep(pre code) {
+  background: transparent;
+  padding: 0;
+  color: #abb2bf;
+  display: block;
+  line-height: 1.6;
+  font-size: 14px;
+  padding-top: 12px; /* 为装饰点留出空间 */
+}
+
+/* 代码高亮特殊样式 */
+.comment-text.markdown-body :deep(.hljs) {
+  padding: 0;
+  background: transparent;
+}
+
+.comment-text.markdown-body :deep(pre.hljs) {
+  padding: 20px;
+}
+
+.comment-text.markdown-body :deep(ul),
+.comment-text.markdown-body :deep(ol) {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.comment-text.markdown-body :deep(li) {
+  margin: 4px 0;
+}
+
+.comment-text.markdown-body :deep(blockquote) {
+  margin: 8px 0;
+  padding-left: 16px;
+  border-left: 3px solid var(--sg-primary);
+  color: var(--lg-text-secondary);
+  font-style: italic;
+}
+
+.comment-text.markdown-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+
+.comment-text.markdown-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.comment-text.markdown-body :deep(th),
+.comment-text.markdown-body :deep(td) {
+  padding: 6px 8px;
+  border: 1px solid var(--lg-border);
+}
+
+.comment-text.markdown-body :deep(th) {
+  background: var(--lg-surface);
+  font-weight: 600;
+}
+
+.comment-text.markdown-body :deep(hr) {
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid var(--lg-border);
 }
 
 /* 操作按钮 */
