@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-const MENU_BASE_URL = "/api/v1/menus";
+const MENU_BASE_URL = "/menus";
 
 const MenuAPI = {
   /** 获取当前用户的路由列表 */
