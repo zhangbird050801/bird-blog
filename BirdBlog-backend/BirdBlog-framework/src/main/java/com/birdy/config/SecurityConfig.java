@@ -4,6 +4,7 @@ import com.birdy.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -55,6 +56,8 @@ public class SecurityConfig {
             )
             // 配置授权规则
             .authorizeHttpRequests(authorize -> authorize
+                // 允许 OPTIONS 请求（CORS 预检请求）
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Swagger UI 相关端点放行
                 .requestMatchers(
                     "/swagger-ui/**",

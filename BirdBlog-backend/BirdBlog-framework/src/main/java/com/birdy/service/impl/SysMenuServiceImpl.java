@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,5 +131,189 @@ public class SysMenuServiceImpl implements SysMenuService {
         }
         
         return name.toString();
+    }
+
+    @Override
+    public List<MenuVO> getMenuTree(String name, Integer status) {
+        // 1. 查询所有菜单
+        LambdaQueryWrapper<SysMenu> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysMenu::getDeleted, false)
+                   .orderByAsc(SysMenu::getOrderNum, SysMenu::getId);
+        
+        // 添加过滤条件
+        if (StringUtils.hasText(name)) {
+            queryWrapper.like(SysMenu::getMenuName, name);
+        }
+        if (status != null) {
+            queryWrapper.eq(SysMenu::getStatus, status);
+        }
+        
+        List<SysMenu> allMenus = sysMenuMapper.selectList(queryWrapper);
+        
+        // 2. 转换为 VO 并构建树形结构
+        List<MenuVO> menuVOList = allMenus.stream()
+                .map(this::convertToMenuVO)
+                .collect(Collectors.toList());
+        
+        return buildMenuVOTree(menuVOList, null);
+    }
+
+    @Override
+    public List<Map<String, Object>> getMenuOptions() {
+        // 查询所有目录和菜单类型的菜单
+        LambdaQueryWrapper<SysMenu> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysMenu::getDeleted, false)
+                   .in(SysMenu::getMenuType, Arrays.asList("M", "C"))
+                   .orderByAsc(SysMenu::getOrderNum, SysMenu::getId);
+        
+        List<SysMenu> allMenus = sysMenuMapper.selectList(queryWrapper);
+        
+        return buildMenuOptions(allMenus, null);
+    }
+
+    @Override
+    public MenuVO getMenuById(Long id) {
+        SysMenu menu = sysMenuMapper.selectById(id);
+        if (menu == null || menu.getDeleted()) {
+            return null;
+        }
+        return convertToMenuVO(menu);
+    }
+
+    @Override
+    public boolean addMenu(MenuFormDTO menuForm) {
+        SysMenu menu = new SysMenu();
+        
+        // 手动映射字段（DTO字段名与实体字段名不同）
+        menu.setMenuName(menuForm.getName());
+        menu.setParentId(menuForm.getParentId());
+        menu.setOrderNum(menuForm.getSort());
+        menu.setPath(menuForm.getPath());
+        menu.setComponent(menuForm.getComponent());
+        menu.setMenuType(menuForm.getType());
+        menu.setVisible(menuForm.getVisible());
+        menu.setStatus(menuForm.getStatus());
+        menu.setPerms(menuForm.getPerm());
+        menu.setIcon(menuForm.getIcon());
+        menu.setRemark(menuForm.getRemark());
+        
+        menu.setCreateTime(LocalDateTime.now());
+        menu.setUpdateTime(LocalDateTime.now());
+        menu.setDeleted(false);
+        menu.setIsFrame(1); // 默认不是外链
+        
+        return sysMenuMapper.insert(menu) > 0;
+    }
+
+    @Override
+    public boolean updateMenu(Long id, MenuFormDTO menuForm) {
+        SysMenu menu = sysMenuMapper.selectById(id);
+        if (menu == null || menu.getDeleted()) {
+            return false;
+        }
+        
+        // 手动映射字段（DTO字段名与实体字段名不同）
+        menu.setMenuName(menuForm.getName());
+        menu.setParentId(menuForm.getParentId());
+        menu.setOrderNum(menuForm.getSort());
+        menu.setPath(menuForm.getPath());
+        menu.setComponent(menuForm.getComponent());
+        menu.setMenuType(menuForm.getType());
+        menu.setVisible(menuForm.getVisible());
+        menu.setStatus(menuForm.getStatus());
+        menu.setPerms(menuForm.getPerm());
+        menu.setIcon(menuForm.getIcon());
+        menu.setRemark(menuForm.getRemark());
+        
+        menu.setUpdateTime(LocalDateTime.now());
+        
+        return sysMenuMapper.updateById(menu) > 0;
+    }
+
+    @Override
+    public boolean deleteMenu(Long id) {
+        // 检查是否存在子菜单
+        LambdaQueryWrapper<SysMenu> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysMenu::getParentId, id)
+                   .eq(SysMenu::getDeleted, false);
+        
+        Long count = sysMenuMapper.selectCount(queryWrapper);
+        if (count > 0) {
+            throw new RuntimeException("存在子菜单，无法删除");
+        }
+        
+        // 逻辑删除
+        SysMenu menu = sysMenuMapper.selectById(id);
+        if (menu == null) {
+            return false;
+        }
+        
+        menu.setDeleted(true);
+        menu.setUpdateTime(LocalDateTime.now());
+        
+        return sysMenuMapper.updateById(menu) > 0;
+    }
+
+    /**
+     * 将 SysMenu 转换为 MenuVO
+     *
+     * @param menu 菜单实体
+     * @return 菜单 VO
+     */
+    private MenuVO convertToMenuVO(SysMenu menu) {
+        MenuVO menuVO = new MenuVO();
+        BeanUtils.copyProperties(menu, menuVO);
+        return menuVO;
+    }
+
+    /**
+     * 构建菜单 VO 树形结构
+     *
+     * @param allMenus 所有菜单 VO 列表
+     * @param parentId 父菜单 ID
+     * @return 树形菜单 VO 列表
+     */
+    private List<MenuVO> buildMenuVOTree(List<MenuVO> allMenus, Long parentId) {
+        List<MenuVO> tree = new ArrayList<>();
+        
+        for (MenuVO menu : allMenus) {
+            if (Objects.equals(menu.getParentId(), parentId)) {
+                List<MenuVO> children = buildMenuVOTree(allMenus, menu.getId());
+                menu.setChildren(children);
+                tree.add(menu);
+            }
+        }
+        
+        return tree;
+    }
+
+    /**
+     * 构建菜单选项树
+     *
+     * @param allMenus 所有菜单列表
+     * @param parentId 父菜单 ID
+     * @return 树形选项列表
+     */
+    private List<Map<String, Object>> buildMenuOptions(List<SysMenu> allMenus, Long parentId) {
+        List<Map<String, Object>> options = new ArrayList<>();
+        
+        List<SysMenu> currentLevelMenus = allMenus.stream()
+                .filter(menu -> Objects.equals(menu.getParentId(), parentId))
+                .collect(Collectors.toList());
+        
+        for (SysMenu menu : currentLevelMenus) {
+            Map<String, Object> option = new HashMap<>();
+            option.put("value", menu.getId());
+            option.put("label", menu.getMenuName());
+            
+            List<Map<String, Object>> children = buildMenuOptions(allMenus, menu.getId());
+            if (!children.isEmpty()) {
+                option.put("children", children);
+            }
+            
+            options.add(option);
+        }
+        
+        return options;
     }
 }
