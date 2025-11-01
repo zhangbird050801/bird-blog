@@ -69,7 +69,10 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/auth/login",
                     "/auth/captcha",
-                    "/auth/logout"
+                    "/auth/logout",
+                    "/admin/auth/login",
+                    "/admin/auth/captcha",
+                    "/admin/auth/logout"
                 ).permitAll()
                 // 博客前台公开接口放行
                 .requestMatchers(
