@@ -12,18 +12,10 @@ module.exports = defineConfig({
     port: 5173,
     open: true,
     proxy: {
-      '/auth': {
+      '/admin': {
         target: 'http://localhost:9090',
         changeOrigin: true
       },
-      '/menus': {
-        target: 'http://localhost:9090',
-        changeOrigin: true
-      },
-      '/content': {
-        target: 'http://localhost:9090',
-        changeOrigin: true
-      }
     }
   },
 
