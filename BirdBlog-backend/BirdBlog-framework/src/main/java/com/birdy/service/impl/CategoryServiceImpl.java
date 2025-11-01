@@ -2,6 +2,7 @@ package com.birdy.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.birdy.constants.SysConstants;
 import com.birdy.domain.CommonResult;
@@ -9,6 +10,7 @@ import com.birdy.domain.entity.Article;
 import com.birdy.domain.entity.Category;
 import com.birdy.domain.vo.CategoryVO;
 import com.birdy.domain.vo.HotArticleVO;
+import com.birdy.domain.vo.PageResult;
 import com.birdy.service.ArticleService;
 import com.birdy.service.CategoryService;
 import com.birdy.mapper.CategoryMapper;
@@ -53,6 +55,28 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
         List<CategoryVO> res = BeanUtil.copyToList(categories, CategoryVO.class);
 
         return CommonResult.success(res);
+    }
+
+    @Override
+    public PageResult<Category> getPageList(Integer pageNum, Integer pageSize) {
+        // 创建分页对象
+        Page<Category> page = new Page<>(pageNum, pageSize);
+        
+        // 构建查询条件：未删除的分类，按创建时间降序
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Category::getDeleted, false)
+                   .orderByDesc(Category::getCreateTime);
+        
+        // 执行分页查询
+        page(page, queryWrapper);
+        
+        // 封装为 PageResult
+        return new PageResult<>(
+            page.getTotal(),
+            page.getRecords(),
+            (int) page.getCurrent(),
+            (int) page.getSize()
+        );
     }
 }
 

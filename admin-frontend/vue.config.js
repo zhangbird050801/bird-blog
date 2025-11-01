@@ -19,6 +19,10 @@ module.exports = defineConfig({
       '/menus': {
         target: 'http://localhost:9090',
         changeOrigin: true
+      },
+      '/content': {
+        target: 'http://localhost:9090',
+        changeOrigin: true
       }
     }
   },

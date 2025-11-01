@@ -143,3 +143,41 @@ export interface RouteData {
   }
   children?: RouteData[]
 }
+
+/**
+ * 分页结果
+ */
+export interface PageResult<T = any> {
+  total: number
+  rows: T[]
+  pageNum: number
+  pageSize: number
+  totalPages: number
+}
+
+/**
+ * 分类信息
+ */
+export interface Category {
+  id: number
+  name: string
+  pid?: number | null
+  description?: string | null
+  status: number
+  count?: number
+  creator?: string
+  createTime?: string
+  updater?: string
+  updateTime?: string
+  deleted?: boolean
+}
+
+/**
+ * 分类查询参数
+ */
+export interface CategoryQueryParams {
+  pageNum?: number
+  pageSize?: number
+  name?: string
+  status?: number
+}

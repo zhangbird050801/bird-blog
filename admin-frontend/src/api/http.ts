@@ -113,8 +113,9 @@ class HttpClient {
 }
 
 // 创建 HTTP 客户端实例
+// 注意：在开发环境中，baseURL 应该为空，因为请求会通过 vue.config.js 的代理转发
 const http = new HttpClient({
-  baseURL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090',
+  baseURL: process.env.NODE_ENV === 'development' ? '' : (process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090'),
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json;charset=UTF-8'
