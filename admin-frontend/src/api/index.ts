@@ -16,28 +16,28 @@ export const authApi = {
    * 获取验证码
    */
   getCaptcha(): Promise<CaptchaResponse> {
-    return http.get('/auth/captcha')
+    return http.get('/admin/auth/captcha')
   },
 
   /**
    * 登录
    */
   login(data: LoginRequest): Promise<LoginResponse> {
-    return http.post('/auth/login', data)
+    return http.post('/admin/auth/login', data)
   },
 
   /**
    * 退出登录
    */
   logout(): Promise<void> {
-    return http.post('/auth/logout')
+    return http.post('/admin/auth/logout')
   },
 
   /**
    * 刷新 Token
    */
   refreshToken(refreshToken: string): Promise<LoginResponse> {
-    return http.post('/auth/refresh-token', null, {
+    return http.post('/admin/auth/refresh-token', null, {
       params: { refreshToken }
     })
   }
@@ -48,10 +48,10 @@ export const authApi = {
  */
 export const menuApi = {
   /**
-   * 获取当前用户的路由菜单（后端已处理为路由格式）
+   * 获取当前用户的路由菜单
    */
   getRoutes(): Promise<RouteData[]> {
-    return http.get('/menus/routes')
+    return http.get('/admin/menus/routes')
   },
 
   /**
@@ -59,42 +59,42 @@ export const menuApi = {
    * @param params 查询参数
    */
   getMenuTree(params?: { name?: string; status?: number }): Promise<MenuItem[]> {
-    return http.get('/menus', { params })
+    return http.get('/admin/menus', { params })
   },
 
   /**
    * 获取菜单下拉选项（用于选择父菜单）
    */
   getMenuOptions(): Promise<Array<{ value: number; label: string; children?: any[] }>> {
-    return http.get('/menus/options')
+    return http.get('/admin/menus/options')
   },
 
   /**
    * 获取菜单详情（用于编辑表单）
    */
   getMenuDetail(id: number): Promise<MenuItem> {
-    return http.get(`/menus/${id}/form`)
+    return http.get(`/admin/menus/${id}/form`)
   },
 
   /**
    * 新增菜单
    */
   createMenu(data: any): Promise<void> {
-    return http.post('/menus', data)
+    return http.post('/admin/menus', data)
   },
 
   /**
    * 修改菜单
    */
   updateMenu(id: number, data: any): Promise<void> {
-    return http.put(`/menus/${id}`, data)
+    return http.put(`/admin/menus/${id}`, data)
   },
 
   /**
    * 删除菜单
    */
   deleteMenu(id: number): Promise<void> {
-    return http.delete(`/menus/${id}`)
+    return http.delete(`/admin/menus/${id}`)
   }
 }
 
@@ -106,6 +106,6 @@ export const userApi = {
    * 获取当前登录用户信息
    */
   getCurrentUser(): Promise<BackendUserInfo> {
-    return http.get('/users/me')
+    return http.get('/admin/users/me')
   }
 }
