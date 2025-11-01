@@ -1,0 +1,53 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: birdblog-admin
+  datasource:
+    url: jdbc:mysql://localhost:3306/birdblog?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 12345678
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 5MB
+  security:
+    user:
+      name: admin
+      password: admin123
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          # 连接池最大连接数
+          max-active: 8
+          # 连接池最大阻塞等待时间(使用负值表示没有限制)
+          max-wait: -1ms
+          # 连接池中的最大空闲连接
+          max-idle: 8
+          # 连接池中的最小空闲连接
+          min-idle: 0
+
+# JWT 配置
+jwt:
+  # JWT 密钥(Base64 编码)
+  secret-key: Your-key
+  # Token 有效期(毫秒) 24小时
+  ttl: 86400000
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      logic-delete-field: is_deleted
