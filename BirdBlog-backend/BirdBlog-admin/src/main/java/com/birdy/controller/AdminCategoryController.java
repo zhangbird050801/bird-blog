@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * @description 分类管理接口，包括分页查询、新增、修改、删除等操作
  */
 @RestController
-@RequestMapping("/admin/categories")
+@RequestMapping("/categories")
 public class AdminCategoryController {
 
     @Autowired
