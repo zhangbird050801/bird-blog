@@ -18,11 +18,14 @@ export { fetchComments, addComment, type CommentNode, type CommentVO, type AddCo
 export { fetchLinks, type Link } from './link'
 export { 
   fetchCaptcha, 
-  login, 
+  login,
+  register,
   logout,
   type CaptchaResponse,
   type LoginRequest,
+  type RegisterRequest,
   type LoginResponse,
+  type RegisterResponse,
   type UserInfo,
 } from './auth'
 export { default as http, type ApiResponse } from './http'

@@ -1,8 +1,10 @@
 package com.birdy.service;
 
 import com.birdy.domain.CommonResult;
-import com.birdy.domain.dto.LoginRequest;
+import com.birdy.domain.dto.LoginRequestDTO;
+import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.vo.LoginVO;
+import com.birdy.domain.vo.RegisterVO;
 
 /**
  * 登录 Service 接口
@@ -16,10 +18,10 @@ public interface LoginService {
     /**
      * 用户登录
      *
-     * @param loginRequest 登录请求参数
+     * @param loginRequestDTO 登录请求参数
      * @return 登录结果(包含 Token 和用户信息)
      */
-    CommonResult<LoginVO> login(LoginRequest loginRequest);
+    CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO);
 
     /**
      * 用户退出登录
@@ -35,4 +37,11 @@ public interface LoginService {
      * @return 新的访问令牌和刷新令牌
      */
     CommonResult<LoginVO> refreshToken(String refreshToken);
+
+    /**
+     * 注册
+     * @param registerRequestDTO
+     * @return
+     */
+    CommonResult<RegisterVO> register(RegisterRequestDTO registerRequestDTO);
 }

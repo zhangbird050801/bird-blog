@@ -1,7 +1,7 @@
 package com.birdy.controller;
 
 import com.birdy.domain.CommonResult;
-import com.birdy.domain.dto.LoginRequest;
+import com.birdy.domain.dto.LoginRequestDTO;
 import com.birdy.domain.vo.CaptchaVO;
 import com.birdy.domain.vo.LoginVO;
 import com.birdy.service.LoginService;
@@ -41,12 +41,12 @@ public class AdminAuthController {
     /**
      * 管理员登录
      *
-     * @param loginRequest 登录请求参数
+     * @param loginRequestDTO 登录请求参数
      * @return 登录结果(Token 和用户信息)
      */
     @PostMapping("/login")
-    public CommonResult<LoginVO> login(@RequestBody LoginRequest loginRequest) {
-        return loginService.login(loginRequest);
+    public CommonResult<LoginVO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        return loginService.login(loginRequestDTO);
     }
 
     /**

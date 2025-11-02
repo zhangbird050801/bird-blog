@@ -19,6 +19,17 @@ export interface LoginRequest {
 }
 
 /**
+ * 注册请求参数
+ */
+export interface RegisterRequest {
+  userName: string
+  email: string
+  password: string
+  code: string  // 验证码
+  uuid: string  // 验证码 UUID
+}
+
+/**
  * 用户信息
  */
 export interface UserInfo {
@@ -39,6 +50,15 @@ export interface LoginResponse {
   refreshToken: string
   /** 用户信息 */
   userInfo: UserInfo
+}
+
+/**
+ * 注册响应
+ */
+export interface RegisterResponse {
+  userName: string
+  email: string
+  nickName: string
 }
 
 /**
@@ -66,6 +86,22 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     return handleApiResponse(response)
   } catch (error) {
     console.error('登录失败:', error)
+    throw error
+  }
+}
+
+/**
+ * 用户注册
+ */
+export async function register(data: RegisterRequest): Promise<RegisterResponse> {
+  try {
+    const response = await request<ApiResponse<RegisterResponse>>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    return handleApiResponse(response)
+  } catch (error) {
+    console.error('注册失败:', error)
     throw error
   }
 }

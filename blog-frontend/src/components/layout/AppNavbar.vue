@@ -8,6 +8,7 @@ import LgIconButton from '@/components/base/LgIconButton.vue'
 import LgInput from '@/components/base/LgInput.vue'
 import LgButton from '@/components/base/LgButton.vue'
 import LoginModal from '@/components/blog/common/LoginModal.vue'
+import RegisterModal from '@/components/blog/common/RegisterModal.vue'
 import LinkModal from '@/components/blog/common/LinkModal.vue'
 import { fetchCategories } from '@/api'
 import type { Category } from '@/api'
@@ -23,6 +24,9 @@ const categoryDropdownRef = ref<HTMLElement | null>(null)
 
 // 登录弹窗
 const showLoginModal = ref(false)
+
+// 注册弹窗
+const showRegisterModal = ref(false)
 
 // 友链弹窗
 const showLinkModal = ref(false)
@@ -87,6 +91,18 @@ function closeUserMenu() {
 // 打开登录弹窗
 function openLoginModal() {
   showLoginModal.value = true
+  showRegisterModal.value = false
+}
+
+// 打开注册弹窗
+function openRegisterModal() {
+  showRegisterModal.value = true
+  showLoginModal.value = false
+}
+
+// 注册成功回调
+function handleRegisterSuccess() {
+  console.log('注册成功')
 }
 
 // 登录成功回调
@@ -241,10 +257,15 @@ onBeforeUnmount(() => {
           </svg>
         </LgIconButton>
 
-        <!-- 未登录：显示登录按钮 -->
-        <LgButton v-if="!isLoggedIn" variant="primary" size="sm" @click="openLoginModal">
-          登录
-        </LgButton>
+        <!-- 未登录：显示登录/注册按钮 -->
+        <div v-if="!isLoggedIn" class="auth-buttons">
+          <LgButton variant="ghost" size="sm" @click="openRegisterModal">
+            注册
+          </LgButton>
+          <LgButton variant="primary" size="sm" @click="openLoginModal">
+            登录
+          </LgButton>
+        </div>
 
         <!-- 已登录：显示用户菜单 -->
         <div v-else ref="userMenuRef" class="user-menu-container">
@@ -276,7 +297,18 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- 登录弹窗 -->
-    <LoginModal v-model:show="showLoginModal" @success="handleLoginSuccess" />
+    <LoginModal 
+      v-model:show="showLoginModal" 
+      @success="handleLoginSuccess"
+      @switch-to-register="openRegisterModal"
+    />
+    
+    <!-- 注册弹窗 -->
+    <RegisterModal 
+      v-model:show="showRegisterModal" 
+      @success="handleRegisterSuccess"
+      @switch-to-login="openLoginModal"
+    />
     
     <!-- 友链弹窗 -->
     <LinkModal :show="showLinkModal" @close="showLinkModal = false" />
@@ -574,6 +606,13 @@ body.dark .user-menu {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
+}
+
+/* 认证按钮组 */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .user-info-avatar {

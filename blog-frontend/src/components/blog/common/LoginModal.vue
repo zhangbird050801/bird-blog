@@ -13,6 +13,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void
   (e: 'success'): void
+  (e: 'switchToRegister'): void
 }>()
 
 const { setAuth } = useAuth()
@@ -143,6 +144,12 @@ async function handleLogin() {
   }
 }
 
+// 切换到注册
+function switchToRegister() {
+  closeModal()
+  emit('switchToRegister')
+}
+
 // 弹窗显示时加载验证码
 watch(() => props.show, (newVal) => {
   if (newVal) {
@@ -240,6 +247,14 @@ watch(() => props.show, (newVal) => {
             >
               {{ loading ? '登录中...' : '登录' }}
             </LgButton>
+
+            <!-- 切换到注册 -->
+            <div class="switch-mode">
+              还没有账号？
+              <button type="button" class="switch-link" @click="switchToRegister">
+                立即注册
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -467,6 +482,33 @@ body.dark .captcha-image {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
+}
+
+/* 切换模式 */
+.switch-mode {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+body.dark .switch-mode {
+  color: #999;
+}
+
+.switch-link {
+  background: none;
+  border: none;
+  color: var(--sg-primary);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.switch-link:hover {
+  opacity: 0.8;
 }
 
 /* 过渡动画 */

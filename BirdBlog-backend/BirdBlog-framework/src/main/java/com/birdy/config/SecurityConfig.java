@@ -70,6 +70,7 @@ public class SecurityConfig {
                     "/auth/login",
                     "/auth/captcha",
                     "/auth/logout",
+                    "/auth/register",
                     "/admin/auth/login",
                     "/admin/auth/captcha",
                     "/admin/auth/logout"

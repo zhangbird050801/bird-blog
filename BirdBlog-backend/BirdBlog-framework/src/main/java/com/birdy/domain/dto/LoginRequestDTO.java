@@ -10,7 +10,7 @@ import lombok.Data;
  * @description 用户登录请求参数
  */
 @Data
-public class LoginRequest {
+public class LoginRequestDTO {
 
     /**
      * 用户名

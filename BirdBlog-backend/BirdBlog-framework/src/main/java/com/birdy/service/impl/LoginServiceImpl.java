@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.birdy.config.JwtProperties;
 import com.birdy.domain.CommonResult;
-import com.birdy.domain.dto.LoginRequest;
+import com.birdy.domain.dto.LoginRequestDTO;
+import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.entity.User;
 import com.birdy.domain.vo.LoginVO;
+import com.birdy.domain.vo.RegisterVO;
 import com.birdy.domain.vo.UserInfoVO;
 import com.birdy.enums.HttpCodeEnum;
 import com.birdy.mapper.UserMapper;
@@ -14,11 +16,18 @@ import com.birdy.service.LoginService;
 import com.birdy.utils.CaptchaUtil;
 import com.birdy.utils.JwtUtil;
 import com.birdy.utils.RedisUtil;
+import com.birdy.utils.SecurityUtils;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import static com.birdy.constants.SysConstants.*;
+import cn.hutool.core.bean.BeanUtil;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * 登录 Service 实现类
@@ -46,31 +55,31 @@ public class LoginServiceImpl implements LoginService {
     private JwtProperties jwtProperties;
 
     @Override
-    public CommonResult<LoginVO> login(LoginRequest loginRequest) {
+    public CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO) {
         // 1. 校验参数
-        if (!StringUtils.hasText(loginRequest.getUserName()) || !StringUtils.hasText(loginRequest.getPassword())) {
+        if (!StringUtils.hasText(loginRequestDTO.getUserName()) || !StringUtils.hasText(loginRequestDTO.getPassword())) {
             return CommonResult.error(HttpCodeEnum.REQUIRE_USERNAME);
         }
 
-        // 2. 校验验证码(如果提供了验证码)
-        if (StringUtils.hasText(loginRequest.getCode()) && StringUtils.hasText(loginRequest.getUuid())) {
-            if (!captchaUtil.verifyCaptcha(loginRequest.getUuid(), loginRequest.getCode())) {
+        // 2. 校验验证码
+        if (StringUtils.hasText(loginRequestDTO.getCode()) && StringUtils.hasText(loginRequestDTO.getUuid())) {
+            if (!captchaUtil.verifyCaptcha(loginRequestDTO.getUuid(), loginRequestDTO.getCode())) {
                 return CommonResult.error(HttpCodeEnum.CAPTCHA_ERROR_OR_EXPIRE);
             }
         }
 
         // 3. 查询用户
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUsername, loginRequest.getUserName());
-        queryWrapper.eq(User::getDeleted, false);
+        queryWrapper.eq(User::getUsername, loginRequestDTO.getUserName());
+        queryWrapper.eq(User::getDeleted, USER_NOT_DELETED);
         User user = userMapper.selectOne(queryWrapper);
 
         if (user == null) {
             return CommonResult.error(HttpCodeEnum.LOGIN_ERROR);
         }
 
-        // 4. 校验密码(数据库中是加密后的密码)
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        // 4. 校验密码
+        if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
             return CommonResult.error(HttpCodeEnum.LOGIN_ERROR);
         }
 
@@ -81,27 +90,12 @@ public class LoginServiceImpl implements LoginService {
 
         // 6. 生成双 Token
         String userId = user.getId().toString();
-        String accessToken = JwtUtil.createJWT(userId); // AccessToken: 默认15分钟
-        String refreshToken = JwtUtil.createRefreshToken(userId); // RefreshToken: 7天
+        String accessToken = JwtUtil.createJWT(userId);
+        String refreshToken = JwtUtil.createRefreshToken(userId);
 
-        // 7. 将用户信息和 RefreshToken 存入 Redis
-        long refreshTokenTtl = 7 * 24 * 60 * 60; // 7天(秒)
-        redisUtil.set("login:" + userId, JSON.toJSONString(user), refreshTokenTtl);
-        redisUtil.set("refresh:" + refreshToken, userId, refreshTokenTtl);
-
-        // 8. 封装返回结果
-        UserInfoVO userInfoVO = new UserInfoVO();
-        userInfoVO.setId(user.getId());
-        userInfoVO.setNickName(user.getNickName());
-        userInfoVO.setAvatar(user.getAvatar());
-        userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
-        userInfoVO.setEmail(user.getEmail());
-
-        LoginVO loginVO = new LoginVO();
-        loginVO.setToken(accessToken);
-        loginVO.setRefreshToken(refreshToken);
-        loginVO.setUserInfo(userInfoVO);
-
+        // 7. 缓存并返回封装结果
+        cacheLogin(user, refreshToken);
+        LoginVO loginVO = buildLoginVO(user, accessToken, refreshToken);
         return CommonResult.success(loginVO);
     }
 
@@ -109,7 +103,7 @@ public class LoginServiceImpl implements LoginService {
     public CommonResult<Void> logout() {
         try {
             // 1. 获取当前用户 ID
-            Long userId = com.birdy.utils.SecurityUtils.getUserId();
+            Long userId = SecurityUtils.getUserId();
             if (userId == null) {
                 return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
             }
@@ -118,18 +112,16 @@ public class LoginServiceImpl implements LoginService {
             String loginKey = "login:" + userId;
             redisUtil.delete(loginKey);
 
-            // 3. 将当前 AccessToken 加入黑名单(可选，防止 Token 被重用)
+            // 3. 将当前 AccessToken 加入黑名单
             // 获取当前请求的 Token
-            org.springframework.web.context.request.ServletRequestAttributes attributes =
-                (org.springframework.web.context.request.ServletRequestAttributes)
-                org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
-                jakarta.servlet.http.HttpServletRequest request = attributes.getRequest();
+                HttpServletRequest request = attributes.getRequest();
                 String authHeader = request.getHeader("Authorization");
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     String token = authHeader.substring(7);
-                    // 将 Token 加入黑名单(有效期设置为原 Token 的剩余时间，这里简化为15分钟)
-                    long tokenTtl = jwtProperties.getTtl() / 1000; // 转换为秒
+                    // 将 Token 加入黑名单(有效期设置为原 Token 的剩余时间) 转换为秒
+                    long tokenTtl = jwtProperties.getTtl() / 1000;
                     redisUtil.set("blacklist:" + token, "1", tokenTtl);
                 }
             }
@@ -169,30 +161,107 @@ public class LoginServiceImpl implements LoginService {
             String newAccessToken = JwtUtil.createJWT(userId);
             String newRefreshToken = JwtUtil.createRefreshToken(userId);
 
-            // 6. 删除旧的 RefreshToken，存储新的 RefreshToken
+            // 6. 删除旧的 RefreshToken，存储新的 RefreshToken 并更新缓存
             redisUtil.delete(refreshKey);
-            long refreshTokenTtl = 7 * 24 * 60 * 60; // 7天(秒)
-            redisUtil.set("refresh:" + newRefreshToken, userId, refreshTokenTtl);
+            cacheLogin(user, newRefreshToken);
 
-            // 7. 更新用户信息缓存
-            redisUtil.set("login:" + userId, JSON.toJSONString(user), refreshTokenTtl);
-
-            // 8. 封装返回结果
-            UserInfoVO userInfoVO = new UserInfoVO();
-            userInfoVO.setId(user.getId());
-            userInfoVO.setNickName(user.getNickName());
-            userInfoVO.setAvatar(user.getAvatar());
-            userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
-            userInfoVO.setEmail(user.getEmail());
-
-            LoginVO loginVO = new LoginVO();
-            loginVO.setToken(newAccessToken);
-            loginVO.setRefreshToken(newRefreshToken);
-            loginVO.setUserInfo(userInfoVO);
-
+            // 7. 封装返回结果
+            LoginVO loginVO = buildLoginVO(user, newAccessToken, newRefreshToken);
             return CommonResult.success(loginVO);
         } catch (Exception e) {
             return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
         }
+    }
+
+    @Override
+    public CommonResult<RegisterVO> register(RegisterRequestDTO registerRequestDTO) {
+        // 1. 校验参数
+        if (!StringUtils.hasText(registerRequestDTO.getUserName()) 
+                || !StringUtils.hasText(registerRequestDTO.getPassword())
+                || !StringUtils.hasText(registerRequestDTO.getEmail())) {
+            return CommonResult.error(HttpCodeEnum.REGISTER_REQUIRE_FIELDS);
+        }
+
+        // 2. 校验验证码
+        if (!StringUtils.hasText(registerRequestDTO.getCode()) || !StringUtils.hasText(registerRequestDTO.getUuid())) {
+            return CommonResult.error(HttpCodeEnum.CAPTCHA_REQUIRED);
+        }
+
+        if (!captchaUtil.verifyCaptcha(registerRequestDTO.getUuid(), registerRequestDTO.getCode())) {
+            return CommonResult.error(HttpCodeEnum.CAPTCHA_ERROR_OR_EXPIRE);
+        }
+
+        // 3. 校验用户名是否已存在
+        LambdaQueryWrapper<User> usernameWrapper = new LambdaQueryWrapper<>();
+        usernameWrapper.eq(User::getUsername, registerRequestDTO.getUserName());
+        usernameWrapper.eq(User::getDeleted, false);
+        Long usernameCount = userMapper.selectCount(usernameWrapper);
+        if (usernameCount > 0) {
+            return CommonResult.error(HttpCodeEnum.USERNAME_EXIST);
+        }
+
+        // 4. 校验邮箱是否已存在
+        LambdaQueryWrapper<User> emailWrapper = new LambdaQueryWrapper<>();
+        emailWrapper.eq(User::getEmail, registerRequestDTO.getEmail());
+        emailWrapper.eq(User::getDeleted, false);
+        Long emailCount = userMapper.selectCount(emailWrapper);
+        if (emailCount > 0) {
+            return CommonResult.error(HttpCodeEnum.EMAIL_EXIST);
+        }
+
+        // 5. 密码长度校验
+        if (registerRequestDTO.getPassword().length() < PASSWORD_MIN_LENGTH) {
+            return CommonResult.error(HttpCodeEnum.PASSWORD_TOO_SHORT);
+        }
+
+        // 6. 创建新用户
+        User newUser = new User();
+        newUser.setUsername(registerRequestDTO.getUserName());
+        // 默认昵称与用户名相同
+        newUser.setNickName(registerRequestDTO.getUserName());
+        newUser.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
+        newUser.setEmail(registerRequestDTO.getEmail());
+        newUser.setType(USER_TYPE_NORMAL);
+        newUser.setStatus(USER_STATUS_NORMAL);
+        newUser.setSex(USER_SEX_UNKNOWN);
+        newUser.setDeleted(USER_NOT_DELETED);
+        newUser.setCreator(SYSTEM);
+        newUser.setUpdater(SYSTEM);
+
+        // 7. 保存到数据库
+        int rows = userMapper.insert(newUser);
+        if (rows <= 0) {
+            return CommonResult.error(HttpCodeEnum.REGISTER_FAILED);
+        }
+
+        // 8. 封装返回结果
+        RegisterVO registerVO = new RegisterVO();
+        BeanUtil.copyProperties(newUser, registerVO);
+        registerVO.setUserName(newUser.getUsername());
+        return CommonResult.success(registerVO);
+    }
+
+    /**
+     * 缓存登录信息和 refresh token
+     */
+    private void cacheLogin(User user, String refreshToken) {
+        long ttl = REFRESH_TOKEN_TTL_SECONDS;
+        redisUtil.set("login:" + user.getId(), JSON.toJSONString(user), ttl);
+        redisUtil.set("refresh:" + refreshToken, user.getId().toString(), ttl);
+    }
+
+    /**
+     * 构建 LoginVO
+     */
+    private LoginVO buildLoginVO(User user, String accessToken, String refreshToken) {
+        UserInfoVO userInfoVO = new UserInfoVO();
+        BeanUtil.copyProperties(user, userInfoVO);
+        userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : String.valueOf(USER_SEX_UNKNOWN));
+
+        LoginVO loginVO = new LoginVO();
+        loginVO.setToken(accessToken);
+        loginVO.setRefreshToken(refreshToken);
+        loginVO.setUserInfo(userInfoVO);
+        return loginVO;
     }
 }

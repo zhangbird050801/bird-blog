@@ -21,6 +21,11 @@ public enum HttpCodeEnum {
     USERNAME_EXIST(501,"用户名已存在"),
     PHONE_NUMBER_EXIST(502,"手机号已存在"),
     EMAIL_EXIST(503, "邮箱已存在"),
+    // 注册相关错误
+    REGISTER_REQUIRE_FIELDS(508, "用户名、密码和邮箱不能为空"),
+    PASSWORD_TOO_SHORT(509, "密码长度不能少于6位"),
+    CAPTCHA_REQUIRED(510, "验证码不能为空"),
+    REGISTER_FAILED(511, "注册失败，请稍后重试"),
     REQUIRE_USERNAME(504, "必需填写用户名"),
     LOGIN_ERROR(505,"用户名或密码错误"),
 

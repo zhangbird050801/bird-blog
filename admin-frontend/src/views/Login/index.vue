@@ -65,10 +65,6 @@
           </el-button>
         </el-form-item>
       </el-form>
-
-      <div class="login-tips">
-        <p>默认账号: admin / 123456</p>
-      </div>
     </el-card>
   </div>
 </template>
@@ -290,19 +286,4 @@ onMounted(() => {
   transform: translateY(0);
 }
 
-.login-tips {
-  text-align: center;
-  margin-top: 20px;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.4);
-  padding: 12px;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
-}
-
-.login-tips p {
-  margin: 0;
-  font-weight: 500;
-}
 </style>

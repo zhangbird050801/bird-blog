@@ -6,6 +6,10 @@ package com.birdy.constants;
  * @description SysConstants
  */
 public class SysConstants {
+    public static final String SYSTEM = "system";
+
+    public static final boolean USER_NOT_DELETED = false;
+
     // 文章状态为发布
     public static final int ARTICLE_STATUS_RELEASE = 0;
     // 文章状态为草稿
@@ -31,5 +35,16 @@ public class SysConstants {
     // 评论状态：0正常，1屏蔽
     public static final int COMMENT_STATUS_NORMAL = 0;
     public static final int COMMENT_STATUS_BLOCKED = 1;
+
+    // Token 有效期 (秒) 7 天
+    public static final long REFRESH_TOKEN_TTL_SECONDS = 7L * 24 * 60 * 60;
+
+    // 密码最小长度
+    public static final int PASSWORD_MIN_LENGTH = 6;
+
+    // 用户相关默认值
+    public static final int USER_TYPE_NORMAL = 0;
+    public static final int USER_STATUS_NORMAL = 0;
+    public static final int USER_SEX_UNKNOWN = 2;
 
 }

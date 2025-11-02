@@ -1,11 +1,14 @@
 package com.birdy.controller;
 
 import com.birdy.domain.CommonResult;
-import com.birdy.domain.dto.LoginRequest;
+import com.birdy.domain.dto.LoginRequestDTO;
+import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.vo.CaptchaVO;
 import com.birdy.domain.vo.LoginVO;
+import com.birdy.domain.vo.RegisterVO;
 import com.birdy.service.LoginService;
 import com.birdy.utils.CaptchaUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,12 +44,12 @@ public class LoginController {
     /**
      * 用户登录
      *
-     * @param loginRequest 登录请求参数
+     * @param loginRequestDTO 登录请求参数
      * @return 登录结果(Token 和用户信息)
      */
     @PostMapping("/login")
-    public CommonResult<LoginVO> login(@RequestBody LoginRequest loginRequest) {
-        return loginService.login(loginRequest);
+    public CommonResult<LoginVO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        return loginService.login(loginRequestDTO);
     }
 
     /**
@@ -69,5 +72,16 @@ public class LoginController {
     @PostMapping("/refresh-token")
     public CommonResult<LoginVO> refreshToken(@RequestParam String refreshToken) {
         return loginService.refreshToken(refreshToken);
+    }
+
+    /**
+     * 注册用户
+     * 
+     * @param registerRequestDTO 注册请求参数（包含用户名、邮箱、密码、验证码）
+     * @return 注册结果
+     */
+    @PostMapping("/register")
+    public CommonResult<RegisterVO> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
+        return loginService.register(registerRequestDTO);
     }
 }
