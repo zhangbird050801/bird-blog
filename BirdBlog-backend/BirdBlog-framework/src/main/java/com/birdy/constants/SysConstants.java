@@ -8,7 +8,6 @@ package com.birdy.constants;
 public class SysConstants {
     public static final String SYSTEM = "system";
 
-    public static final boolean USER_NOT_DELETED = false;
 
     // 文章状态为发布
     public static final int ARTICLE_STATUS_RELEASE = 0;
@@ -20,18 +19,22 @@ public class SysConstants {
     // 最新文章查询分页常量
     public static final int LATEST_ARTICLE_PAGE_NUM = 1;
     public static final int LATEST_ARTICLE_PAGE_SIZE = 3;
+
+
     // 分类状态为正常
     public static final int CATEGORY_STATUS_ENABLE = 0;
+    // 分类未删除
+    public static final boolean CATEGORY_NOT_DELETED = false;
+
 
     //友链审核状态：0已审核通过, 1审核不通过, 2未审核
     public static final int LINK_STATUS_ENABLE = 0;
     public static final int LINK_STATUS_DISABLE = 1;
     public static final int LINK_STATUS_PENDING = 2;
 
+
     // 评论类型：0文章评论
     public static final int COMMENT_TYPE_ARTICLE = 0;
-
-
     // 评论状态：0正常，1屏蔽
     public static final int COMMENT_STATUS_NORMAL = 0;
     public static final int COMMENT_STATUS_BLOCKED = 1;
@@ -46,5 +49,6 @@ public class SysConstants {
     public static final int USER_TYPE_NORMAL = 0;
     public static final int USER_STATUS_NORMAL = 0;
     public static final int USER_SEX_UNKNOWN = 2;
-
+    // 用户状态非禁用
+    public static final boolean USER_NOT_DELETED = false;
 }

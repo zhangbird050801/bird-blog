@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.birdy.constants.SysConstants.CATEGORY_NOT_DELETED;
+
 /**
 * @author Young
 * @description 针对表【bg_category(分类表)】的数据库操作Service实现
@@ -44,7 +46,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
 
         //查询article的分类id，去重
         Set<Long> categoryIds = list.stream()
-                .map(article -> article.getCategoryId())
+                .map(Article::getCategoryId)
                 .collect(Collectors.toSet());
         //查询分类表（通过categoryId）
         List<Category> categories = listByIds(categoryIds).stream().
@@ -64,7 +66,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
         
         // 构建查询条件：未删除的分类，按创建时间降序
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Category::getDeleted, false)
+        queryWrapper.eq(Category::getDeleted, CATEGORY_NOT_DELETED)
                    .orderByDesc(Category::getCreateTime);
         
         // 执行分页查询

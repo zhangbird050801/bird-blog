@@ -41,13 +41,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         Page<Article> page = new Page<>(HOT_ARTICLE_PAGE_NUM, HOT_ARTICLE_PAGE_SIZE);
         page(page, queryWrapper);
 
-//        List<HotArticleVO> res = page.getRecords().stream()
-//                .map(article -> {
-//                    HotArticleVO vo = new HotArticleVO();
-//                    BeanUtils.copyProperties(article, vo);
-//                    return vo;
-//                })
-//                .toList();
         List<HotArticleVO> res = BeanUtil.copyToList(page.getRecords(), HotArticleVO.class);
 
         return CommonResult.success(res);
