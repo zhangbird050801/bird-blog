@@ -56,6 +56,17 @@ export interface LatestArticleVO extends HotArticleVO {
 }
 
 /**
+ * 相关文章 VO
+ */
+export interface RelatedArticleVO {
+  id: number
+  title: string
+  slug: string
+  categoryName?: string
+  thumbnail?: string
+}
+
+/**
  * 通用文章卡片接口
  */
 export interface ArticleCardInfo {
@@ -131,5 +142,15 @@ export async function fetchHotArticles(limit = 5): Promise<HotArticleVO[]> {
  */
 export async function fetchLatestArticles(): Promise<LatestArticleVO[]> {
   const response = await get<ApiResponse<LatestArticleVO[]>>('/article/latest')
+  return handleApiResponse(response)
+}
+
+/**
+ * 获取相关文章列表
+ * @param articleId 当前文章ID
+ * @returns 相关文章列表
+ */
+export async function fetchRelatedArticles(articleId: number): Promise<RelatedArticleVO[]> {
+  const response = await get<ApiResponse<RelatedArticleVO[]>>(`/article/related/${articleId}`)
   return handleApiResponse(response)
 }

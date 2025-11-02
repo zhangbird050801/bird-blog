@@ -95,6 +95,15 @@
         <result property="publishedTime" column="published_time" />
     </resultMap>
 
+    <!-- RelatedArticleVO -->
+    <resultMap id="RelatedArticleVOResultMap" type="com.birdy.domain.vo.RelatedArticleVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="slug" column="slug" />
+        <result property="categoryName" column="category_name" />
+        <result property="thumbnail" column="thumbnail" />
+    </resultMap>
+
     <!-- 根据ID查询文章详情 -->
     <select id="selectArticleDetailById" resultMap="ArticleDetailVOResultMap">
         SELECT 
@@ -149,5 +158,23 @@
         WHERE id = #{id}
           AND deleted = 0
     </update>
+
+    <!-- 查询相关文章（基于分类） -->
+    <select id="selectRelatedArticles" resultMap="RelatedArticleVOResultMap">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            c.name AS category_name,
+            a.thumbnail
+        FROM bg_article a
+        LEFT JOIN bg_category c ON a.category_id = c.id
+        WHERE a.category_id = #{categoryId}
+          AND a.id != #{excludeArticleId}
+          AND a.status = 0
+          AND a.deleted = 0
+        ORDER BY a.view_count DESC, a.published_time DESC
+        LIMIT #{limit}
+    </select>
 
 </mapper>

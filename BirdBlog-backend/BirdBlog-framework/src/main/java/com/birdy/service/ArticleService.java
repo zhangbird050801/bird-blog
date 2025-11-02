@@ -47,4 +47,11 @@ public interface ArticleService extends IService<Article> {
      * @return 最新文章 3 篇
      */
     CommonResult<List<LatestArticleVO>> latest();
+
+    /**
+     * 返回最多 6 篇相关推荐（基于文章分类）
+     * @param articleId 当前文章ID
+     * @return 相关推荐文章列表
+     */
+    CommonResult<List<RelatedArticleVO>> related(Long articleId);
 }

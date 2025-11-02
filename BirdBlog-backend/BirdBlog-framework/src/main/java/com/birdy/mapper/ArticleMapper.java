@@ -5,7 +5,10 @@ import com.birdy.domain.entity.Article;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.birdy.domain.vo.ArticleDetailVO;
 import com.birdy.domain.vo.ArticleVO;
+import com.birdy.domain.vo.RelatedArticleVO;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author birdy
@@ -50,6 +53,18 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return 影响行数
      */
     int incrementViewCount(@Param("id") Long id);
+
+    /**
+     * 查询相关文章（基于分类）
+     *
+     * @param categoryId 分类ID
+     * @param excludeArticleId 排除的文章ID
+     * @param limit 查询数量限制
+     * @return 相关文章列表
+     */
+    List<RelatedArticleVO> selectRelatedArticles(@Param("categoryId") Long categoryId,
+                                                 @Param("excludeArticleId") Long excludeArticleId,
+                                                 @Param("limit") Integer limit);
 }
 
 

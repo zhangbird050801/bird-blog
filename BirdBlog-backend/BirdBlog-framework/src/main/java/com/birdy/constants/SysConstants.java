@@ -19,6 +19,8 @@ public class SysConstants {
     // 最新文章查询分页常量
     public static final int LATEST_ARTICLE_PAGE_NUM = 1;
     public static final int LATEST_ARTICLE_PAGE_SIZE = 3;
+    // 相关文章数量
+    public static final int RELATED_ARTICLE_COUNT = 6;
 
 
     // 分类状态为正常

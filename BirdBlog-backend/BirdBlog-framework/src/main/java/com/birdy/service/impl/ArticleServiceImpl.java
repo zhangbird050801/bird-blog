@@ -105,6 +105,27 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
         return CommonResult.success(res);
     }
+
+    @Override
+    public CommonResult<List<RelatedArticleVO>> related(Long articleId) {
+        if (articleId == null || articleId <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+
+        // 先获取当前文章的分类ID
+        Article currentArticle = getById(articleId);
+        if (currentArticle == null) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        List<RelatedArticleVO> res = articleMapper.selectRelatedArticles(
+                currentArticle.getCategoryId(),
+                articleId,
+                RELATED_ARTICLE_COUNT);
+
+
+        return CommonResult.success(res);
+    }
 }
 
 

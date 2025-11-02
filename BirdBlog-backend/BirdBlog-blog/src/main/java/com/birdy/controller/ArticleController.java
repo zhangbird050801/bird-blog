@@ -64,4 +64,14 @@ public class ArticleController {
     public CommonResult<List<LatestArticleVO>> latest() {
         return articleService.latest();
     }
+
+    /**
+     * 返回相关推荐
+     * @param articleId 当前文章ID
+     * @return 相关推荐 6 篇(最多)
+     */
+    @GetMapping("/related/{articleId}")
+    public CommonResult<List<RelatedArticleVO>> related(@PathVariable Long articleId) {
+        return articleService.related(articleId);
+    }
 }
