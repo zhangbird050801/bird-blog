@@ -121,8 +121,18 @@ export interface PagedResponse<T> {
 export async function fetchArticles(query: ArticleQuery = {}): Promise<PagedResponse<ArticleVO>> {
   const params = new URLSearchParams()
   if (query.category) params.set('categoryId', String(query.category))
+  if (query.tag) params.set('tagId', String(query.tag))
   params.set('pageNum', String(query.page ?? 1))
   params.set('pageSize', String(query.size ?? 20))
+
+  // 如果有搜索关键词，使用搜索接口并返回结果
+  if (query.q) {
+    const searchResults = await searchArticles(query.q)
+    return {
+      total: searchResults.length,
+      items: searchResults,
+    }
+  }
 
   const path = `/article/list?${params.toString()}`
   const response = await get<ApiResponse<PageResultVO<ArticleVO>>>(path)
@@ -130,7 +140,7 @@ export async function fetchArticles(query: ArticleQuery = {}): Promise<PagedResp
 
   return {
     total: pageResult.total,
-    items: pageResult.rows, 
+    items: pageResult.rows,
   }
 }
 
@@ -180,5 +190,22 @@ export async function fetchRelatedArticles(articleId: number): Promise<RelatedAr
  */
 export async function fetchAdjacentArticles(articleId: number): Promise<AdjacentArticlesVO> {
   const response = await get<ApiResponse<AdjacentArticlesVO>>(`/article/adjacent/${articleId}`)
+  return handleApiResponse(response)
+}
+
+/**
+ * 搜索文章
+ * @param keyword 搜索关键词
+ * @returns 搜索结果
+ */
+export async function searchArticles(keyword: string): Promise<ArticleVO[]> {
+  if (!keyword || !keyword.trim()) {
+    return []
+  }
+
+  const params = new URLSearchParams()
+  params.set('keyword', keyword.trim())
+
+  const response = await get<ApiResponse<ArticleVO[]>>(`/article/search?${params.toString()}`)
   return handleApiResponse(response)
 }

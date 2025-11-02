@@ -151,6 +151,37 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         AdjacentArticlesVO result = new AdjacentArticlesVO(previous, next);
         return CommonResult.success(result);
     }
+
+    @Override
+    public CommonResult<List<ArticleVO>> search(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return CommonResult.error(HttpCodeEnum.KEYWORDS_EMPTY);
+        }
+
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+
+        // 只搜索已发布且未删除的文章
+        queryWrapper.eq(Article::getStatus, ARTICLE_STATUS_RELEASE);
+        queryWrapper.eq(Article::getDeleted, false);
+
+        // 模糊搜索：标题、摘要、内容
+        String searchKeyword = keyword.trim();
+        queryWrapper.and(wrapper ->
+            wrapper.like(Article::getTitle, searchKeyword)
+                   .or()
+                   .like(Article::getSummary, searchKeyword)
+                   .or()
+                   .like(Article::getContent, searchKeyword)
+        );
+
+        // 按发布时间降序排序
+        queryWrapper.orderByDesc(Article::getPublishedTime);
+
+        List<Article> articles = list(queryWrapper);
+        List<ArticleVO> articleVOs = BeanUtil.copyToList(articles, ArticleVO.class);
+
+        return CommonResult.success(articleVOs);
+    }
 }
 
 

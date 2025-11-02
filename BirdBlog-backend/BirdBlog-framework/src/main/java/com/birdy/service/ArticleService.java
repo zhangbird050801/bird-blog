@@ -61,4 +61,11 @@ public interface ArticleService extends IService<Article> {
      * @return 上一篇和下一篇文章
      */
     CommonResult<AdjacentArticlesVO> adjacent(Long articleId);
+
+    /**
+     * 搜索文章
+     * @param keyword 搜索关键词
+     * @return 搜索结果
+     */
+    CommonResult<List<ArticleVO>> search(String keyword);
 }

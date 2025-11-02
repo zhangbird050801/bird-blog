@@ -98,9 +98,25 @@ function isCategoryActive(categoryId: number): boolean {
   return route.query.category === String(categoryId)
 }
 
-function onSearchSubmit() {
-  if (!search.value.trim()) return
-  router.push({ path: '/', query: { q: search.value } })
+// 搜索状态
+const isSearching = ref(false)
+
+async function onSearchSubmit() {
+  const keyword = search.value.trim()
+  if (!keyword) return
+
+  try {
+    isSearching.value = true
+
+    // 跳转到首页并传递搜索参数
+    router.push({ path: '/', query: { q: keyword } })
+  } catch (error) {
+    console.error('搜索失败:', error)
+    // 即使搜索失败也跳转，让前端处理错误状态
+    router.push({ path: '/', query: { q: keyword } })
+  } finally {
+    isSearching.value = false
+  }
 }
 
 onMounted(() => {
@@ -195,6 +211,8 @@ onBeforeUnmount(() => {
           v-model="search"
           placeholder="搜索文章..."
           aria-label="搜索文章"
+          :loading="isSearching"
+          :disabled="isSearching"
           icon
           @submit="onSearchSubmit"
         >

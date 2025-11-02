@@ -85,5 +85,15 @@ public class ArticleController {
         return articleService.adjacent(articleId);
     }
 
+    /**
+     * 搜索文章
+     * @param keyword 搜索关键词
+     * @return 搜索结果
+     */
+    @GetMapping("/search")
+    public CommonResult<List<ArticleVO>> search(String keyword) {
+        return articleService.search(keyword);
+    }
+
 
 }

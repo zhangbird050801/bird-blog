@@ -3,6 +3,7 @@ export {
   fetchArticleDetail,
   fetchHotArticles,
   fetchLatestArticles,
+  searchArticles,
   type ArticleVO,
   type ArticleDetailVO,
   type HotArticleVO,
