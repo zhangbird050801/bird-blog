@@ -29,14 +29,10 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
 
     @Override
     public CommonResult<List<TagVO>> getAllTags() {
-        // 查询所有未删除的标签
-        LambdaQueryWrapper<Tag> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Tag::getDeleted, false);
-        List<Tag> tags = list(queryWrapper);
+        // 直接查询带文章数量的标签列表
+        List<TagVO> tagVOs = baseMapper.selectTagsWithArticleCount();
 
-        List<TagVO> res = BeanUtil.copyToList(tags, TagVO.class);
-
-        return CommonResult.success(res);
+        return CommonResult.success(tagVOs);
     }
 
     @Override

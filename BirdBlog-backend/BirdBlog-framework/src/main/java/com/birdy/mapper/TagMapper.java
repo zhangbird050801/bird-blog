@@ -1,7 +1,9 @@
 package com.birdy.mapper;
 
 import com.birdy.domain.entity.Tag;
+import com.birdy.domain.vo.TagVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import java.util.List;
 
 /**
 * @author Young
@@ -11,6 +13,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface TagMapper extends BaseMapper<Tag> {
 
+    /**
+     * 查询带文章数量的标签列表
+     * @return 带文章数量的标签列表
+     */
+    List<TagVO> selectTagsWithArticleCount();
 }
 
 

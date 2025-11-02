@@ -15,8 +15,28 @@
             <result property="deleted" column="deleted" />
     </resultMap>
 
+    <resultMap id="TagVOResultMap" type="com.birdy.domain.vo.TagVO">
+            <id property="id" column="id" />
+            <result property="name" column="name" />
+            <result property="remark" column="remark" />
+            <result property="articleCount" column="article_count" />
+    </resultMap>
+
     <sql id="Base_Column_List">
         id,name,remark,creator,create_time,updater,
         update_time,deleted
     </sql>
+
+    <!-- 查询带文章数量的标签列表 -->
+    <select id="selectTagsWithArticleCount" resultMap="TagVOResultMap">
+        SELECT
+            t.id,
+            t.name,
+            t.remark,
+            COALESCE(t.article_count, 0) as article_count
+        FROM bg_tag t
+        WHERE t.deleted = 0
+        ORDER BY t.article_count DESC, t.id ASC
+    </select>
+
 </mapper>

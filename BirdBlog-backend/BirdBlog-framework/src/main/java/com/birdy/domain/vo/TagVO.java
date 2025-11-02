@@ -25,5 +25,10 @@ public class TagVO {
      * 备注
      */
     private String remark;
+
+    /**
+     * 文章数量
+     */
+    private Integer articleCount;
 }
 
