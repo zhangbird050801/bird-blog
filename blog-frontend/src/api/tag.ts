@@ -1,4 +1,3 @@
-import { mockTags } from './mockData'
 import { get, handleApiResponse, type ApiResponse } from './http'
 
 /**
@@ -20,7 +19,7 @@ export async function fetchTags(): Promise<Tag[]> {
     return handleApiResponse(response)
   } catch (error) {
     console.error('获取标签列表失败:', error)
-    return mockTags
+    return []
   }
 }
 

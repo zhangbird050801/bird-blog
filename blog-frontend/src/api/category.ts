@@ -1,4 +1,3 @@
-import { mockCategories } from './mockData'
 import { get, handleApiResponse, type ApiResponse } from './http'
 
 /**
@@ -17,14 +16,13 @@ export interface Category {
  * 获取分类列表
  *
  * @returns 分类列表数组
- * @throws 请求失败时自动降级使用Mock数据
  */
 export async function fetchCategories(): Promise<Category[]> {
   try {
     const response = await get<ApiResponse<Category[]>>('/category/get')
     return handleApiResponse(response)
   } catch (error) {
-    console.error('获取分类列表失败,使用Mock数据:', error)
-    return mockCategories
+    console.error('获取分类列表失败:', error)
+    return []
   }
 }

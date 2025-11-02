@@ -1,17 +1,5 @@
-import { getMockArticleById, getMockComments } from './mockData'
 import { get, post, handleApiResponse, type ApiResponse } from './http'
 
-/**
- * 评论节点（树形结构）
- */
-export interface CommentNode {
-  id: number
-  author: string
-  content: string
-  createdAt?: string
-  userAgent?: string
-  replies: CommentNode[]
-}
 
 /**
  * 后端返回的评论VO
