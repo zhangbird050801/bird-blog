@@ -1,21 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { fetchCaptcha, login, type LoginRequest } from '@/api'
 import { useAuth } from '@/composables/useAuth'
 import LgInput from '@/components/base/LgInput.vue'
 import LgButton from '@/components/base/LgButton.vue'
 import LgToast from '@/components/base/LgToast.vue'
 
-const props = defineProps<{
-  show: boolean
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:show', value: boolean): void
-  (e: 'success'): void
-  (e: 'switchToRegister'): void
-}>()
-
+const router = useRouter()
 const { setAuth } = useAuth()
 
 // 表单数据
@@ -39,12 +31,6 @@ const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'success' | 'error'>('success')
 
-// 关闭弹窗
-function closeModal() {
-  emit('update:show', false)
-  resetForm()
-}
-
 // 重置表单
 function resetForm() {
   formData.value = {
@@ -60,7 +46,7 @@ function resetForm() {
 async function loadCaptcha() {
   loadingCaptcha.value = true
   errorMsg.value = ''
-  
+
   try {
     const data = await fetchCaptcha()
     captchaImg.value = data.img
@@ -80,52 +66,51 @@ async function handleLogin() {
     errorMsg.value = '请输入用户名'
     return
   }
-  
+
   if (!formData.value.password) {
     errorMsg.value = '请输入密码'
     return
   }
-  
+
   if (!formData.value.code?.trim()) {
     errorMsg.value = '请输入验证码'
     return
   }
-  
+
   loading.value = true
   errorMsg.value = ''
-  
+
   try {
     const response = await login(formData.value)
-    
+
     console.log('登录 API 响应:', response)
-    
+
     // 保存登录信息（包含 token、refreshToken 和 userInfo）
     setAuth(response.token, response.refreshToken, response.userInfo)
-    
+
     // 显示成功提示
     toastMessage.value = '登录成功！'
     toastType.value = 'success'
     showToast.value = true
-    
-    // 触发成功事件
-    emit('success')
-    
-    // 关闭弹窗
-    closeModal()
+
+    // 跳转到首页
+    setTimeout(() => {
+      router.push('/')
+    }, 1000)
   } catch (error: any) {
     console.error('====== 登录失败调试信息 ======')
     console.error('错误对象:', error)
     console.error('错误消息:', error.message)
     console.error('错误类型:', typeof error)
     console.error('=============================')
-    
+
     // 提取错误消息
     let message = '登录失败，请检查用户名和密码'
-    
+
     if (error.message) {
       // 从错误对象中提取消息
       message = error.message
-      
+
       // 如果消息包含 "API 错误" 前缀，提取实际错误信息
       const match = error.message.match(/API 错误 \[\d+\]: (.+)/)
       if (match) {
@@ -133,10 +118,10 @@ async function handleLogin() {
         console.log('提取到的错误消息:', message)
       }
     }
-    
+
     console.log('最终显示的错误消息:', message)
     errorMsg.value = message
-    
+
     // 登录失败后刷新验证码
     loadCaptcha()
   } finally {
@@ -144,122 +129,125 @@ async function handleLogin() {
   }
 }
 
-// 切换到注册
-function switchToRegister() {
-  closeModal()
-  emit('switchToRegister')
+// 跳转到注册页面
+function goToRegister() {
+  router.push('/register')
 }
 
-// 弹窗显示时加载验证码
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    loadCaptcha()
-  }
+// 页面加载时获取验证码
+onMounted(() => {
+  loadCaptcha()
 })
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition name="modal">
-      <div v-if="show" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-container">
-          <!-- 关闭按钮 -->
-          <button class="modal-close" @click="closeModal" aria-label="关闭">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <path
-                fill="currentColor"
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-            </svg>
-          </button>
-
-          <!-- 标题 -->
-          <div class="modal-header">
-            <h2 class="modal-title">登录</h2>
-            <p class="modal-subtitle">欢迎回来</p>
-          </div>
-
-          <!-- 表单 -->
-          <form class="login-form" @submit.prevent="handleLogin">
-            <!-- 错误提示 -->
-            <div v-if="errorMsg" class="error-message">
-              {{ errorMsg }}
-            </div>
-
-            <!-- 用户名 -->
-            <div class="form-group">
-              <label for="username" class="form-label">用户名</label>
-              <LgInput
-                id="username"
-                v-model="formData.userName"
-                type="text"
-                placeholder="请输入用户名"
-                autocomplete="username"
-                :disabled="loading"
-              />
-            </div>
-
-            <!-- 密码 -->
-            <div class="form-group">
-              <label for="password" class="form-label">密码</label>
-              <LgInput
-                id="password"
-                v-model="formData.password"
-                type="password"
-                placeholder="请输入密码"
-                autocomplete="current-password"
-                :disabled="loading"
-              />
-            </div>
-
-            <!-- 验证码 -->
-            <div class="form-group">
-              <label for="captcha" class="form-label">验证码</label>
-              <div class="captcha-group">
-                <LgInput
-                  id="captcha"
-                  v-model="formData.code"
-                  type="text"
-                  placeholder="请输入验证码"
-                  autocomplete="off"
-                  :disabled="loading"
-                  maxlength="4"
-                />
-                <div class="captcha-image" @click="loadCaptcha">
-                  <img
-                    v-if="captchaImg && !loadingCaptcha"
-                    :src="captchaImg"
-                    alt="验证码"
-                  />
-                  <div v-else class="captcha-loading">
-                    {{ loadingCaptcha ? '加载中...' : '点击刷新' }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 提交按钮 -->
-            <LgButton
-              type="submit"
-              variant="primary"
-              :disabled="loading"
-              class="login-button"
-            >
-              {{ loading ? '登录中...' : '登录' }}
-            </LgButton>
-
-            <!-- 切换到注册 -->
-            <div class="switch-mode">
-              还没有账号？
-              <button type="button" class="switch-link" @click="switchToRegister">
-                立即注册
-              </button>
-            </div>
-          </form>
+  <div class="login-page">
+    <!-- 左侧图片面板 -->
+    <div class="login-image-panel">
+      <div class="image-content">
+        <div class="brand-logo">
+          <span class="brand-text">BirdBlog 博客系统</span>
+        </div>
+        <div class="auth-divider">
+          <span class="divider-line"></span>
+          <span class="divider-text">登录</span>
+          <span class="divider-line"></span>
+        </div>
+        <div class="image-decoration">
+          <div class="circle circle-1"></div>
+          <div class="circle circle-2"></div>
+          <div class="circle circle-3"></div>
         </div>
       </div>
-    </Transition>
-    
+    </div>
+
+    <!-- 右侧表单区域 -->
+    <div class="login-form-panel">
+      <!-- 标题 -->
+      <div class="page-header">
+        <h1 class="page-title">登录</h1>
+        <p class="page-subtitle">请输入您的账号信息</p>
+      </div>
+
+      <!-- 表单 -->
+      <form class="login-form" @submit.prevent="handleLogin">
+        <!-- 错误提示 -->
+        <div v-if="errorMsg" class="error-message">
+          {{ errorMsg }}
+        </div>
+
+        <!-- 用户名 -->
+        <div class="form-group">
+          <label for="username" class="form-label">用户名</label>
+          <LgInput
+            id="username"
+            v-model="formData.userName"
+            type="text"
+            placeholder="请输入用户名"
+            autocomplete="username"
+            :disabled="loading"
+          />
+        </div>
+
+        <!-- 密码 -->
+        <div class="form-group">
+          <label for="password" class="form-label">密码</label>
+          <LgInput
+            id="password"
+            v-model="formData.password"
+            type="password"
+            placeholder="请输入密码"
+            autocomplete="current-password"
+            :disabled="loading"
+          />
+        </div>
+
+        <!-- 验证码 -->
+        <div class="form-group">
+          <label for="captcha" class="form-label">验证码</label>
+          <div class="captcha-group">
+            <LgInput
+              id="captcha"
+              v-model="formData.code"
+              type="text"
+              placeholder="请输入验证码"
+              autocomplete="off"
+              :disabled="loading"
+              maxlength="4"
+            />
+            <div class="captcha-image" @click="loadCaptcha">
+              <img
+                v-if="captchaImg && !loadingCaptcha"
+                :src="captchaImg"
+                alt="验证码"
+              />
+              <div v-else class="captcha-loading">
+                {{ loadingCaptcha ? '加载中...' : '点击刷新' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <LgButton
+          type="submit"
+          variant="primary"
+          :disabled="loading"
+          class="login-button"
+        >
+          {{ loading ? '登录中...' : '登录' }}
+        </LgButton>
+
+        <!-- 切换到注册 -->
+        <div class="switch-mode">
+          还没有账号？
+          <button type="button" class="switch-link" @click="goToRegister">
+            立即注册
+          </button>
+        </div>
+      </form>
+    </div>
+
     <!-- Toast 通知 -->
     <LgToast
       v-model:show="showToast"
@@ -267,95 +255,159 @@ watch(() => props.show, (newVal) => {
       :type="toastType"
       :duration="3000"
     />
-  </Teleport>
+  </div>
 </template>
 
 <style scoped>
-/* 弹窗遮罩 */
-.modal-overlay {
-  position: fixed;
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  background: #f8f9fa;
+  padding: 60px 0 0;
+}
+
+body.dark .login-page {
+  background: #0d1117;
+}
+
+/* 左侧图片面板 */
+.login-image-panel {
+  flex: 1.2;
+  background: url('@/assets/wallhaven-yqxqv7.jpg') center center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-image-panel::before {
+  content: '';
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(40, 42, 44, 0.2);
+  z-index: 1;
+}
+
+body.dark .login-image-panel::before {
+  background: rgba(26, 26, 46, 0.85);
+}
+
+.image-content {
+  text-align: center;
+  color: #fff;
+  z-index: 2;
+  padding: 40px;
+}
+
+/* 品牌标识 */
+.brand-logo {
+  margin-bottom: 40px;
+}
+
+.brand-text {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 认证分割线 */
+.auth-divider {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+  margin-bottom: 40px;
+  gap: 20px;
 }
 
-/* 弹窗容器 */
-.modal-container {
-  position: relative;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+.divider-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  max-width: 100px;
+}
+
+.divider-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  padding: 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* 装饰圆圈 */
+.image-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 420px;
-  padding: 32px;
-  animation: slideUp 0.3s ease;
+  height: 100%;
+  z-index: 1;
 }
 
-body.dark .modal-container {
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.circle-1 {
+  width: 200px;
+  height: 200px;
+  top: -50px;
+  left: -50px;
+}
+
+.circle-2 {
+  width: 150px;
+  height: 150px;
+  bottom: 50px;
+  right: 50px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.circle-3 {
+  width: 100px;
+  height: 100px;
+  top: 100px;
+  right: -30px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 右侧表单面板 */
+.login-form-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 80px;
+  max-width: 600px;
+  background: #fff;
+}
+
+body.dark .login-form-panel {
   background: #1a1a2e;
   color: #fff;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-/* 关闭按钮 */
-.modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.05);
-  color: #666;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: #333;
-}
-
-body.dark .modal-close {
-  background: rgba(255, 255, 255, 0.05);
-  color: #ccc;
-}
-
-body.dark .modal-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-
-/* 标题区 */
-.modal-header {
+/* 页面标题 */
+.page-header {
   margin-bottom: 32px;
   text-align: center;
 }
 
-.modal-title {
-  font-size: 28px;
+.page-title {
+  font-size: 32px;
   font-weight: 700;
   margin: 0 0 8px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -364,20 +416,20 @@ body.dark .modal-close:hover {
   background-clip: text;
 }
 
-body.dark .modal-title {
+body.dark .page-title {
   background: linear-gradient(135deg, #7aa2ff 0%, #50ccd5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.modal-subtitle {
-  font-size: 14px;
+.page-subtitle {
+  font-size: 16px;
   color: #666;
   margin: 0;
 }
 
-body.dark .modal-subtitle {
+body.dark .page-subtitle {
   color: #999;
 }
 
@@ -511,34 +563,36 @@ body.dark .switch-mode {
   opacity: 0.8;
 }
 
-/* 过渡动画 */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active .modal-container,
-.modal-leave-active .modal-container {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-from .modal-container,
-.modal-leave-to .modal-container {
-  transform: translateY(30px);
-}
-
 /* 移动端适配 */
-@media (max-width: 480px) {
-  .modal-container {
-    padding: 24px;
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
   }
 
-  .modal-title {
+  .login-image-panel {
+    flex: none;
+    min-height: 200px;
+  }
+
+  .login-form-panel {
+    padding: 40px 24px;
+  }
+
+  .brand-text {
+    font-size: 36px;
+  }
+
+  .divider-text {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form-panel {
+    padding: 32px 20px;
+  }
+
+  .page-title {
     font-size: 24px;
   }
 

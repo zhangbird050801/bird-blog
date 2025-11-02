@@ -7,8 +7,6 @@ import { logout } from '@/api'
 import LgIconButton from '@/components/base/LgIconButton.vue'
 import LgInput from '@/components/base/LgInput.vue'
 import LgButton from '@/components/base/LgButton.vue'
-import LoginModal from '@/components/blog/common/LoginModal.vue'
-import RegisterModal from '@/components/blog/common/RegisterModal.vue'
 import LinkModal from '@/components/blog/common/LinkModal.vue'
 import { fetchCategories } from '@/api'
 import type { Category } from '@/api'
@@ -22,11 +20,6 @@ const categories = ref<Category[]>([])
 const showCategoryMenu = ref(false)
 const categoryDropdownRef = ref<HTMLElement | null>(null)
 
-// 登录弹窗
-const showLoginModal = ref(false)
-
-// 注册弹窗
-const showRegisterModal = ref(false)
 
 // 友链弹窗
 const showLinkModal = ref(false)
@@ -38,8 +31,6 @@ const userMenuRef = ref<HTMLElement | null>(null)
 // 提供简单导航跳转
 const navItems = [
   { name: '主页', path: '/' },
-  { name: '归档', path: '/#archive' },
-  { name: '关于', path: '/#about' },
 ]
 
 // 打开友链弹窗
@@ -88,31 +79,6 @@ function closeUserMenu() {
   showUserMenu.value = false
 }
 
-// 打开登录弹窗
-function openLoginModal() {
-  showLoginModal.value = true
-  showRegisterModal.value = false
-}
-
-// 打开注册弹窗
-function openRegisterModal() {
-  showRegisterModal.value = true
-  showLoginModal.value = false
-}
-
-// 注册成功回调
-function handleRegisterSuccess() {
-  console.log('注册成功')
-}
-
-// 登录成功回调
-function handleLoginSuccess() {
-  console.log('登录成功，准备刷新页面')
-  // 延迟一点刷新，让用户看到成功提示
-  setTimeout(() => {
-    window.location.reload()
-  }, 500)
-}
 
 // 退出登录
 async function handleLogout() {
@@ -259,12 +225,12 @@ onBeforeUnmount(() => {
 
         <!-- 未登录：显示登录/注册按钮 -->
         <div v-if="!isLoggedIn" class="auth-buttons">
-          <LgButton variant="ghost" size="sm" @click="openRegisterModal">
+          <router-link to="/register" class="nav-register-link">
             注册
-          </LgButton>
-          <LgButton variant="primary" size="sm" @click="openLoginModal">
+          </router-link>
+          <router-link to="/login" class="nav-login-link">
             登录
-          </LgButton>
+          </router-link>
         </div>
 
         <!-- 已登录：显示用户菜单 -->
@@ -296,20 +262,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- 登录弹窗 -->
-    <LoginModal 
-      v-model:show="showLoginModal" 
-      @success="handleLoginSuccess"
-      @switch-to-register="openRegisterModal"
-    />
-    
-    <!-- 注册弹窗 -->
-    <RegisterModal 
-      v-model:show="showRegisterModal" 
-      @success="handleRegisterSuccess"
-      @switch-to-login="openLoginModal"
-    />
-    
     <!-- 友链弹窗 -->
     <LinkModal :show="showLinkModal" @close="showLinkModal = false" />
   </header>
@@ -613,6 +565,45 @@ body.dark .user-menu {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 导航链接样式 */
+.nav-register-link,
+.nav-login-link {
+  padding: 8px 16px;
+  height: 32px;
+  line-height: 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-register-link {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.nav-register-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-login-link {
+  background: var(--sg-primary);
+  color: #fff;
+  border: 1px solid var(--sg-primary);
+}
+
+.nav-login-link:hover {
+  background: var(--sg-primary-hover);
+  border-color: var(--sg-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .user-info-avatar {

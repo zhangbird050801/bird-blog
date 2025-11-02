@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { addComment, type AddCommentRequest } from '@/api'
 import LgButton from '@/components/base/LgButton.vue'
 import EmojiPicker from './EmojiPicker.vue'
-import LoginModal from '@/components/blog/common/LoginModal.vue'
 
 const props = defineProps<{
   articleId: number
@@ -20,12 +20,12 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
+const router = useRouter()
 const { isLoggedIn } = useAuth()
 const content = ref('')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
-const showLoginModal = ref(false)
 
 /**
  * 提交评论
@@ -118,21 +118,12 @@ function insertEmoji(emoji: string) {
 }
 
 /**
- * 打开登录弹窗
+ * 跳转到登录页面
  */
-function openLoginModal() {
-  showLoginModal.value = true
+function goToLogin() {
+  router.push('/login')
 }
 
-/**
- * 登录成功后的回调
- */
-function handleLoginSuccess() {
-  // 登录成功后，自动聚焦到评论输入框
-  nextTick(() => {
-    focus()
-  })
-}
 
 // 暴露方法给父组件
 defineExpose({
@@ -153,7 +144,7 @@ defineExpose({
     <!-- 未登录提示 -->
     <div v-if="!isLoggedIn" class="comment-input__login-tip">
       <i class="fa fa-info-circle"></i>
-      请先<button type="button" class="comment-input__login-link" @click="openLoginModal">登录</button>后再评论
+      请先<button type="button" class="comment-input__login-link" @click="goToLogin">登录</button>后再评论
     </div>
 
     <!-- 输入区域 -->
@@ -166,7 +157,7 @@ defineExpose({
         :placeholder="props.placeholder || '说点什么吧...（支持 Markdown 语法）'"
         :disabled="!isLoggedIn || isSubmitting"
         rows="4"
-        @click="!isLoggedIn && openLoginModal()"
+        @click="!isLoggedIn && goToLogin()"
       ></textarea>
       
       <!-- 表情选择器 -->
@@ -210,9 +201,7 @@ defineExpose({
       </div>
     </div>
 
-    <!-- 登录弹窗 -->
-    <LoginModal v-model:show="showLoginModal" @success="handleLoginSuccess" />
-  </div>
+    </div>
 </template>
 
 <style scoped>
