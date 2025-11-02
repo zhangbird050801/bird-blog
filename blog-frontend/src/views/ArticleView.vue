@@ -53,33 +53,6 @@ const nextArticle = ref({
   thumbnail: 'https://images.unsplash.com/photo-1640158615573-cd28feb1bf4e?w=400&h=250&fit=crop'
 })
 
-// Mock数据：相关推荐
-const relatedArticles = ref([
-  {
-    id: 101,
-    slug: 'linux-bandit',
-    title: 'Linux | Bandit 练习',
-    thumbnail: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=250&fit=crop',
-    categoryName: 'Linux',
-    publishedTime: '2025-04-13'
-  },
-  {
-    id: 102,
-    slug: 'linux-debian-gnome',
-    title: 'Linux | Debian | 更换 Gnome 至 Xfce4',
-    thumbnail: 'https://images.unsplash.com/photo-1640158615573-cd28feb1bf4e?w=400&h=250&fit=crop',
-    categoryName: 'Linux',
-    publishedTime: '2024-08-23'
-  },
-  {
-    id: 103,
-    slug: 'linux-ubuntu-lts',
-    title: 'Linux | 安装并配置 Ubuntu 22.04 LTS',
-    thumbnail: 'https://images.unsplash.com/photo-1640552435388-a54879e72b28?w=400&h=250&fit=crop',
-    categoryName: 'Linux',
-    publishedTime: '2024-05-24'
-  }
-])
 
 const publishDate = computed(() => {
   const value = articleState.data.value?.publishedTime
@@ -175,7 +148,7 @@ watch(
           <hr class="section-divider" />
 
           <!-- 相关推荐 -->
-          <RelatedArticles :articles="relatedArticles" />
+          <RelatedArticles v-if="articleState.data.value" :article-id="articleState.data.value.id" />
 
           <!-- 分割线 -->
           <hr class="section-divider" />

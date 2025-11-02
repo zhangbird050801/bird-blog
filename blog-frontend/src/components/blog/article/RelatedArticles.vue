@@ -1,22 +1,32 @@
 <script setup lang="ts">
-import type { ArticleCardInfo } from '@/api'
+import { ref, watch } from 'vue'
+import type { RelatedArticleVO } from '@/api/article'
+import { fetchRelatedArticles } from '@/api/article'
 
-interface RelatedArticle extends ArticleCardInfo {
-  categoryName?: string
+interface Props {
+  articleId: number
 }
 
-defineProps<{
-  articles: RelatedArticle[]
-}>()
+const props = defineProps<Props>()
+const articles = ref<RelatedArticleVO[]>([])
+const loading = ref(false)
 
-const formatDate = (dateString?: string) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  })
+const loadRelatedArticles = async () => {
+  if (!props.articleId) return
+
+  loading.value = true
+  try {
+    articles.value = await fetchRelatedArticles(props.articleId)
+  } catch (error) {
+    console.error('Failed to load related articles:', error)
+    articles.value = []
+  } finally {
+    loading.value = false
+  }
 }
+
+// 监听 articleId 变化
+watch(() => props.articleId, loadRelatedArticles, { immediate: true })
 </script>
 
 <template>
@@ -45,10 +55,6 @@ const formatDate = (dateString?: string) => {
             <span v-if="article.categoryName" class="related-category">
               <i class="fa fa-folder-o"></i>
               {{ article.categoryName }}
-            </span>
-            <span v-if="article.publishedTime" class="related-date">
-              <i class="fa fa-calendar-o"></i>
-              {{ formatDate(article.publishedTime) }}
             </span>
           </div>
         </div>
