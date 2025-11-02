@@ -74,4 +74,16 @@ public class ArticleController {
     public CommonResult<List<RelatedArticleVO>> related(@PathVariable Long articleId) {
         return articleService.related(articleId);
     }
+
+    /**
+     * 获取上一篇和下一篇文章
+     * @param articleId 当前文章ID
+     * @return 上一篇和下一篇文章
+     */
+    @GetMapping("/adjacent/{articleId}")
+    public CommonResult<AdjacentArticlesVO> adjacent(@PathVariable Long articleId) {
+        return articleService.adjacent(articleId);
+    }
+
+
 }

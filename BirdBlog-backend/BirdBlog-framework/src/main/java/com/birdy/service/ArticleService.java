@@ -54,4 +54,11 @@ public interface ArticleService extends IService<Article> {
      * @return 相关推荐文章列表
      */
     CommonResult<List<RelatedArticleVO>> related(Long articleId);
+
+    /**
+     * 获取上一篇和下一篇文章
+     * @param articleId 当前文章ID
+     * @return 上一篇和下一篇文章
+     */
+    CommonResult<AdjacentArticlesVO> adjacent(Long articleId);
 }

@@ -40,18 +40,6 @@ async function refreshComments() {
   }
 }
 
-// Mock数据：上一篇/下一篇
-const prevArticle = ref({
-  slug: 'ubuntu-redis-install',
-  title: 'Ubuntu | Redis | 安装配置与密码验证',
-  thumbnail: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=250&fit=crop'
-})
-
-const nextArticle = ref({
-  slug: 'wsl2-clash',
-  title: 'wsl2 | 如何使用本机 clash',
-  thumbnail: 'https://images.unsplash.com/photo-1640158615573-cd28feb1bf4e?w=400&h=250&fit=crop'
-})
 
 
 const publishDate = computed(() => {
@@ -139,9 +127,9 @@ watch(
           <hr class="section-divider" />
 
           <!-- 上一篇/下一篇导航 -->
-          <ArticleNavigation 
-            :prev-article="prevArticle" 
-            :next-article="nextArticle" 
+          <ArticleNavigation
+            v-if="articleState.data.value"
+            :article-id="articleState.data.value.id"
           />
 
           <!-- 分割线 -->

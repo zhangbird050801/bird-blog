@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.birdy.domain.vo.ArticleDetailVO;
 import com.birdy.domain.vo.ArticleVO;
 import com.birdy.domain.vo.RelatedArticleVO;
+import com.birdy.domain.vo.AdjacentArticleVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -65,6 +66,22 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<RelatedArticleVO> selectRelatedArticles(@Param("categoryId") Long categoryId,
                                                  @Param("excludeArticleId") Long excludeArticleId,
                                                  @Param("limit") Integer limit);
+
+    /**
+     * 查询上一篇文章（按发布时间）
+     *
+     * @param publishedTime 当前文章发布时间
+     * @return 上一篇文章
+     */
+    AdjacentArticleVO selectPreviousArticle(@Param("publishedTime") String publishedTime);
+
+    /**
+     * 查询下一篇文章（按发布时间）
+     *
+     * @param publishedTime 当前文章发布时间
+     * @return 下一篇文章
+     */
+    AdjacentArticleVO selectNextArticle(@Param("publishedTime") String publishedTime);
 }
 
 

@@ -13,6 +13,7 @@ import com.birdy.mapper.ArticleMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static com.birdy.constants.SysConstants.*;
@@ -125,6 +126,30 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
 
         return CommonResult.success(res);
+    }
+
+    @Override
+    public CommonResult<AdjacentArticlesVO> adjacent(Long articleId) {
+        if (articleId == null || articleId <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+
+        // 先获取当前文章的发布时间
+        Article currentArticle = getById(articleId);
+        if (currentArticle == null) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        // 格式化发布时间为字符串
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String publishedTime = sdf.format(currentArticle.getPublishedTime());
+
+        // 查询上一篇和下一篇文章
+        AdjacentArticleVO previous = articleMapper.selectPreviousArticle(publishedTime);
+        AdjacentArticleVO next = articleMapper.selectNextArticle(publishedTime);
+
+        AdjacentArticlesVO result = new AdjacentArticlesVO(previous, next);
+        return CommonResult.success(result);
     }
 }
 

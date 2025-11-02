@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import type { RelatedArticleVO } from '@/api/article'
 import { fetchRelatedArticles } from '@/api/article'
+
+const router = useRouter()
 
 interface Props {
   articleId: number
@@ -25,6 +28,19 @@ const loadRelatedArticles = async () => {
   }
 }
 
+// 跳转到文章详情
+const goToArticle = (slug: string) => {
+  router.push(`/article/${slug}`)
+}
+
+// 处理键盘事件
+const handleKeyDown = (event: KeyboardEvent, slug: string) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    goToArticle(slug)
+  }
+}
+
 // 监听 articleId 变化
 watch(() => props.articleId, loadRelatedArticles, { immediate: true })
 </script>
@@ -36,11 +52,14 @@ watch(() => props.articleId, loadRelatedArticles, { immediate: true })
       相关推荐
     </h3>
     <div class="related-grid">
-      <a
+      <div
         v-for="article in articles"
         :key="article.slug"
-        :href="`#/article/${article.slug}`"
+        @click="goToArticle(article.slug)"
+        @keydown="handleKeyDown($event, article.slug)"
         class="related-card"
+        role="button"
+        tabindex="0"
       >
         <div class="related-thumb">
           <img 
@@ -58,7 +77,7 @@ watch(() => props.articleId, loadRelatedArticles, { immediate: true })
             </span>
           </div>
         </div>
-      </a>
+      </div>
     </div>
   </div>
 </template>

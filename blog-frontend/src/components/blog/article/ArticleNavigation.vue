@@ -1,22 +1,63 @@
 <script setup lang="ts">
-interface Article {
-  slug: string
-  title: string
-  thumbnail?: string
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import type { AdjacentArticleVO } from '@/api/article'
+import { fetchAdjacentArticles } from '@/api/article'
+
+const router = useRouter()
+
+interface Props {
+  articleId: number
 }
 
-defineProps<{
-  prevArticle?: Article
-  nextArticle?: Article
-}>()
+const props = defineProps<Props>()
+const prevArticle = ref<AdjacentArticleVO>()
+const nextArticle = ref<AdjacentArticleVO>()
+const loading = ref(false)
+
+const loadAdjacentArticles = async () => {
+  if (!props.articleId) return
+
+  loading.value = true
+  try {
+    const result = await fetchAdjacentArticles(props.articleId)
+    prevArticle.value = result.previous
+    nextArticle.value = result.next
+  } catch (error) {
+    console.error('Failed to load adjacent articles:', error)
+    prevArticle.value = undefined
+    nextArticle.value = undefined
+  } finally {
+    loading.value = false
+  }
+}
+
+// 跳转到文章详情
+const goToArticle = (slug: string) => {
+  router.push(`/article/${slug}`)
+}
+
+// 处理键盘事件
+const handleKeyDown = (event: KeyboardEvent, slug: string) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    goToArticle(slug)
+  }
+}
+
+// 监听 articleId 变化
+watch(() => props.articleId, loadAdjacentArticles, { immediate: true })
 </script>
 
 <template>
   <nav class="article-navigation">
-    <a 
-      v-if="prevArticle" 
-      :href="`#/article/${prevArticle.slug}`" 
+    <div
+      v-if="prevArticle"
+      @click="goToArticle(prevArticle.slug)"
+      @keydown="handleKeyDown($event, prevArticle.slug)"
       class="nav-item nav-prev"
+      role="button"
+      tabindex="0"
     >
       <div class="nav-icon">
         <i class="fa fa-chevron-left"></i>
@@ -28,15 +69,18 @@ defineProps<{
       <div v-if="prevArticle.thumbnail" class="nav-thumb">
         <img :src="prevArticle.thumbnail" :alt="prevArticle.title" />
       </div>
-    </a>
+    </div>
     <div v-else class="nav-item nav-disabled">
       <span class="nav-label">没有更早的文章了</span>
     </div>
 
-    <a 
-      v-if="nextArticle" 
-      :href="`#/article/${nextArticle.slug}`" 
+    <div
+      v-if="nextArticle"
+      @click="goToArticle(nextArticle.slug)"
+      @keydown="handleKeyDown($event, nextArticle.slug)"
       class="nav-item nav-next"
+      role="button"
+      tabindex="0"
     >
       <div v-if="nextArticle.thumbnail" class="nav-thumb">
         <img :src="nextArticle.thumbnail" :alt="nextArticle.title" />
@@ -48,7 +92,7 @@ defineProps<{
       <div class="nav-icon">
         <i class="fa fa-chevron-right"></i>
       </div>
-    </a>
+    </div>
     <div v-else class="nav-item nav-disabled">
       <span class="nav-label">没有更新的文章了</span>
     </div>

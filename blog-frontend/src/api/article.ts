@@ -67,6 +67,24 @@ export interface RelatedArticleVO {
 }
 
 /**
+ * 相邻文章 VO
+ */
+export interface AdjacentArticleVO {
+  id: number
+  title: string
+  slug: string
+  thumbnail?: string
+}
+
+/**
+ * 上一篇/下一篇文章集合 VO
+ */
+export interface AdjacentArticlesVO {
+  previous?: AdjacentArticleVO
+  next?: AdjacentArticleVO
+}
+
+/**
  * 通用文章卡片接口
  */
 export interface ArticleCardInfo {
@@ -152,5 +170,15 @@ export async function fetchLatestArticles(): Promise<LatestArticleVO[]> {
  */
 export async function fetchRelatedArticles(articleId: number): Promise<RelatedArticleVO[]> {
   const response = await get<ApiResponse<RelatedArticleVO[]>>(`/article/related/${articleId}`)
+  return handleApiResponse(response)
+}
+
+/**
+ * 获取上一篇和下一篇文章
+ * @param articleId 当前文章ID
+ * @returns 上一篇和下一篇文章
+ */
+export async function fetchAdjacentArticles(articleId: number): Promise<AdjacentArticlesVO> {
+  const response = await get<ApiResponse<AdjacentArticlesVO>>(`/article/adjacent/${articleId}`)
   return handleApiResponse(response)
 }

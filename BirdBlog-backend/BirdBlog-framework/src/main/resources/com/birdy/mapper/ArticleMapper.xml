@@ -104,6 +104,14 @@
         <result property="thumbnail" column="thumbnail" />
     </resultMap>
 
+    <!-- AdjacentArticleVO -->
+    <resultMap id="AdjacentArticleVOResultMap" type="com.birdy.domain.vo.AdjacentArticleVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="slug" column="slug" />
+        <result property="thumbnail" column="thumbnail" />
+    </resultMap>
+
     <!-- 根据ID查询文章详情 -->
     <select id="selectArticleDetailById" resultMap="ArticleDetailVOResultMap">
         SELECT 
@@ -175,6 +183,36 @@
           AND a.deleted = 0
         ORDER BY a.view_count DESC, a.published_time DESC
         LIMIT #{limit}
+    </select>
+
+    <!-- 查询上一篇文章（按发布时间） -->
+    <select id="selectPreviousArticle" resultMap="AdjacentArticleVOResultMap">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.thumbnail
+        FROM bg_article a
+        WHERE a.published_time &lt; #{publishedTime}
+          AND a.status = 0
+          AND a.deleted = 0
+        ORDER BY a.published_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 查询下一篇文章（按发布时间） -->
+    <select id="selectNextArticle" resultMap="AdjacentArticleVOResultMap">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.thumbnail
+        FROM bg_article a
+        WHERE a.published_time &gt; #{publishedTime}
+          AND a.status = 0
+          AND a.deleted = 0
+        ORDER BY a.published_time ASC
+        LIMIT 1
     </select>
 
 </mapper>
