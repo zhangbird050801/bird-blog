@@ -22,19 +22,23 @@ public class AdminCategoryController {
     private CategoryService categoryService;
 
     /**
-     * 获取分类分页列表
-     * 
+     * 获取分类分页列表（支持按名称模糊查询和状态筛选）
+     *
      * @param pageNum 页码，默认第1页
      * @param pageSize 每页数量，默认10条
+     * @param name 分类名称，支持模糊查询，可选参数
+     * @param status 状态筛选：0正常，1禁用，可选参数
      * @return 分页结果，包含分类列表和分页信息
      */
     @GetMapping("/page")
     public CommonResult<PageResult<Category>> getPageList(
             @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer status
     ) {
         try {
-            PageResult<Category> pageResult = categoryService.getPageList(pageNum, pageSize);
+            PageResult<Category> pageResult = categoryService.getPageListWithQuery(pageNum, pageSize, name, status);
             return CommonResult.success(pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,6 +49,7 @@ public class AdminCategoryController {
         }
     }
 
+    
     /**
      * 获取分类详情
      * 暂未实现

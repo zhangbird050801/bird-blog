@@ -63,15 +63,48 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
     public PageResult<Category> getPageList(Integer pageNum, Integer pageSize) {
         // 创建分页对象
         Page<Category> page = new Page<>(pageNum, pageSize);
-        
+
         // 构建查询条件：未删除的分类，按创建时间降序
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Category::getDeleted, CATEGORY_NOT_DELETED)
                    .orderByDesc(Category::getCreateTime);
-        
+
         // 执行分页查询
         page(page, queryWrapper);
-        
+
+        // 封装为 PageResult
+        return new PageResult<>(
+            page.getTotal(),
+            page.getRecords(),
+            (int) page.getCurrent(),
+            (int) page.getSize()
+        );
+    }
+
+    @Override
+    public PageResult<Category> getPageListWithQuery(Integer pageNum, Integer pageSize, String name, Integer status) {
+        // 创建分页对象
+        Page<Category> page = new Page<>(pageNum, pageSize);
+
+        // 构建查询条件：未删除的分类，按创建时间降序
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Category::getDeleted, CATEGORY_NOT_DELETED);
+
+        // 如果名称不为空，则添加模糊查询条件
+        if (name != null && !name.trim().isEmpty()) {
+            queryWrapper.like(Category::getName, name.trim());
+        }
+
+        // 如果状态不为空，则添加状态筛选条件
+        if (status != null) {
+            queryWrapper.eq(Category::getStatus, status);
+        }
+
+        queryWrapper.orderByDesc(Category::getCreateTime);
+
+        // 执行分页查询
+        page(page, queryWrapper);
+
         // 封装为 PageResult
         return new PageResult<>(
             page.getTotal(),

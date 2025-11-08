@@ -29,4 +29,14 @@ public interface CategoryService extends IService<Category> {
      * @return 分页结果
      */
     PageResult<Category> getPageList(Integer pageNum, Integer pageSize);
+
+    /**
+     * 获取分页分类列表（支持模糊查询和状态筛选）
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @param name 分类名称（支持模糊查询）
+     * @param status 状态筛选
+     * @return 分页结果
+     */
+    PageResult<Category> getPageListWithQuery(Integer pageNum, Integer pageSize, String name, Integer status);
 }
