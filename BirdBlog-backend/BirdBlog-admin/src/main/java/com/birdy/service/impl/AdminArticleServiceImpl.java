@@ -15,6 +15,7 @@ import com.birdy.mapper.ArticleMapper;
 import com.birdy.mapper.CategoryMapper;
 import com.birdy.mapper.UserMapper;
 import com.birdy.service.AdminArticleService;
+import com.birdy.utils.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -157,8 +158,19 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         Article updateArticle = new Article();
         BeanUtils.copyProperties(articleVO, updateArticle);
         updateArticle.setId(id);
-        updateArticle.setUpdater("admin"); // TODO: 从当前登录用户获取
+
+        // 获取当前登录用户信息
+        Long currentUserId = SecurityUtils.getUserId();
+        String currentUserInfo = currentUserId != null ? currentUserId.toString() : "admin";
+
+        updateArticle.setUpdater(currentUserInfo);
         updateArticle.setUpdateTime(new java.util.Date());
+
+        // 如果状态改为发布状态且原文章未发布，设置发布时间
+        if (updateArticle.getStatus() != null && updateArticle.getStatus() == 0 &&
+            (existingArticle.getPublishedTime() == null || existingArticle.getStatus() != 0)) {
+            updateArticle.setPublishedTime(new java.util.Date());
+        }
 
         int result = articleMapper.updateById(updateArticle);
         if (result > 0) {
@@ -173,7 +185,13 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         // 创建文章
         Article newArticle = new Article();
         BeanUtils.copyProperties(articleVO, newArticle);
-        newArticle.setCreator("admin"); // TODO: 从当前登录用户获取
+
+        // 获取当前登录用户信息
+        Long currentUserId = SecurityUtils.getUserId();
+        String currentUserInfo = currentUserId != null ? currentUserId.toString() : "admin";
+
+        newArticle.setCreator(currentUserInfo);
+        newArticle.setAuthorId(currentUserId != null ? currentUserId : 1L); // 如果获取不到用户ID，使用默认值1
         newArticle.setCreateTime(new java.util.Date());
         newArticle.setUpdateTime(new java.util.Date());
         newArticle.setDeleted(false);
@@ -187,6 +205,11 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         }
         if (newArticle.getCommentCount() == null) {
             newArticle.setCommentCount(0L);
+        }
+
+        // 如果是发布状态，设置发布时间
+        if (newArticle.getStatus() != null && newArticle.getStatus() == 0) {
+            newArticle.setPublishedTime(new java.util.Date());
         }
 
         int result = articleMapper.insert(newArticle);
