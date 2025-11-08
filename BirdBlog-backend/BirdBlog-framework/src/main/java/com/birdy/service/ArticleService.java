@@ -77,4 +77,28 @@ public interface ArticleService extends IService<Article> {
      * @return 分页结果
      */
     CommonResult<PageResult<AdminArticleVO>> getArticleList(ArticleQueryDTO queryDTO);
+
+    /**
+     * 获取文章详情（管理后台用，包含完整内容）
+     *
+     * @param id 文章ID
+     * @return 文章详情
+     */
+    CommonResult<AdminArticleVO> getArticleDetail(Long id);
+
+    /**
+     * 创建文章
+     *
+     * @param article 文章信息
+     * @return 创建结果
+     */
+    CommonResult<Long> createArticle(Article article);
+
+    /**
+     * 更新文章
+     *
+     * @param article 文章信息
+     * @return 更新结果
+     */
+    CommonResult<Void> updateArticle(Article article);
 }

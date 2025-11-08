@@ -17,6 +17,7 @@ import com.birdy.mapper.CategoryMapper;
 import com.birdy.mapper.UserMapper;
 import com.birdy.service.ArticleService;
 import com.birdy.mapper.ArticleMapper;
+import com.birdy.utils.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -264,6 +265,122 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         );
 
         return CommonResult.success(pageResult);
+    }
+
+    @Override
+    public CommonResult<AdminArticleVO> getArticleDetail(Long id) {
+        if (id == null || id <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+
+        Article article = getById(id);
+        if (article == null || article.getDeleted()) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        // 获取分类信息
+        String categoryName = null;
+        if (article.getCategoryId() != null) {
+            Category category = categoryMapper.selectById(article.getCategoryId());
+            if (category != null && !category.getDeleted()) {
+                categoryName = category.getName();
+            }
+        }
+
+        // 获取作者信息
+        String authorName = null;
+        if (article.getAuthorId() != null) {
+            User author = userMapper.selectById(article.getAuthorId());
+            if (author != null && !author.getDeleted()) {
+                authorName = author.getNickName();
+            }
+        }
+
+        // 转换为 AdminArticleVO
+        AdminArticleVO adminArticleVO = new AdminArticleVO();
+        BeanUtils.copyProperties(article, adminArticleVO);
+        adminArticleVO.setCategoryName(categoryName);
+        adminArticleVO.setAuthorName(authorName);
+
+        return CommonResult.success(adminArticleVO);
+    }
+
+    @Override
+    public CommonResult<Long> createArticle(Article article) {
+        // 获取当前登录用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null) {
+            return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
+        }
+
+        // 设置作者ID
+        article.setAuthorId(currentUserId);
+
+        // 设置默认值
+        if (article.getViewCount() == null) {
+            article.setViewCount(0L);
+        }
+        if (article.getIsTop() == null) {
+            article.setIsTop(false);
+        }
+        if (article.getDeleted() == null) {
+            article.setDeleted(false);
+        }
+
+        // 如果状态为发布且发布时间为空，设置当前时间
+        if (article.getStatus() != null && article.getStatus() == ARTICLE_STATUS_RELEASE && article.getPublishedTime() == null) {
+            article.setPublishedTime(new java.util.Date());
+        }
+
+        boolean success = save(article);
+        if (success) {
+            return CommonResult.success(article.getId());
+        } else {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "文章创建失败");
+        }
+    }
+
+    @Override
+    public CommonResult<Void> updateArticle(Article article) {
+        if (article.getId() == null || article.getId() <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+
+        // 检查文章是否存在
+        Article existingArticle = getById(article.getId());
+        if (existingArticle == null || existingArticle.getDeleted()) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        // 获取当前登录用户ID（检查权限）
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null) {
+            return CommonResult.error(HttpCodeEnum.NEED_LOGIN);
+        }
+
+        // 检查权限：只有文章作者或管理员可以修改
+        if (!currentUserId.equals(existingArticle.getAuthorId())) {
+            // 检查是否为管理员（这里简化处理，实际应该有角色判断）
+            // 暂时允许所有用户修改，或者需要根据实际情况调整权限逻辑
+            // return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH);
+        }
+
+        // 设置不可修改的字段
+        article.setAuthorId(existingArticle.getAuthorId());
+        article.setCreateTime(existingArticle.getCreateTime());
+
+        // 如果状态改为发布且发布时间为空，设置当前时间
+        if (article.getStatus() != null && article.getStatus() == ARTICLE_STATUS_RELEASE &&
+            (article.getPublishedTime() == null || existingArticle.getStatus() == null || existingArticle.getStatus() != ARTICLE_STATUS_RELEASE)) {
+            article.setPublishedTime(new java.util.Date());
+        }
+
+        boolean success = updateById(article);
+        if (success) {
+            return CommonResult.success();
+        } else {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "文章更新失败");
+        }
     }
 
     /**

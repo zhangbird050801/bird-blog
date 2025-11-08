@@ -97,11 +97,32 @@
           <el-row :gutter="20">
             <el-col :span="24">
               <el-form-item label="缩略图">
-                <el-input
-                  v-model="formData.thumbnail"
-                  placeholder="请输入缩略图URL，可选"
-                  clearable
-                />
+                <div class="thumbnail-upload-container">
+                  <div v-if="formData.thumbnail" class="thumbnail-preview" @click="removeThumbnail">
+                    <img :src="formData.thumbnail" alt="缩略图" />
+                    <div class="thumbnail-overlay">
+                      <el-icon><Delete /></el-icon>
+                      <span>删除</span>
+                    </div>
+                  </div>
+                  <div v-else class="thumbnail-placeholder" @click="triggerThumbnailUpload">
+                    <el-icon class="thumbnail-icon"><Plus /></el-icon>
+                    <div class="thumbnail-text">点击上传缩略图</div>
+                  </div>
+                  <input
+                    ref="thumbnailFileInput"
+                    type="file"
+                    accept="image/*"
+                    style="display: none"
+                    @change="handleThumbnailFileChange"
+                  />
+                  <el-input
+                    v-model="formData.thumbnail"
+                    placeholder="或直接输入缩略图URL"
+                    clearable
+                    class="thumbnail-url-input"
+                  />
+                </div>
               </el-form-item>
             </el-col>
           </el-row>
@@ -132,6 +153,11 @@
                     :toolbars="editToolbars"
                     :tab-width="4"
                     :show-code-row-number="true"
+                    :toolbars-exclude="[]"
+                    :catalog-visible="false"
+                    :html-preview="false"
+                    :no-upload-img="false"
+                    :auto-detect-code="true"
                     @on-upload-img="handleUploadImage"
                     @onChange="handleContentChange"
                   />
@@ -176,11 +202,13 @@
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
 import { MdEditor } from 'md-editor-v3'
-import { Edit, View } from '@element-plus/icons-vue'
+import { Edit, View, Plus, Delete } from '@element-plus/icons-vue'
 import 'md-editor-v3/lib/style.css'
 import { useMarkdown } from '@/composables/useMarkdown'
 import { updateArticle, createArticle, Article } from '@/api/article'
 import { getCategoryPage } from '@/api/category'
+import { uploadImage, uploadThumbnail } from '@/api/upload'
+import type { UploadResponse } from '@/api/upload'
 import type { Category } from '@/types'
 
 interface Props {
@@ -204,6 +232,18 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 const saving = ref(false)
 const categoryOptions = ref<Category[]>([])
+const thumbnailFileInput = ref<HTMLInputElement>()
+
+// 上传配置
+const uploadAction = ref('/admin/upload/thumbnail')
+
+// 动态获取上传头
+const getUploadHeaders = () => {
+  const token = localStorage.getItem('token') || ''
+  return {
+    'Authorization': `Bearer ${token}`
+  }
+}
 
 // 计算属性
 const visible = computed({
@@ -381,15 +421,21 @@ const handleUploadImage = async (files: File[], callback: (urls: string[]) => vo
 
   for (const file of files) {
     try {
-      // 这里应该调用图片上传API
-      // 暂时使用占位符，实际项目中需要实现图片上传功能
-      const url = `https://placeholder.com/${file.name}`
+      // 调用图片上传API
+      const response = await uploadImage(file, 'article')
+      const url = response.url
+
+      // 调试信息
+      console.log('上传成功，URL:', url)
+      console.log('完整响应:', response)
+
+      // md-editor-v3 期望的回调是直接的URL数组，不是markdown格式
       res.push(url)
 
       ElMessage.success(`${file.name} 上传成功`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('图片上传失败:', error)
-      ElMessage.error(`${file.name} 上传失败`)
+      ElMessage.error(`${file.name} 上传失败: ${error.message || '未知错误'}`)
     }
   }
 
@@ -438,6 +484,79 @@ const handleContentChange = (content: string) => {
   formData.content = content
 }
 
+/**
+ * 触发缩略图上传
+ */
+const triggerThumbnailUpload = () => {
+  thumbnailFileInput.value?.click()
+}
+
+/**
+ * 处理缩略图文件选择
+ */
+const handleThumbnailFileChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+
+  if (!file) return
+
+  // 文件校验
+  const isImage = file.type.startsWith('image/')
+  const isLt10M = file.size / 1024 / 1024 < 10
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return
+  }
+  if (!isLt10M) {
+    ElMessage.error('上传图片大小不能超过 10MB!')
+    return
+  }
+
+  try {
+    // 调用缩略图上传API
+    const response = await uploadThumbnail(file)
+    formData.thumbnail = response.url
+    ElMessage.success('缩略图上传成功')
+  } catch (error: any) {
+    console.error('缩略图上传失败:', error)
+    ElMessage.error(`缩略图上传失败: ${error.message || '未知错误'}`)
+  } finally {
+    // 清空文件选择，允许重复选择同一文件
+    target.value = ''
+  }
+}
+
+/**
+ * 缩略图上传前校验（已废弃，改为使用自定义上传）
+ */
+const beforeThumbnailUpload = (file: File) => {
+  return true // 为了兼容性保留
+}
+
+/**
+ * 缩略图上传成功处理（已废弃，改为使用自定义上传）
+ */
+const handleThumbnailSuccess = (response: any) => {
+  // 已废弃，改为使用自定义上传
+}
+
+/**
+ * 删除缩略图
+ */
+const removeThumbnail = () => {
+  ElMessageBox.confirm('确定要删除这张缩略图吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    formData.thumbnail = ''
+    ElMessage.success('缩略图已删除')
+  }).catch(() => {
+    // 用户取消删除
+  })
+}
+
 
 /**
  * 关闭弹窗
@@ -454,6 +573,94 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 缩略图上传样式 */
+.thumbnail-upload-container {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.thumbnail-uploader {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.thumbnail-uploader:hover {
+  border-color: var(--el-color-primary);
+}
+
+.thumbnail-preview {
+  width: 120px;
+  height: 80px;
+  position: relative;
+  cursor: pointer;
+}
+
+.thumbnail-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.thumbnail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 6px;
+}
+
+.thumbnail-preview:hover .thumbnail-overlay {
+  opacity: 1;
+}
+
+.thumbnail-overlay .el-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.thumbnail-overlay span {
+  font-size: 12px;
+}
+
+.thumbnail-placeholder {
+  width: 120px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--el-text-color-placeholder);
+}
+
+.thumbnail-icon {
+  font-size: 24px;
+  color: var(--el-text-color-placeholder);
+  margin-bottom: 8px;
+}
+
+.thumbnail-text {
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
+
+.thumbnail-url-input {
+  flex: 1;
+}
 .article-edit-dialog {
   --el-dialog-padding-primary: 20px;
 }
@@ -712,6 +919,54 @@ onMounted(() => {
 
 :deep(.md-editor-preview) {
   padding: 16px;
+}
+
+/* 图片样式 - 支持调整大小 */
+:deep(.md-editor-content img),
+:deep(.markdown-preview img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+:deep(.md-editor-content img:hover),
+:deep(.markdown-preview img:hover) {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* 可调整大小的图片容器 */
+:deep(.resizable-image) {
+  position: relative;
+  display: inline-block;
+  margin: 8px 0;
+}
+
+:deep(.resizable-image img) {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 图片调整手柄 */
+:deep(.resizable-handle) {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--el-color-primary);
+  cursor: nwse-resize;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+:deep(.resizable-image:hover .resizable-handle) {
+  opacity: 1;
 }
 
 :deep(.el-card__body) {
