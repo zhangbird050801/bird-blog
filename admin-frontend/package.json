@@ -9,9 +9,13 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "@types/markdown-it": "^14.1.2",
     "axios": "^1.13.1",
     "core-js": "^3.8.3",
     "element-plus": "^2.11.5",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.0",
+    "md-editor-v3": "^6.1.1",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
     "vue": "^3.2.13",
@@ -20,6 +24,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@babel/plugin-transform-private-methods": "^7.27.1",
     "@types/node": "^24.9.2",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
