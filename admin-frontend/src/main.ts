@@ -12,6 +12,8 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 // 全局样式
 import './styles/index.css'
+// 代码高亮样式
+import './assets/atom-one-dark.css'
 
 const app = createApp(App)
 

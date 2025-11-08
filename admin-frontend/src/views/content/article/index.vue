@@ -140,6 +140,20 @@
         />
       </div>
     </el-card>
+
+    <!-- 文章查看弹窗 -->
+    <ArticleView
+      v-model="viewDialogVisible"
+      :article-id="viewArticleId"
+      @edit="handleEditFromView"
+    />
+
+    <!-- 文章编辑弹窗 -->
+    <ArticleEdit
+      v-model="editDialogVisible"
+      :article="editArticle"
+      @success="handleEditSuccess"
+    />
   </div>
 </template>
 
@@ -151,6 +165,8 @@ import { getArticlePage, deleteArticle, toggleArticleTop, Article, ArticleQueryP
 import { getCategoryPage } from '@/api/category'
 import type { Category } from '@/types'
 import { useUserStore } from '@/stores/user'
+import ArticleView from './ArticleView.vue'
+import ArticleEdit from './ArticleEdit.vue'
 
 // 响应式数据
 const loading = ref(false)
@@ -158,6 +174,14 @@ const articleList = ref<Article[]>([])
 const total = ref(0)
 const selectedIds = ref<number[]>([])
 const categoryOptions = ref<Category[]>([])
+
+// 查看弹窗相关
+const viewDialogVisible = ref(false)
+const viewArticleId = ref<number | undefined>()
+
+// 编辑弹窗相关
+const editDialogVisible = ref(false)
+const editArticle = ref<Article | null>(null)
 
 // 查询参数
 const queryParams = reactive<ArticleQueryParams>({
@@ -240,21 +264,38 @@ const handleReset = () => {
  * 新增文章
  */
 const handleAdd = () => {
-  ElMessage.info('新增文章功能开发中...')
+  editArticle.value = null // 设置为null表示新增模式
+  editDialogVisible.value = true
 }
 
 /**
  * 查看文章
  */
 const handleView = (row: Article) => {
-  ElMessage.info(`查看文章功能开发中... ID: ${row.id}`)
+  viewArticleId.value = row.id
+  viewDialogVisible.value = true
 }
 
 /**
  * 编辑文章
  */
 const handleEdit = (row: Article) => {
-  ElMessage.info(`编辑文章功能开发中... ID: ${row.id}`)
+  editArticle.value = row
+  editDialogVisible.value = true
+}
+
+/**
+ * 从查看弹窗编辑文章
+ */
+const handleEditFromView = (article: Article) => {
+  handleEdit(article)
+}
+
+/**
+ * 编辑成功回调
+ */
+const handleEditSuccess = () => {
+  getList() // 重新获取文章列表
 }
 
 /**

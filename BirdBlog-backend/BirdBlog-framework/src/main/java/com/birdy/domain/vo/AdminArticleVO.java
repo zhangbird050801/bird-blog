@@ -40,6 +40,11 @@ public class AdminArticleVO {
     private String summary;
 
     /**
+     * 正文内容
+     */
+    private String content;
+
+    /**
      * 分类ID
      */
     private Long categoryId;
