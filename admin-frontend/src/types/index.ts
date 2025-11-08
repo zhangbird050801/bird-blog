@@ -204,3 +204,30 @@ export interface TagQueryParams {
   pageSize?: number
   name?: string
 }
+
+/**
+ * 友链信息
+ */
+export interface Link {
+  id: number
+  name: string
+  logo?: string | null
+  description?: string | null
+  url: string
+  status: number // 0通过 1未通过 2待审核
+  creator?: string
+  createTime?: string
+  updater?: string
+  updateTime?: string
+  deleted?: boolean
+}
+
+/**
+ * 友链查询参数
+ */
+export interface LinkQueryParams {
+  pageNum?: number
+  pageSize?: number
+  name?: string
+  status?: number
+}

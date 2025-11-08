@@ -42,7 +42,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
     }
 
     @Override
-    public PageResult<Link> getPageListWithQuery(Integer pageNum, Integer pageSize, String name) {
+    public PageResult<Link> getPageListWithQuery(Integer pageNum, Integer pageSize, String name, Integer status) {
         //创建分页对象
         Page<Link> page = new Page<>(pageNum, pageSize);
 
@@ -63,11 +63,25 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
             queryWrapper.like(Link::getName, name.trim());
         }
 
+        //增加状态筛选条件
+        if (status != null) {
+            queryWrapper.eq(Link::getStatus, status);
+        }
+
         //查询结果按创建时间的降序排列
         queryWrapper.orderByDesc(Link::getCreateTime);
 
         //执行分页查询
         page(page,queryWrapper);
+
+        // 打印调试信息
+        System.out.println("=== 友链分页查询调试信息 ===");
+        System.out.println("页码: " + pageNum);
+        System.out.println("每页大小: " + pageSize);
+        System.out.println("查询条件 name: " + name);
+        System.out.println("查询条件 status: " + status);
+        System.out.println("总数: " + page.getTotal());
+        System.out.println("当前页数据量: " + page.getRecords().size());
 
         //封装为PageResult
         return new PageResult<>(

@@ -18,28 +18,36 @@ import org.springframework.web.bind.annotation.*;
  * @description 友链管理接口，包括分页查询、新增、修改、删除等操作
  */
 @RestController
-@RequestMapping("links")
+@RequestMapping("/links")
 public class AdminLinkController {
 
     @Autowired
     private LinkService linkService;
 
-
-    //获取友链分页列表
+    /**
+     * 获取友链分页列表（支持按名称模糊查询和状态筛选）
+     *
+     * @param pageNum 页码，默认第1页
+     * @param pageSize 每页数量，默认10条
+     * @param name 友链名称，支持模糊查询，可选参数
+     * @param status 审核状态：0通过 1未通过 2待审核，可选参数
+     * @return 分页结果，包含友链列表和分页信息
+     */
     @GetMapping("/page")
     public CommonResult<PageResult<Link>> getPageList(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) String name
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer status
     ){
         try{
-            PageResult<Link> pageResult = linkService.getPageListWithQuery(pageNum, pageSize, name);
+            PageResult<Link> pageResult = linkService.getPageListWithQuery(pageNum, pageSize, name, status);
             return CommonResult.success(pageResult);
         }catch(Exception e){
             e.printStackTrace();
             return CommonResult.error(
                     com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
-                    "获取标签列表失败: " + e.getMessage()
+                    "获取友链列表失败: " + e.getMessage()
             );
         }
     }

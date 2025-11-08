@@ -23,13 +23,13 @@ public interface LinkService extends IService<Link> {
     CommonResult<List<LinkVO>> getAllLink();
 
     /**
-     * 获取分页友链列表（支持模糊查询）
+     * 获取分页友链列表（支持模糊查询和状态筛选）
      * @param pageNum 页码
      * @param pageSize 每页数量
      * @param name 友链名称（支持模糊查询）
+     * @param status 审核状态筛选
      * @return 分页结果
      */
-
-    PageResult<Link> getPageListWithQuery(Integer pageNum, Integer pageSize, String name);
+    PageResult<Link> getPageListWithQuery(Integer pageNum, Integer pageSize, String name, Integer status);
 
 }
