@@ -181,3 +181,26 @@ export interface CategoryQueryParams {
   name?: string
   status?: number
 }
+
+/**
+ * 标签信息
+ */
+export interface Tag {
+  id: number
+  name: string
+  remark?: string | null
+  creator?: string
+  createTime?: string
+  updater?: string
+  updateTime?: string
+  deleted?: boolean
+}
+
+/**
+ * 标签查询参数
+ */
+export interface TagQueryParams {
+  pageNum?: number
+  pageSize?: number
+  name?: string
+}
