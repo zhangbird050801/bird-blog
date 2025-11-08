@@ -2,6 +2,7 @@ package com.birdy.service;
 
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.Tag;
+import com.birdy.domain.vo.PageResult;
 import com.birdy.domain.vo.TagVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -26,4 +27,13 @@ public interface TagService extends IService<Tag> {
      * @return 标签列表
      */
     CommonResult<List<TagVO>> getTagsByArticleId(Long articleId);
+
+    /**
+     * 获取分页标签列表（支持模糊查询）
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @param name 标签名称（支持模糊查询）
+     * @return 分页结果
+     */
+    PageResult<Tag> getPageListWithQuery(Integer pageNum, Integer pageSize, String name);
 }

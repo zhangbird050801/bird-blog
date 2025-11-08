@@ -28,6 +28,9 @@ public class SysConstants {
     // 分类未删除
     public static final boolean CATEGORY_NOT_DELETED = false;
 
+    // 标签未删除
+    public static final boolean TAG_NOT_DELETED = false;
+
 
     //友链审核状态：0已审核通过, 1审核不通过, 2未审核
     public static final int LINK_STATUS_ENABLE = 0;
