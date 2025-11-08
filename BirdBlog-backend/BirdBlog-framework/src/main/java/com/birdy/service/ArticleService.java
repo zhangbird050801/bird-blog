@@ -1,6 +1,7 @@
 package com.birdy.service;
 
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.ArticleQueryDTO;
 import com.birdy.domain.entity.Article;
 import com.birdy.domain.vo.*;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -68,4 +69,12 @@ public interface ArticleService extends IService<Article> {
      * @return 搜索结果
      */
     CommonResult<List<ArticleVO>> search(String keyword);
+
+    /**
+     * 分页查询文章列表（支持模糊搜索）
+     *
+     * @param queryDTO 查询条件
+     * @return 分页结果
+     */
+    CommonResult<PageResult<AdminArticleVO>> getArticleList(ArticleQueryDTO queryDTO);
 }
