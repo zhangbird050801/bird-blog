@@ -231,3 +231,39 @@ export interface LinkQueryParams {
   name?: string
   status?: number
 }
+
+/**
+ * 评论信息
+ */
+export interface Comment {
+  id: number
+  type: number // 0文章评论，1友链评论
+  articleId?: number | null
+  rootId?: number | null
+  parentId?: number | null
+  fromUserId?: number | null
+  fromUserName?: string
+  fromUserAvatar?: string
+  toUserId?: number | null
+  toUserName?: string
+  content: string
+  status: number // 0正常，1屏蔽
+  likeCount?: number
+  creator?: string
+  createTime?: string
+  updater?: string
+  updateTime?: string
+  deleted?: boolean
+}
+
+/**
+ * 评论查询参数
+ */
+export interface CommentQueryParams {
+  pageNum?: number
+  pageSize?: number
+  type?: number
+  articleId?: number
+  status?: number
+  content?: string
+}

@@ -20,6 +20,11 @@ public class CommentVO {
     private Long id;
 
     /**
+     * 评论类型：0文章评论，1友链评论
+     */
+    private Integer type;
+
+    /**
      * 文章ID
      */
     private Long articleId;
@@ -65,14 +70,39 @@ public class CommentVO {
     private String content;
 
     /**
+     * 状态：0正常，1屏蔽
+     */
+    private Integer status;
+
+    /**
      * 点赞数
      */
     private Long likeCount;
 
     /**
+     * 创建者
+     */
+    private String creator;
+
+    /**
      * 创建时间
      */
     private Date createTime;
+
+    /**
+     * 更新者
+     */
+    private String updater;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
+
+    /**
+     * 是否删除
+     */
+    private Boolean deleted;
 
     /**
      * 子评论列表
