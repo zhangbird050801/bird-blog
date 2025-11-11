@@ -122,6 +122,11 @@ async function handleLogin() {
     console.log('最终显示的错误消息:', message)
     errorMsg.value = message
 
+    // 使用 Toast 显示错误消息
+    toastMessage.value = message
+    toastType.value = 'error'
+    showToast.value = true
+
     // 登录失败后刷新验证码
     loadCaptcha()
   } finally {

@@ -15,8 +15,20 @@ export {
 
 export { fetchCategories, type Category } from './category'
 export { fetchTags, fetchArticleTags, type Tag } from './tag'
-export { fetchComments, addComment, type CommentVO, type AddCommentRequest } from './comment'
-export { fetchLinks, type Link } from './link'
+export { 
+  fetchComments, 
+  fetchLinkComments, 
+  addComment, 
+  type CommentVO, 
+  type AddCommentRequest, 
+  CommentType 
+} from './comment'
+export { 
+  fetchLinks, 
+  applyForLink, 
+  type Link, 
+  type LinkApplicationRequest 
+} from './link'
 export { 
   fetchCaptcha, 
   login,

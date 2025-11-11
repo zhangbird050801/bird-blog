@@ -3,6 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import ArticleView from '@/views/ArticleView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import LinksView from '@/views/LinksView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,6 +30,11 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
       meta: { requiresAuthLayout: false }
+    },
+    {
+      path: '/links',
+      name: 'links',
+      component: LinksView,
     },
   ],
   scrollBehavior(to, from, savedPosition) {
