@@ -1,9 +1,9 @@
 package com.birdy.service;
 
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.LinkApplicationRequest;
 import com.birdy.domain.entity.Link;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.birdy.domain.entity.Tag;
 import com.birdy.domain.vo.LinkVO;
 import com.birdy.domain.vo.PageResult;
 
@@ -21,6 +21,13 @@ public interface LinkService extends IService<Link> {
      * @return 友链列表
      */
     CommonResult<List<LinkVO>> getAllLink();
+
+    /**
+     * 申请友链
+     * @param request 友链申请请求参数
+     * @return 申请结果
+     */
+    CommonResult<String> applyForLink(LinkApplicationRequest request);
 
     /**
      * 获取分页友链列表（支持模糊查询和状态筛选）

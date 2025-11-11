@@ -1,21 +1,24 @@
 package com.birdy.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.birdy.constants.SysConstants;
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.LinkApplicationRequest;
 import com.birdy.domain.entity.Link;
 import com.birdy.domain.entity.Tag;
 import com.birdy.domain.vo.CategoryVO;
 import com.birdy.domain.vo.LinkVO;
 import com.birdy.domain.vo.PageResult;
+import com.birdy.enums.HttpCodeEnum;
 import com.birdy.service.LinkService;
 import com.birdy.mapper.LinkMapper;
-//import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,6 +42,88 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
 
         //封装返回
         return CommonResult.success(res);
+    }
+
+    @Override
+    public CommonResult<String> applyForLink(LinkApplicationRequest request) {
+        // 参数校验
+        if (StrUtil.isBlank(request.getName())) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "网站名称不能为空");
+        }
+        if (StrUtil.isBlank(request.getUrl())) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "网站地址不能为空");
+        }
+        if (StrUtil.isBlank(request.getDescription())) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "网站描述不能为空");
+        }
+
+        // URL 格式校验
+        String url = request.getUrl().trim();
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "网站地址格式不正确，请以 http:// 或 https:// 开头");
+        }
+
+        // 检查是否重复申请
+        LambdaQueryWrapper<Link> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Link::getUrl, url);
+        queryWrapper.and(wrapper ->
+                wrapper.isNull(Link::getDeleted)
+                        .or()
+                        .eq(Link::getDeleted, false)
+                        .or()
+                        .eq(Link::getDeleted, 0)
+        );
+        Link existingLink = getOne(queryWrapper);
+        if (existingLink != null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "该网站已申请过友链");
+        }
+
+        // 构建申请者信息
+        StringBuilder creatorInfo = new StringBuilder("游客申请");
+        if (StrUtil.isNotBlank(request.getContactName())) {
+            creatorInfo.append(" - ").append(request.getContactName().trim());
+        }
+        if (StrUtil.isNotBlank(request.getContactEmail())) {
+            creatorInfo.append(" (").append(request.getContactEmail().trim()).append(")");
+        }
+
+        // 构建完整描述（包含申请留言）
+        String fullDescription = request.getDescription().trim();
+        if (StrUtil.isNotBlank(request.getMessage())) {
+            fullDescription += "\n\n申请留言：" + request.getMessage().trim();
+        }
+
+        // 创建友链对象
+        Link link = new Link();
+        link.setName(request.getName().trim());
+        link.setUrl(url);
+        link.setDescription(fullDescription);
+        
+        // Logo 处理
+        if (StrUtil.isNotBlank(request.getLogo())) {
+            String logo = request.getLogo().trim();
+            if (logo.startsWith("http://") || logo.startsWith("https://")) {
+                link.setLogo(logo);
+            }
+        }
+        
+        // 设置为待审核状态
+        link.setStatus(SysConstants.LINK_STATUS_PENDING);
+        
+        // 设置创建信息
+        link.setCreator(creatorInfo.toString());
+        link.setCreateTime(new Date());
+        link.setUpdater("system");
+        link.setUpdateTime(new Date());
+        link.setDeleted(false);
+
+        // 保存到数据库
+        boolean saved = save(link);
+        if (saved) {
+            return CommonResult.success("友链申请提交成功，请等待管理员审核");
+        } else {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "友链申请提交失败，请稍后重试");
+        }
     }
 
     @Override
