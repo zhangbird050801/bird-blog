@@ -36,7 +36,7 @@ public class User {
     private String password;
 
     /**
-     * 用户类型：0普通用户，1管理员
+     * 用户类型：0访客，1作者
      */
     private Integer type;
 

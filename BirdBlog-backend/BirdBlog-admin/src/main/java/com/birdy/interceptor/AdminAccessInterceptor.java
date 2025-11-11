@@ -28,7 +28,7 @@ public class AdminAccessInterceptor implements HandlerInterceptor {
             writeError(response, HttpCodeEnum.NEED_LOGIN, "请先登录后台账号");
             return false;
         }
-        if (!Objects.equals(userInfo.getType(), SysConstants.USER_TYPE_ADMIN)) {
+        if (!Objects.equals(userInfo.getType(), SysConstants.USER_TYPE_AUTHOR)) {
             writeError(response, HttpCodeEnum.NO_OPERATOR_AUTH, "仅管理员可访问后台接口");
             return false;
         }

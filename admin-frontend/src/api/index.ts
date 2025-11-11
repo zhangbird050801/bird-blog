@@ -5,7 +5,10 @@ import type {
   CaptchaResponse,
   MenuItem,
   RouteData,
-  BackendUserInfo
+  BackendUserInfo,
+  AdminUserItem,
+  UserQueryParams,
+  PageResult
 } from '@/types'
 
 /**
@@ -107,5 +110,19 @@ export const userApi = {
    */
   getCurrentUser(): Promise<BackendUserInfo> {
     return http.get('/admin/users/me')
+  },
+
+  /**
+   * 分页查询用户
+   */
+  getUserPage(params?: UserQueryParams): Promise<PageResult<AdminUserItem>> {
+    return http.get('/admin/users/page', params)
+  },
+
+  /**
+   * 更新用户状态
+   */
+  updateUserStatus(id: number, status: number): Promise<void> {
+    return http.put(`/admin/users/${id}/status`, { status })
   }
 }

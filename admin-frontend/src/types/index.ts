@@ -62,6 +62,33 @@ export interface UserInfo {
 }
 
 /**
+ * 后台用户表格项
+ */
+export interface AdminUserItem {
+  id: number
+  username: string
+  nickName: string
+  email?: string | null
+  phone?: string | null
+  status: number
+  type?: number | null
+  sex?: number | null
+  createTime?: string
+  updateTime?: string
+}
+
+/**
+ * 用户查询参数
+ */
+export interface UserQueryParams {
+  pageNum?: number
+  pageSize?: number
+  keyword?: string
+  status?: number
+  type?: number
+}
+
+/**
  * 菜单/路由项
  */
 export interface MenuItem {

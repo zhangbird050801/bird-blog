@@ -1,9 +1,18 @@
 package com.birdy.controller;
 
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.UserQueryDTO;
+import com.birdy.domain.dto.UserStatusUpdateDTO;
+import com.birdy.domain.vo.AdminUserVO;
+import com.birdy.domain.vo.PageResult;
 import com.birdy.domain.vo.UserInfoVO;
+import com.birdy.enums.HttpCodeEnum;
+import com.birdy.service.UserService;
 import com.birdy.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 /**
  * 用户管理 Controller
@@ -15,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 public class AdminUserController {
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 获取当前登录用户信息
@@ -47,47 +59,27 @@ public class AdminUserController {
     }
 
     /**
-     * 获取用户列表（分页）
-     * 暂未实现，返回未实现提示
+     * 分页查询用户列表
      */
     @GetMapping("/page")
-    public CommonResult<?> getPage() {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "用户管理功能暂未实现");
+    public CommonResult<PageResult<AdminUserVO>> getPage(UserQueryDTO queryDTO) {
+        return userService.getUserPage(queryDTO);
     }
 
     /**
-     * 获取用户表单详情
-     * 暂未实现
+     * 更新用户状态（启用/停用）
      */
-    @GetMapping("/{id}/form")
-    public CommonResult<?> getFormData(@PathVariable Long id) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "用户管理功能暂未实现");
-    }
+    @PutMapping("/{id}/status")
+    public CommonResult<Void> updateStatus(@PathVariable Long id, @RequestBody UserStatusUpdateDTO statusDTO) {
+        if (statusDTO == null || statusDTO.getStatus() == null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "状态不能为空");
+        }
 
-    /**
-     * 添加用户
-     * 暂未实现
-     */
-    @PostMapping
-    public CommonResult<?> create(@RequestBody Object data) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "用户管理功能暂未实现");
-    }
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId != null && Objects.equals(currentUserId, id)) {
+            return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "不能修改自己的状态");
+        }
 
-    /**
-     * 修改用户
-     * 暂未实现
-     */
-    @PutMapping("/{id}")
-    public CommonResult<?> update(@PathVariable Long id, @RequestBody Object data) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "用户管理功能暂未实现");
-    }
-
-    /**
-     * 删除用户
-     * 暂未实现
-     */
-    @DeleteMapping("/{ids}")
-    public CommonResult<?> delete(@PathVariable String ids) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "用户管理功能暂未实现");
+        return userService.updateUserStatus(id, statusDTO.getStatus());
     }
 }

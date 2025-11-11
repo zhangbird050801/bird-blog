@@ -150,9 +150,7 @@ async function handleLogin() {
       const redirect = (route.query.redirect as string) || '/'
       router.push(redirect)
     } catch (error: any) {
-      console.error('登录失败:', error)
-      ElMessage.error(error.message || '登录失败,请检查用户名和密码')
-      // 登录失败后刷新验证码
+      // 登录失败交给全局拦截器提示，这里只刷新验证码
       refreshCaptcha()
     } finally {
       loading.value = false

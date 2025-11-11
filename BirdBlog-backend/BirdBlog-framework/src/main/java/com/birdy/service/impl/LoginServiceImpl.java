@@ -93,7 +93,7 @@ public class LoginServiceImpl implements LoginService {
         }
 
         // 5.1 根据登录场景校验权限
-        if (scene == LoginScene.ADMIN && !Objects.equals(user.getType(), USER_TYPE_ADMIN)) {
+        if (scene == LoginScene.ADMIN && !Objects.equals(user.getType(), USER_TYPE_AUTHOR)) {
             return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "仅管理员可登录后台");
         }
 
@@ -230,7 +230,7 @@ public class LoginServiceImpl implements LoginService {
         newUser.setNickName(registerRequestDTO.getUserName());
         newUser.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         newUser.setEmail(registerRequestDTO.getEmail());
-        newUser.setType(USER_TYPE_NORMAL);
+        newUser.setType(USER_TYPE_VISITOR);
         newUser.setStatus(USER_STATUS_NORMAL);
         newUser.setSex(USER_SEX_UNKNOWN);
         newUser.setDeleted(USER_NOT_DELETED);
