@@ -6,6 +6,7 @@ import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.vo.CaptchaVO;
 import com.birdy.domain.vo.LoginVO;
 import com.birdy.domain.vo.RegisterVO;
+import com.birdy.enums.LoginScene;
 import com.birdy.service.LoginService;
 import com.birdy.utils.CaptchaUtil;
 import jakarta.validation.Valid;
@@ -49,7 +50,7 @@ public class LoginController {
      */
     @PostMapping("/login")
     public CommonResult<LoginVO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
-        return loginService.login(loginRequestDTO);
+        return loginService.login(loginRequestDTO, LoginScene.FRONT);
     }
 
     /**

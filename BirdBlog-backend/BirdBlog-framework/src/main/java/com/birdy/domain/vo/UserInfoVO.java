@@ -40,4 +40,9 @@ public class UserInfoVO {
      * 邮箱
      */
     private String email;
+
+    /**
+     * 用户类型：0普通用户，1管理员
+     */
+    private Integer type;
 }

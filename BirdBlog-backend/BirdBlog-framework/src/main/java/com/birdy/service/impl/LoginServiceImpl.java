@@ -11,6 +11,7 @@ import com.birdy.domain.vo.LoginVO;
 import com.birdy.domain.vo.RegisterVO;
 import com.birdy.domain.vo.UserInfoVO;
 import com.birdy.enums.HttpCodeEnum;
+import com.birdy.enums.LoginScene;
 import com.birdy.mapper.UserMapper;
 import com.birdy.service.LoginService;
 import com.birdy.utils.CaptchaUtil;
@@ -28,6 +29,8 @@ import static com.birdy.constants.SysConstants.*;
 import cn.hutool.core.bean.BeanUtil;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Objects;
 
 /**
  * 登录 Service 实现类
@@ -55,7 +58,8 @@ public class LoginServiceImpl implements LoginService {
     private JwtProperties jwtProperties;
 
     @Override
-    public CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO) {
+    public CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO, LoginScene loginScene) {
+        LoginScene scene = loginScene == null ? LoginScene.FRONT : loginScene;
         // 1. 校验参数
         if (!StringUtils.hasText(loginRequestDTO.getUserName()) || !StringUtils.hasText(loginRequestDTO.getPassword())) {
             return CommonResult.error(HttpCodeEnum.REQUIRE_USERNAME);
@@ -86,6 +90,11 @@ public class LoginServiceImpl implements LoginService {
         // 5. 校验用户状态
         if (user.getStatus() != null && user.getStatus() == 1) {
             return CommonResult.error(HttpCodeEnum.USER_BANNED);
+        }
+
+        // 5.1 根据登录场景校验权限
+        if (scene == LoginScene.ADMIN && !Objects.equals(user.getType(), USER_TYPE_ADMIN)) {
+            return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "仅管理员可登录后台");
         }
 
         // 6. 生成双 Token
@@ -257,6 +266,7 @@ public class LoginServiceImpl implements LoginService {
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtil.copyProperties(user, userInfoVO);
         userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : String.valueOf(USER_SEX_UNKNOWN));
+        userInfoVO.setType(user.getType());
 
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(accessToken);

@@ -5,6 +5,7 @@ import com.birdy.domain.dto.LoginRequestDTO;
 import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.vo.LoginVO;
 import com.birdy.domain.vo.RegisterVO;
+import com.birdy.enums.LoginScene;
 
 /**
  * 登录 Service 接口
@@ -21,7 +22,11 @@ public interface LoginService {
      * @param loginRequestDTO 登录请求参数
      * @return 登录结果(包含 Token 和用户信息)
      */
-    CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO);
+    CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO, LoginScene loginScene);
+
+    default CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO) {
+        return login(loginRequestDTO, LoginScene.FRONT);
+    }
 
     /**
      * 用户退出登录

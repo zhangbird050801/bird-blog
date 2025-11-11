@@ -193,7 +193,7 @@ public class SecurityUtils {
         userInfoVO.setAvatar(user.getAvatar());
         userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
         userInfoVO.setEmail(user.getEmail());
+        userInfoVO.setType(user.getType());
         return userInfoVO;
     }
 }
-

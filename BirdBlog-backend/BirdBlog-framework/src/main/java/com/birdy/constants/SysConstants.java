@@ -54,6 +54,7 @@ public class SysConstants {
 
     // 用户相关默认值
     public static final int USER_TYPE_NORMAL = 0;
+    public static final int USER_TYPE_ADMIN = 1;
     public static final int USER_STATUS_NORMAL = 0;
     public static final int USER_SEX_UNKNOWN = 2;
     // 用户状态非禁用
