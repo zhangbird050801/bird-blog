@@ -82,5 +82,11 @@
             <groupId>com.qcloud</groupId>
             <artifactId>cos_api</artifactId>
         </dependency>
+
+        <!-- 验证相关依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
     </dependencies>
 </project>
