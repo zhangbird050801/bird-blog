@@ -2,7 +2,17 @@
   <div class="link-container">
     <div class="header">
       <h2>友链管理</h2>
-      <el-button type="primary" :icon="Plus" @click="handleAdd">新增友链</el-button>
+      <div class="header-actions">
+        <el-button
+          type="danger"
+          :icon="Delete"
+          @click="handleBatchDelete"
+          :disabled="selectedIds.length === 0"
+        >
+          批量删除
+        </el-button>
+        <el-button type="primary" :icon="Plus" @click="handleAdd">新增友链</el-button>
+      </div>
     </div>
 
     <!-- 搜索表单 -->
@@ -106,6 +116,72 @@
         />
       </div>
     </el-card>
+
+    <!-- 新增友链对话框 -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="600px"
+      :close-on-click-modal="false"
+      @close="handleDialogClose"
+    >
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="80px"
+        @submit.prevent="handleSubmit"
+      >
+        <el-form-item label="网站名称" prop="name">
+          <el-input
+            v-model="form.name"
+            placeholder="请输入网站名称"
+            clearable
+            maxlength="50"
+            show-word-limit
+          />
+        </el-form-item>
+        <el-form-item label="网站地址" prop="url">
+          <el-input
+            v-model="form.url"
+            placeholder="请输入网站地址，以 http:// 或 https:// 开头"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="网站Logo" prop="logo">
+          <el-input
+            v-model="form.logo"
+            placeholder="请输入网站Logo地址（可选）"
+            clearable
+          />
+          <div class="form-help-text">支持 http:// 或 https:// 开头的图片链接</div>
+        </el-form-item>
+        <el-form-item label="网站描述" prop="description">
+          <el-input
+            v-model="form.description"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入网站描述"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+        <el-form-item label="审核状态" prop="status">
+          <el-radio-group v-model="form.status">
+            <el-radio :label="0">审核通过</el-radio>
+            <el-radio :label="1">审核不通过</el-radio>
+            <el-radio :label="2">待审核</el-radio>
+          </el-radio-group>
+          <div class="form-help-text">管理员添加的友链建议直接设为审核通过</div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -113,7 +189,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { getLinkPage, deleteLink } from '@/api/link'
+import { getLinkPage, deleteLink, createLink, updateLink } from '@/api/link'
 import type { Link, LinkQueryParams } from '@/types'
 import { useUserStore } from '@/stores/user'
 
@@ -123,6 +199,14 @@ const linkList = ref<Link[]>([])
 const total = ref(0)
 const selectedIds = ref<number[]>([])
 
+// 新增友链对话框
+const dialogVisible = ref(false)
+const dialogTitle = ref('新增友链')
+const submitLoading = ref(false)
+const formRef = ref()
+const isEdit = ref(false)
+const editingId = ref<number | null>(null)
+
 // 查询参数
 const queryParams = reactive<LinkQueryParams>({
   pageNum: 1,
@@ -130,6 +214,45 @@ const queryParams = reactive<LinkQueryParams>({
   name: '',
   status: undefined
 })
+
+// 表单数据
+const form = reactive<Partial<Link>>({
+  name: '',
+  url: '',
+  logo: '',
+  description: '',
+  status: 0 // 默认审核通过
+})
+
+// 表单验证规则
+const rules = {
+  name: [
+    { required: true, message: '请输入网站名称', trigger: 'blur' },
+    { min: 1, max: 50, message: '网站名称长度为 1 到 50 个字符', trigger: 'blur' }
+  ],
+  url: [
+    { required: true, message: '请输入网站地址', trigger: 'blur' },
+    {
+      pattern: /^https?:\/\/.+/i,
+      message: '网站地址必须以 http:// 或 https:// 开头',
+      trigger: 'blur'
+    }
+  ],
+  description: [
+    { required: true, message: '请输入网站描述', trigger: 'blur' },
+    { min: 1, max: 500, message: '网站描述长度为 1 到 500 个字符', trigger: 'blur' }
+  ],
+  logo: [
+    {
+      pattern: /^(https?:\/\/.+|)$/,
+      message: 'Logo地址必须以 http:// 或 https:// 开头',
+      trigger: 'blur'
+    }
+  ],
+  status: [
+    { required: true, message: '请选择审核状态', trigger: 'change' }
+  ]
+}
 
 /**
  * 获取友链列表
@@ -205,14 +328,87 @@ const handleCurrentChange = (val: number) => {
  * 新增
  */
 const handleAdd = () => {
-  ElMessage.info('新增友链功能开发中...')
+  dialogTitle.value = '新增友链'
+  isEdit.value = false
+  editingId.value = null
+  // 重置表单
+  resetForm()
+  dialogVisible.value = true
+}
+
+/**
+ * 重置表单
+ */
+const resetForm = () => {
+  form.name = ''
+  form.url = ''
+  form.logo = ''
+  form.description = ''
+  form.status = 0
+  isEdit.value = false
+  editingId.value = null
+  if (formRef.value) {
+    formRef.value.resetFields()
+  }
+}
+
+/**
+ * 提交表单
+ */
+const handleSubmit = async () => {
+  if (!formRef.value) return
+
+  try {
+    // 表单验证
+    await formRef.value.validate()
+    submitLoading.value = true
+
+    let result: string
+    if (isEdit.value && editingId.value) {
+      // 编辑模式
+      result = await updateLink(editingId.value, form)
+      ElMessage.success(result || '更新友链成功')
+    } else {
+      // 新增模式
+      result = await createLink(form)
+      ElMessage.success(result || '新增友链成功')
+    }
+
+    dialogVisible.value = false
+    // 刷新列表
+    await getList()
+  } catch (error: any) {
+    console.error(isEdit.value ? '更新友链失败:' : '新增友链失败:', error)
+    ElMessage.error(error.message || (isEdit.value ? '更新友链失败' : '新增友链失败'))
+  } finally {
+    submitLoading.value = false
+  }
+}
+
+/**
+ * 对话框关闭处理
+ */
+const handleDialogClose = () => {
+  dialogVisible.value = false
+  resetForm()
 }
 
 /**
  * 编辑
  */
 const handleEdit = (row: Link) => {
-  ElMessage.info(`编辑友链功能开发中... ID: ${row.id}`)
+  dialogTitle.value = '编辑友链'
+  isEdit.value = true
+  editingId.value = row.id
+
+  // 填充表单数据
+  form.name = row.name
+  form.url = row.url
+  form.logo = row.logo || ''
+  form.description = row.description || ''
+  form.status = row.status
+
+  dialogVisible.value = true
 }
 
 /**
@@ -237,6 +433,41 @@ const handleDelete = async (row: Link) => {
     if (error !== 'cancel') {
       console.error('删除失败:', error)
       ElMessage.error(error.message || '删除失败')
+    }
+  }
+}
+
+/**
+ * 批量删除
+ */
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning('请选择要删除的友链')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedIds.value.length} 个友链吗？`,
+      '批量删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    const ids = selectedIds.value.join(',')
+    const result = await deleteLink(ids)
+    ElMessage.success(result || '批量删除成功')
+
+    // 清空选择
+    selectedIds.value = []
+    getList()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      console.error('批量删除失败:', error)
+      ElMessage.error(error.message || '批量删除失败')
     }
   }
 }
@@ -312,6 +543,11 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .search-card {
   margin-bottom: 20px;
 }
@@ -328,5 +564,12 @@ onMounted(() => {
 
 :deep(.el-card__body) {
   padding: 20px;
+}
+
+.form-help-text {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 </style>

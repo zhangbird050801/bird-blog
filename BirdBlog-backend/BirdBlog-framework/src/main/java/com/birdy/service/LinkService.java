@@ -39,4 +39,25 @@ public interface LinkService extends IService<Link> {
      */
     PageResult<Link> getPageListWithQuery(Integer pageNum, Integer pageSize, String name, Integer status);
 
+    /**
+     * 新增友链
+     * @param link 友链信息
+     * @return 新增结果
+     */
+    CommonResult<String> addLink(Link link);
+
+    /**
+     * 更新友链
+     * @param link 友链信息
+     * @return 更新结果
+     */
+    CommonResult<String> updateLink(Link link);
+
+    /**
+     * 删除友链
+     * @param ids 友链ID列表
+     * @return 删除结果
+     */
+    CommonResult<String> deleteLinks(List<Long> ids);
+
 }

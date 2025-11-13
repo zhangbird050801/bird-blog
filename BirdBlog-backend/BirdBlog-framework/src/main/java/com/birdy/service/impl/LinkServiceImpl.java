@@ -176,8 +176,186 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
                 (int) page.getSize()
         );
     }
+
+    @Override
+    public CommonResult<String> addLink(Link link) {
+        try {
+            // 1. 参数校验
+            if (link == null) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "友链信息不能为空");
+            }
+
+            if (StrUtil.isBlank(link.getName())) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "网站名称不能为空");
+            }
+            if (StrUtil.isBlank(link.getUrl())) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "网站地址不能为空");
+            }
+            if (StrUtil.isBlank(link.getDescription())) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "网站描述不能为空");
+            }
+
+            // URL 格式校验
+            String url = link.getUrl().trim();
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "网站地址格式不正确，请以 http:// 或 https:// 开头");
+            }
+
+            // 2. 检查友链名称或URL是否重复
+            LambdaQueryWrapper<Link> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Link::getUrl, url)
+                    .and(wrapper ->
+                            wrapper.isNull(Link::getDeleted)
+                                    .or()
+                                    .eq(Link::getDeleted, false)
+                                    .or()
+                                    .eq(Link::getDeleted, 0)
+                    );
+            Link existingLink = getOne(queryWrapper);
+            if (existingLink != null) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "该网站已存在");
+            }
+
+            // 3. 设置友链信息
+            link.setName(link.getName().trim());
+            link.setUrl(url);
+            link.setDescription(link.getDescription().trim());
+
+            // Logo 处理
+            if (StrUtil.isNotBlank(link.getLogo())) {
+                String logo = link.getLogo().trim();
+                if (!logo.startsWith("http://") && !logo.startsWith("https://")) {
+                    link.setLogo(null); // 如果logo格式不正确，设为null
+                }
+            } else {
+                link.setLogo(null);
+            }
+
+            // 设置默认状态为已通过审核
+            link.setStatus(SysConstants.LINK_STATUS_ENABLE);
+
+            // 设置创建信息
+            link.setCreator("admin");
+            link.setCreateTime(new Date());
+            link.setUpdater("admin");
+            link.setUpdateTime(new Date());
+            link.setDeleted(SysConstants.LINK_NOT_DELETED);
+
+            // 4. 保存到数据库
+            boolean saved = save(link);
+            if (saved) {
+                return CommonResult.success("新增友链成功");
+            } else {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "新增友链失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "新增友链失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<String> updateLink(Link link) {
+        try {
+            // 1. 参数校验
+            if (link == null || link.getId() == null) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "友链信息不能为空");
+            }
+
+            if (StrUtil.isBlank(link.getName())) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "网站名称不能为空");
+            }
+            if (StrUtil.isBlank(link.getUrl())) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "网站地址不能为空");
+            }
+            if (StrUtil.isBlank(link.getDescription())) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "网站描述不能为空");
+            }
+
+            // 2. 检查友链是否存在
+            Link existingLink = getById(link.getId());
+            if (existingLink == null) {
+                return CommonResult.error(HttpCodeEnum.NOT_FOUND, "友链不存在");
+            }
+
+            // URL 格式校验
+            String url = link.getUrl().trim();
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "网站地址格式不正确，请以 http:// 或 https:// 开头");
+            }
+
+            // 3. 检查URL是否重复（排除当前友链）
+            if (!existingLink.getUrl().equals(url)) {
+                LambdaQueryWrapper<Link> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(Link::getUrl, url)
+                        .ne(Link::getId, link.getId())
+                        .and(wrapper ->
+                                wrapper.isNull(Link::getDeleted)
+                                        .or()
+                                        .eq(Link::getDeleted, false)
+                                        .or()
+                                        .eq(Link::getDeleted, 0)
+                        );
+                Link duplicateLink = getOne(queryWrapper);
+                if (duplicateLink != null) {
+                    return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "该网站地址已存在");
+                }
+            }
+
+            // 4. 更新友链信息
+            link.setName(link.getName().trim());
+            link.setUrl(url);
+            link.setDescription(link.getDescription().trim());
+
+            // Logo 处理
+            if (StrUtil.isNotBlank(link.getLogo())) {
+                String logo = link.getLogo().trim();
+                if (!logo.startsWith("http://") && !logo.startsWith("https://")) {
+                    link.setLogo(null); // 如果logo格式不正确，设为null
+                }
+            } else {
+                link.setLogo(null);
+            }
+
+            link.setUpdater("admin");
+            link.setUpdateTime(new Date());
+
+            // 保持原有的deleted状态，不修改
+
+            boolean updated = updateById(link);
+            if (updated) {
+                return CommonResult.success("更新友链成功");
+            } else {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "更新友链失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "更新友链失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<String> deleteLinks(List<Long> ids) {
+        try {
+            if (ids == null || ids.isEmpty()) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "请选择要删除的友链");
+            }
+
+            // 2. 软删除友链（将deleted字段设为true）
+            for (Long id : ids) {
+                Link link = getById(id);
+                if (link != null) {
+                    link.setDeleted(true);
+                    link.setUpdater("admin");
+                    link.setUpdateTime(new Date());
+                    updateById(link);
+                }
+            }
+
+            return CommonResult.success("删除友链成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "删除友链失败：" + e.getMessage());
+        }
+    }
 }
-
-
-
-

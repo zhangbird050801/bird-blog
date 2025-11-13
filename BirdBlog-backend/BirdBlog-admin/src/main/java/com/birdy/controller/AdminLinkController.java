@@ -65,29 +65,82 @@ public class AdminLinkController {
 
     /**
      * 添加友链
-     * 暂未实现
+     *
+     * @param link 友链信息
+     * @return 添加结果
      */
     @PostMapping
-    public CommonResult<?> create(@RequestBody Link link) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "添加友链功能暂未实现");
+    public CommonResult<String> create(@RequestBody Link link) {
+        try {
+            return linkService.addLink(link);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(
+                com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
+                "添加友链失败: " + e.getMessage()
+            );
+        }
     }
 
     /**
      * 修改友链
-     * 暂未实现
+     *
+     * @param id 友链ID
+     * @param link 友链信息
+     * @return 修改结果
      */
     @PutMapping("/{id}")
-    public CommonResult<?> update(@PathVariable Long id, @RequestBody Link link) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "修改友链功能暂未实现");
+    public CommonResult<String> update(@PathVariable Long id, @RequestBody Link link) {
+        try {
+            // 设置友链ID
+            link.setId(id);
+            return linkService.updateLink(link);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(
+                com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
+                "修改友链失败: " + e.getMessage()
+            );
+        }
     }
 
     /**
      * 删除友链
-     * 暂未实现
+     *
+     * @param ids 友链ID，多个ID用逗号分隔
+     * @return 删除结果
      */
     @DeleteMapping("/{ids}")
-    public CommonResult<?> delete(@PathVariable String ids) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除友链功能暂未实现");
+    public CommonResult<String> delete(@PathVariable String ids) {
+        try {
+            // 将字符串转换为List<Long>
+            java.util.List<Long> idList = java.util.Arrays.stream(ids.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Long::parseLong)
+                    .collect(java.util.stream.Collectors.toList());
+
+            if (idList.isEmpty()) {
+                return CommonResult.error(
+                    com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
+                    "请提供要删除的友链ID"
+                );
+            }
+
+            return linkService.deleteLinks(idList);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return CommonResult.error(
+                com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
+                "友链ID格式不正确"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(
+                com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
+                "删除友链失败: " + e.getMessage()
+            );
+        }
     }
 
 

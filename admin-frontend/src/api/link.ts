@@ -27,7 +27,7 @@ export function getLinkDetail(id: string | number): Promise<Link> {
  * @param data 友链数据
  * @returns 创建结果
  */
-export function createLink(data: Partial<Link>): Promise<void> {
+export function createLink(data: Partial<Link>): Promise<string> {
   return http.post('/admin/links', data)
 }
 
@@ -38,7 +38,7 @@ export function createLink(data: Partial<Link>): Promise<void> {
  * @param data 友链数据
  * @returns 更新结果
  */
-export function updateLink(id: string | number, data: Partial<Link>): Promise<void> {
+export function updateLink(id: string | number, data: Partial<Link>): Promise<string> {
   return http.put(`/admin/links/${id}`, data)
 }
 
@@ -48,6 +48,6 @@ export function updateLink(id: string | number, data: Partial<Link>): Promise<vo
  * @param ids 友链ID，多个ID用逗号分隔
  * @returns 删除结果
  */
-export function deleteLink(ids: string): Promise<void> {
+export function deleteLink(ids: string): Promise<string> {
   return http.delete(`/admin/links/${ids}`)
 }
