@@ -27,7 +27,7 @@ export function getTagDetail(id: string | number): Promise<Tag> {
  * @param data 标签数据
  * @returns 创建结果
  */
-export function createTag(data: Partial<Tag>): Promise<void> {
+export function createTag(data: Partial<Tag>): Promise<string> {
   return http.post('/admin/tags', data)
 }
 
@@ -38,7 +38,7 @@ export function createTag(data: Partial<Tag>): Promise<void> {
  * @param data 标签数据
  * @returns 更新结果
  */
-export function updateTag(id: string | number, data: Partial<Tag>): Promise<void> {
+export function updateTag(id: string | number, data: Partial<Tag>): Promise<string> {
   return http.put(`/admin/tags/${id}`, data)
 }
 
@@ -48,6 +48,6 @@ export function updateTag(id: string | number, data: Partial<Tag>): Promise<void
  * @param ids 标签ID，多个ID用逗号分隔
  * @returns 删除结果
  */
-export function deleteTag(ids: string): Promise<void> {
+export function deleteTag(ids: string): Promise<string> {
   return http.delete(`/admin/tags/${ids}`)
 }

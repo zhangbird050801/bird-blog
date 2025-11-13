@@ -36,4 +36,25 @@ public interface TagService extends IService<Tag> {
      * @return 分页结果
      */
     PageResult<Tag> getPageListWithQuery(Integer pageNum, Integer pageSize, String name);
+
+    /**
+     * 新增标签
+     * @param tag 标签信息
+     * @return 新增结果
+     */
+    CommonResult<String> addTag(Tag tag);
+
+    /**
+     * 更新标签
+     * @param tag 标签信息
+     * @return 更新结果
+     */
+    CommonResult<String> updateTag(Tag tag);
+
+    /**
+     * 删除标签
+     * @param ids 标签ID列表
+     * @return 删除结果
+     */
+    CommonResult<String> deleteTags(List<Long> ids);
 }
