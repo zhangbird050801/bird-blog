@@ -113,6 +113,204 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
             (int) page.getSize()
         );
     }
+
+    @Override
+    public CommonResult<String> addCategory(Category category) {
+        try {
+            // 1. 参数校验
+            if (category.getName() == null || category.getName().trim().isEmpty()) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "分类名称不能为空");
+            }
+
+            // 2. 检查分类名称是否重复
+            LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Category::getName, category.getName().trim())
+                    .eq(Category::getDeleted, CATEGORY_NOT_DELETED);
+            Category existingCategory = getOne(queryWrapper);
+            if (existingCategory != null) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "分类名称已存在");
+            }
+
+            // 3. 设置默认值
+            category.setName(category.getName().trim());
+            if (category.getStatus() == null) {
+                category.setStatus(SysConstants.CATEGORY_STATUS_ENABLE);
+            }
+            if (category.getPid() == null) {
+                category.setPid(null);
+            }
+            if (category.getDescription() != null) {
+                category.setDescription(category.getDescription().trim());
+            } else {
+                category.setDescription("");
+            }
+            if (category.getCount() == 0) {
+                category.setCount(0);
+            }
+
+            // 4. 设置创建信息
+            category.setCreator("admin");
+            category.setCreateTime(new java.util.Date());
+            category.setUpdater("admin");
+            category.setUpdateTime(new java.util.Date());
+            category.setDeleted(CATEGORY_NOT_DELETED);
+
+            // 5. 保存到数据库
+            boolean saved = save(category);
+            if (saved) {
+                return CommonResult.success("新增分类成功");
+            } else {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "新增分类失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "新增分类失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<String> updateCategory(Category category) {
+        try {
+            // 1. 参数校验
+            if (category.getId() == null) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "分类ID不能为空");
+            }
+            if (category.getName() == null || category.getName().trim().isEmpty()) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "分类名称不能为空");
+            }
+
+            // 2. 检查分类是否存在
+            Category existingCategory = getById(category.getId());
+            if (existingCategory == null) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "分类不存在");
+            }
+
+            // 3. 检查分类名称是否重复（排除当前分类）
+            if (!existingCategory.getName().equals(category.getName().trim())) {
+                LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(Category::getName, category.getName().trim())
+                        .eq(Category::getDeleted, CATEGORY_NOT_DELETED)
+                        .ne(Category::getId, category.getId());
+                Category duplicateCategory = getOne(queryWrapper);
+                if (duplicateCategory != null) {
+                    return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "分类名称已存在");
+                }
+            }
+
+            // 4. 检查父分类设置是否合理（不能选择自己或自己的子分类作为父分类）
+            if (category.getPid() != null && !category.getPid().equals(0L)) {
+                if (category.getPid().equals(category.getId())) {
+                    return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "不能选择自己作为父分类");
+                }
+                // 这里可以添加更复杂的层级检查，但暂时只做基本检查
+            }
+
+            // 5. 更新分类信息
+            existingCategory.setName(category.getName().trim());
+            existingCategory.setPid(category.getPid());
+            existingCategory.setStatus(category.getStatus());
+            if (category.getDescription() != null) {
+                existingCategory.setDescription(category.getDescription().trim());
+            }
+            existingCategory.setUpdater("admin");
+            existingCategory.setUpdateTime(new java.util.Date());
+
+            // 6. 保存更新
+            boolean updated = updateById(existingCategory);
+            if (updated) {
+                return CommonResult.success("更新分类成功");
+            } else {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "更新分类失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "更新分类失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<String> deleteCategories(List<Long> ids) {
+        try {
+            if (ids == null || ids.isEmpty()) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "请选择要删除的分类");
+            }
+
+            // 1. 检查每个分类是否有绑定的文章
+            for (Long id : ids) {
+                // 查询该分类下是否有文章
+                LambdaQueryWrapper<Article> articleWrapper = new LambdaQueryWrapper<>();
+                articleWrapper.eq(Article::getCategoryId, id);
+                long articleCount = articleService.count(articleWrapper);
+
+                if (articleCount > 0) {
+                    // 获取分类名称用于错误提示
+                    Category category = getById(id);
+                    String categoryName = category != null ? category.getName() : "未知分类";
+                    return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
+                        String.format("分类【%s】下还有 %d 篇文章，无法删除。请先删除或转移这些文章。", categoryName, articleCount));
+                }
+
+                // 检查是否有子分类
+                LambdaQueryWrapper<Category> childWrapper = new LambdaQueryWrapper<>();
+                childWrapper.eq(Category::getPid, id)
+                           .eq(Category::getDeleted, CATEGORY_NOT_DELETED);
+                long childCount = count(childWrapper);
+
+                if (childCount > 0) {
+                    Category category = getById(id);
+                    String categoryName = category != null ? category.getName() : "未知分类";
+                    return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
+                        String.format("分类【%s】下还有 %d 个子分类，无法删除。请先删除子分类。", categoryName, childCount));
+                }
+            }
+
+            // 2. 软删除分类（将deleted字段设为true）
+            for (Long id : ids) {
+                Category category = getById(id);
+                if (category != null) {
+                    category.setDeleted(true);
+                    category.setUpdater("admin");
+                    category.setUpdateTime(new java.util.Date());
+                    updateById(category);
+                }
+            }
+
+            return CommonResult.success("删除分类成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除分类失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<Category> getCategoryDetail(Long id) {
+        try {
+            if (id == null || id <= 0) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.PARAM_ERROR, "分类ID不能为空");
+            }
+
+            // 使用查询条件获取未删除的分类（处理多种未删除状态）
+            LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Category::getId, id)
+                       .and(wrapper ->
+                           wrapper.isNull(Category::getDeleted)
+                                   .or()
+                                   .eq(Category::getDeleted, false)
+                                   .or()
+                                   .eq(Category::getDeleted, 0)
+                       );
+
+            Category category = getOne(queryWrapper);
+            if (category == null) {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.NOT_FOUND, "分类不存在或已被删除");
+            }
+
+            return CommonResult.success(category);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "获取分类详情失败：" + e.getMessage());
+        }
+    }
 }
 
 

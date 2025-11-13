@@ -39,4 +39,32 @@ public interface CategoryService extends IService<Category> {
      * @return 分页结果
      */
     PageResult<Category> getPageListWithQuery(Integer pageNum, Integer pageSize, String name, Integer status);
+
+    /**
+     * 新增分类
+     * @param category 分类信息
+     * @return 新增结果
+     */
+    CommonResult<String> addCategory(Category category);
+
+    /**
+     * 更新分类
+     * @param category 分类信息
+     * @return 更新结果
+     */
+    CommonResult<String> updateCategory(Category category);
+
+    /**
+     * 删除分类
+     * @param ids 分类ID列表
+     * @return 删除结果
+     */
+    CommonResult<String> deleteCategories(List<Long> ids);
+
+    /**
+     * 获取分类详情
+     * @param id 分类ID
+     * @return 分类详情
+     */
+    CommonResult<Category> getCategoryDetail(Long id);
 }

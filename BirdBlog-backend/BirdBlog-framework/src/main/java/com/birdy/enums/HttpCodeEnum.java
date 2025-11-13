@@ -39,7 +39,13 @@ public enum HttpCodeEnum {
     ARTICLE_ID_NOT_NULL(400, "文章ID不能为空"),
     ARTICLE_SLUG_NOT_NULL(400, "文章slug不能为空"),
 
-    KEYWORDS_EMPTY(507, "搜索关键词不能为空");
+    KEYWORDS_EMPTY(507, "搜索关键词不能为空"),
+
+    // 通用参数错误码
+    PARAM_ERROR(400, "参数错误"),
+
+    // 通用未找到错误码
+    NOT_FOUND(404, "资源不存在");
 
     private final int code;
     private final String msg;

@@ -23,31 +23,31 @@ export function getCategoryDetail(id: string | number): Promise<Category> {
 
 /**
  * 创建分类
- * 
+ *
  * @param data 分类数据
  * @returns 创建结果
  */
-export function createCategory(data: Partial<Category>): Promise<void> {
+export function createCategory(data: Partial<Category>): Promise<string> {
   return http.post('/admin/categories', data)
 }
 
 /**
  * 更新分类
- * 
+ *
  * @param id 分类ID
  * @param data 分类数据
  * @returns 更新结果
  */
-export function updateCategory(id: string | number, data: Partial<Category>): Promise<void> {
+export function updateCategory(id: string | number, data: Partial<Category>): Promise<string> {
   return http.put(`/admin/categories/${id}`, data)
 }
 
 /**
  * 删除分类
- * 
+ *
  * @param ids 分类ID，多个ID用逗号分隔
  * @returns 删除结果
  */
-export function deleteCategory(ids: string): Promise<void> {
+export function deleteCategory(ids: string): Promise<string> {
   return http.delete(`/admin/categories/${ids}`)
 }
