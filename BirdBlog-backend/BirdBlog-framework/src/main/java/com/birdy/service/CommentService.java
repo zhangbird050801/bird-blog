@@ -24,6 +24,13 @@ public interface CommentService extends IService<Comment> {
     CommonResult<List<CommentVO>> getArticleComments(Long articleId);
 
     /**
+     * 获取友链评论列表（树形结构）
+     * @param linkId 友链ID
+     * @return 评论列表
+     */
+    CommonResult<List<CommentVO>> getLinkComments(Long linkId);
+
+    /**
      * 添加评论
      * @param request 评论请求
      * @param userId 当前登录用户ID
@@ -39,9 +46,10 @@ public interface CommentService extends IService<Comment> {
      * @param articleId 文章ID（可选）
      * @param status 状态：0正常，1屏蔽
      * @param content 评论内容（模糊查询）
+     * @param objectKeyword 关联对象关键词（文章标题或友链名称，模糊查询），可选参数
      * @return 分页结果
      */
-    PageResult<CommentVO> getPageList(Integer pageNum, Integer pageSize, Integer type, Long articleId, Integer status, String content);
+    PageResult<CommentVO> getPageList(Integer pageNum, Integer pageSize, Integer type, Long articleId, Integer status, String content, String objectKeyword);
 
     /**
      * 更新评论状态

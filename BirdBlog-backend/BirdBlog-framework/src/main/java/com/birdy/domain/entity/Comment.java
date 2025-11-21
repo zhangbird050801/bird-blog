@@ -31,6 +31,11 @@ public class Comment {
     private Long articleId;
 
     /**
+     * 友链ID（友链评论必填）
+     */
+    private Long linkId;
+
+    /**
      * 根评论ID
      */
     private Long rootId;
@@ -105,6 +110,7 @@ public class Comment {
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
             && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
             && (this.getArticleId() == null ? other.getArticleId() == null : this.getArticleId().equals(other.getArticleId()))
+            && (this.getLinkId() == null ? other.getLinkId() == null : this.getLinkId().equals(other.getLinkId()))
             && (this.getRootId() == null ? other.getRootId() == null : this.getRootId().equals(other.getRootId()))
             && (this.getParentId() == null ? other.getParentId() == null : this.getParentId().equals(other.getParentId()))
             && (this.getFromUserId() == null ? other.getFromUserId() == null : this.getFromUserId().equals(other.getFromUserId()))
@@ -126,6 +132,7 @@ public class Comment {
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
         result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
         result = prime * result + ((getArticleId() == null) ? 0 : getArticleId().hashCode());
+        result = prime * result + ((getLinkId() == null) ? 0 : getLinkId().hashCode());
         result = prime * result + ((getRootId() == null) ? 0 : getRootId().hashCode());
         result = prime * result + ((getParentId() == null) ? 0 : getParentId().hashCode());
         result = prime * result + ((getFromUserId() == null) ? 0 : getFromUserId().hashCode());
@@ -150,6 +157,7 @@ public class Comment {
         sb.append(", id=").append(id);
         sb.append(", type=").append(type);
         sb.append(", articleId=").append(articleId);
+        sb.append(", linkId=").append(linkId);
         sb.append(", rootId=").append(rootId);
         sb.append(", parentId=").append(parentId);
         sb.append(", fromUserId=").append(fromUserId);

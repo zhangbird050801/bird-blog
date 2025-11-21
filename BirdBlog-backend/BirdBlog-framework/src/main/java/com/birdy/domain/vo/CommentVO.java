@@ -30,6 +30,21 @@ public class CommentVO {
     private Long articleId;
 
     /**
+     * 文章标题
+     */
+    private String articleTitle;
+
+    /**
+     * 友链ID
+     */
+    private Long linkId;
+
+    /**
+     * 友链名称
+     */
+    private String linkName;
+
+    /**
      * 根评论ID
      */
     private Long rootId;

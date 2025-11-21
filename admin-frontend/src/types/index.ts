@@ -293,4 +293,5 @@ export interface CommentQueryParams {
   articleId?: number
   status?: number
   content?: string
+  objectKeyword?: string
 }

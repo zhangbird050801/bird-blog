@@ -40,8 +40,9 @@ public class SysConstants {
     public static final int LINK_STATUS_PENDING = 2;
 
 
-    // 评论类型：0文章评论
+    // 评论类型：0文章评论，1友链评论
     public static final int COMMENT_TYPE_ARTICLE = 0;
+    public static final int COMMENT_TYPE_LINK = 1;
     // 评论状态：0正常，1屏蔽
     public static final int COMMENT_STATUS_NORMAL = 0;
     public static final int COMMENT_STATUS_BLOCKED = 1;

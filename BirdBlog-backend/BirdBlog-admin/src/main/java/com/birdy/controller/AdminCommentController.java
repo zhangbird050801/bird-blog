@@ -29,9 +29,10 @@ public class AdminCommentController {
      * @param pageNum 页码，默认第1页
      * @param pageSize 每页数量，默认10条
      * @param type 评论类型：0文章评论，1友链评论，可选参数
-     * @param articleId 文章ID，可选参数
+     * @param articleId 文章ID或友链ID，可选参数
      * @param status 状态：0正常，1屏蔽，可选参数
      * @param content 评论内容（模糊查询），可选参数
+     * @param objectKeyword 关联对象关键词（文章标题或友链名称，模糊查询），可选参数
      * @return 分页结果，包含评论列表和分页信息
      */
     @GetMapping("/page")
@@ -41,10 +42,11 @@ public class AdminCommentController {
             @RequestParam(required = false) Integer type,
             @RequestParam(required = false) Long articleId,
             @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) String content
+            @RequestParam(required = false) String content,
+            @RequestParam(required = false) String objectKeyword
     ) {
         try {
-            PageResult<CommentVO> pageResult = commentService.getPageList(pageNum, pageSize, type, articleId, status, content);
+            PageResult<CommentVO> pageResult = commentService.getPageList(pageNum, pageSize, type, articleId, status, content, objectKeyword);
             return CommonResult.success(pageResult);
         } catch (Exception e) {
             e.printStackTrace();

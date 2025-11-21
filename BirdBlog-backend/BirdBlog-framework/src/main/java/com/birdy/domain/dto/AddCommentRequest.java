@@ -13,9 +13,14 @@ import lombok.Data;
 public class AddCommentRequest {
 
     /**
-     * 文章ID（必填）
+     * 文章ID（文章评论必填）
      */
     private Long articleId;
+
+    /**
+     * 友链ID（友链评论必填）
+     */
+    private Long linkId;
 
     /**
      * 根评论ID（回复评论时填写）

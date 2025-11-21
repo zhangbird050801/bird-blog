@@ -33,6 +33,16 @@ public class CommentController {
     }
 
     /**
+     * 获取友链评论列表
+     * @param linkId 友链ID
+     * @return 评论列表（树形结构）
+     */
+    @GetMapping("/link/{linkId}")
+    public CommonResult<List<CommentVO>> getLinkComments(@PathVariable("linkId") Long linkId) {
+        return commentService.getLinkComments(linkId);
+    }
+
+    /**
      * 添加评论
      * @param request 评论请求
      * @return 添加结果

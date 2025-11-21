@@ -28,12 +28,12 @@
             <el-option label="友链评论" :value="1" />
           </el-select>
         </el-form-item>
-        <el-form-item label="文章ID">
+        <el-form-item label="关联对象">
           <el-input
-            v-model="queryParams.articleId"
-            placeholder="请输入文章ID"
+            v-model="queryParams.objectKeyword"
+            placeholder="请输入文章标题或友链名称"
             clearable
-            style="width: 120px"
+            style="width: 200px"
             @keyup.enter="handleQuery"
           />
         </el-form-item>
@@ -82,9 +82,10 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="articleId" label="文章ID" width="100" align="center">
+        <el-table-column label="关联对象" width="200" align="center">
           <template #default="{ row }">
-            <span v-if="row.articleId">{{ row.articleId }}</span>
+            <span v-if="row.type === 0 && row.articleTitle">{{ row.articleTitle }}</span>
+            <span v-else-if="row.type === 1 && row.linkName">{{ row.linkName }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -172,7 +173,8 @@ const queryParams = reactive<CommentQueryParams>({
   type: undefined,
   articleId: undefined,
   status: undefined,
-  content: ''
+  content: '',
+  objectKeyword: ''
 })
 
 /**
@@ -227,6 +229,7 @@ const handleReset = () => {
   queryParams.articleId = undefined
   queryParams.status = undefined
   queryParams.content = ''
+  queryParams.objectKeyword = ''
   getList()
 }
 
