@@ -29,13 +29,14 @@ public class ArticleController {
     /**
      * 获取文章列表
      * @param categoryId 分类id
+     * @param tagId 标签id
      * @param pageNum 页码
      * @param pageSize 每页数量
      * @return 文章列表
      */
     @GetMapping("/list")
-    public CommonResult<PageResult<ArticleVO>> list(Long categoryId, int pageNum, int pageSize) {
-        return articleService.list(categoryId, pageNum, pageSize);
+    public CommonResult<PageResult<ArticleVO>> list(Long categoryId, Long tagId, int pageNum, int pageSize) {
+        return articleService.list(categoryId, tagId, pageNum, pageSize);
     }
 
     /**

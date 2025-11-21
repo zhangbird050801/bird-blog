@@ -22,12 +22,13 @@ public interface ArticleService extends IService<Article> {
 
     /**
      * 分页查询文章列表
-     * 
+     *
      * @param categoryId 分类ID（可选）
+     * @param tagId 标签ID（可选）
      * @param pageNum 页码
      * @param pageSize 每页数量
      */
-    CommonResult<PageResult<ArticleVO>> list(Long categoryId, int pageNum, int pageSize);
+    CommonResult<PageResult<ArticleVO>> list(Long categoryId, Long tagId, int pageNum, int pageSize);
 
     /**
      * 获取文章详情（通过ID）

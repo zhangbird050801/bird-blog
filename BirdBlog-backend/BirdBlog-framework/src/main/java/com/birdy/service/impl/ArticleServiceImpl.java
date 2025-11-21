@@ -67,10 +67,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public CommonResult<PageResult<ArticleVO>> list(Long categoryId, int pageNum, int pageSize) {
+    public CommonResult<PageResult<ArticleVO>> list(Long categoryId, Long tagId, int pageNum, int pageSize) {
         Page<ArticleVO> page = new Page<>(pageNum, pageSize);
-        Page<ArticleVO> result = articleMapper.selectArticleVOPage(page, categoryId, ARTICLE_STATUS_RELEASE);
-        
+        Page<ArticleVO> result = articleMapper.selectArticleVOPage(page, categoryId, tagId, ARTICLE_STATUS_RELEASE);
+
         // 封装分页结果
         PageResult<ArticleVO> pageResult = new PageResult<>(
             result.getTotal(),
@@ -78,7 +78,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
             pageNum,
             pageSize
         );
-        
+
         return CommonResult.success(pageResult);
     }
 

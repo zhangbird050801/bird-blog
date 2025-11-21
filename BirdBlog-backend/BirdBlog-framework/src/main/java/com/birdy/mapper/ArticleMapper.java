@@ -24,11 +24,13 @@ public interface ArticleMapper extends BaseMapper<Article> {
      *
      * @param page 分页对象
      * @param categoryId 分类ID，null表示查询所有分类
+     * @param tagId 标签ID，null表示查询所有标签
      * @param status 文章状态
      * @return 文章VO列表（包含categoryName）
      */
-    Page<ArticleVO> selectArticleVOPage(Page<ArticleVO> page, 
-                                         @Param("categoryId") Long categoryId, 
+    Page<ArticleVO> selectArticleVOPage(Page<ArticleVO> page,
+                                         @Param("categoryId") Long categoryId,
+                                         @Param("tagId") Long tagId,
                                          @Param("status") Integer status);
 
     /**
