@@ -23,9 +23,9 @@ public class LinkApplicationRequest {
     private String name;
 
     /**
-     * 网站Logo地址
+     * 网站Logo地址（可选）
      */
-    @Pattern(regexp = "^(https?://)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*\\/?$", message = "Logo地址格式不正确")
+    @Pattern(regexp = "^$|^(https?://)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*\\/?$", message = "Logo地址格式不正确")
     private String logo;
 
     /**
