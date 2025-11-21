@@ -33,10 +33,17 @@
             t.id,
             t.name,
             t.remark,
-            COALESCE(t.article_count, 0) as article_count
+            COALESCE(article_count, 0) as article_count
         FROM bg_tag t
+        LEFT JOIN (
+            SELECT at.tag_id, COUNT(*) as article_count
+            FROM bg_article_tag at
+            INNER JOIN bg_article a ON at.article_id = a.id
+            WHERE a.deleted = 0 AND a.status = 0
+            GROUP BY at.tag_id
+        ) ac ON t.id = ac.tag_id
         WHERE t.deleted = 0
-        ORDER BY t.article_count DESC, t.id ASC
+        ORDER BY article_count DESC, t.id ASC
     </select>
 
 </mapper>
