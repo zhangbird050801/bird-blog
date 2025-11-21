@@ -187,13 +187,20 @@ public class SecurityUtils {
         if (user == null) {
             return null;
         }
-        UserInfoVO userInfoVO = new UserInfoVO();
-        userInfoVO.setId(user.getId());
-        userInfoVO.setNickName(user.getNickName());
-        userInfoVO.setAvatar(user.getAvatar());
-        userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
-        userInfoVO.setEmail(user.getEmail());
-        userInfoVO.setType(user.getType());
-        return userInfoVO;
+
+        try {
+            // 使用UserService获取完整的用户信息（包括角色）
+            return userService.getUserInfo(user.getId());
+        } catch (Exception e) {
+            // 如果获取完整信息失败，返回基本信息
+            UserInfoVO userInfoVO = new UserInfoVO();
+            userInfoVO.setId(user.getId());
+            userInfoVO.setNickName(user.getNickName());
+            userInfoVO.setAvatar(user.getAvatar());
+            userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
+            userInfoVO.setEmail(user.getEmail());
+            userInfoVO.setType(user.getType());
+            return userInfoVO;
+        }
     }
 }

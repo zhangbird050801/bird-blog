@@ -3,6 +3,7 @@ package com.birdy.controller;
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.dto.UserQueryDTO;
 import com.birdy.domain.dto.UserStatusUpdateDTO;
+import com.birdy.domain.dto.UserRoleUpdateDTO;
 import com.birdy.domain.vo.AdminUserVO;
 import com.birdy.domain.vo.PageResult;
 import com.birdy.domain.vo.UserInfoVO;
@@ -81,5 +82,13 @@ public class AdminUserController {
         }
 
         return userService.updateUserStatus(id, statusDTO.getStatus());
+    }
+
+    /**
+     * 更新用户角色
+     */
+    @PutMapping("/{userId}/roles")
+    public CommonResult<Void> updateUserRoles(@PathVariable Long userId, @RequestBody UserRoleUpdateDTO updateDTO) {
+        return userService.updateUserRoles(userId, updateDTO);
     }
 }

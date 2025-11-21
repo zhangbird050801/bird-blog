@@ -102,6 +102,7 @@ export const useMenuStore = defineStore('menu', () => {
       'content/link/index': () => import('@/views/content/link/index.vue'),
       'system/menu/index': () => import('@/views/system/menu/index.vue'),
       'system/user/index': () => import('@/views/system/user/index.vue'),
+      'system/role/index': () => import('@/views/system/role/index.vue'),
     }
 
     const loader = componentMap[component]

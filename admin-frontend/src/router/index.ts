@@ -17,6 +17,15 @@ const constantRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/403',
+    name: 'Forbidden',
+    component: () => import('@/views/Error/403.vue'),
+    meta: {
+      title: '403',
+      hidden: true
+    }
+  },
+  {
     path: '/',
     redirect: '/dashboard'
   }
@@ -69,7 +78,7 @@ router.beforeEach(async (to, from, next) => {
   if (menuStore.routes.length === 0) {
     try {
       const dynamicRoutes = await menuStore.loadMenuRoutes()
-      
+
       // 添加动态路由
       dynamicRoutes.forEach((route) => {
         router.addRoute(route)
@@ -96,6 +105,31 @@ router.beforeEach(async (to, from, next) => {
       next({ path: '/login' })
     }
     return
+  }
+
+  // 权限检查
+  if (to.meta.roles && Array.isArray(to.meta.roles) && to.meta.roles.length > 0) {
+    const requiredRoles = to.meta.roles as string[]
+    console.log('路由需要权限:', requiredRoles)
+
+    // 检查用户是否有所需权限
+    const hasPermission = requiredRoles.some(role => {
+      // 检查角色权限
+      if (userStore.hasRole(role)) {
+        return true
+      }
+      // 检查具体权限
+      if (userStore.hasPermission(role)) {
+        return true
+      }
+      return false
+    })
+
+    if (!hasPermission) {
+      console.warn('用户没有访问权限，需要:', requiredRoles)
+      next({ path: '/403' })
+      return
+    }
   }
 
   next()

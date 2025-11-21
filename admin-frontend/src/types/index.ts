@@ -35,6 +35,9 @@ export interface BackendUserInfo {
   avatar?: string | null
   sex?: string | null
   email?: string | null
+  type?: number
+  roles?: RoleItem[]
+  permissions?: string[]
 }
 
 /**
@@ -57,8 +60,50 @@ export interface UserInfo {
   phone?: string
   sex: 0 | 1 | 2
   avatar?: string
-  type?: number
   status?: number
+  roles?: RoleItem[]
+}
+
+/**
+ * 角色信息
+ */
+export interface RoleItem {
+  id: number
+  name: string
+  code: string
+  description?: string | null
+  status: number
+  createTime?: string
+  updateTime?: string
+}
+
+/**
+ * 角色查询参数
+ */
+export interface RoleQueryParams {
+  pageNum?: number
+  pageSize?: number
+  keyword?: string
+  status?: number
+}
+
+/**
+ * 创建角色请求参数
+ */
+export interface CreateRoleRequest {
+  name: string
+  code: string
+  description?: string
+  status: number
+}
+
+/**
+ * 更新角色请求参数
+ */
+export interface UpdateRoleRequest {
+  name: string
+  description?: string
+  status: number
 }
 
 /**
@@ -71,10 +116,11 @@ export interface AdminUserItem {
   email?: string | null
   phone?: string | null
   status: number
-  type?: number | null
   sex?: number | null
+  avatar?: string | null
   createTime?: string
   updateTime?: string
+  roles?: RoleItem[]
 }
 
 /**
@@ -85,7 +131,6 @@ export interface UserQueryParams {
   pageSize?: number
   keyword?: string
   status?: number
-  type?: number
 }
 
 /**

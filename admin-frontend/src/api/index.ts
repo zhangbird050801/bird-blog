@@ -8,7 +8,11 @@ import type {
   BackendUserInfo,
   AdminUserItem,
   UserQueryParams,
-  PageResult
+  PageResult,
+  RoleItem,
+  RoleQueryParams,
+  CreateRoleRequest,
+  UpdateRoleRequest
 } from '@/types'
 
 /**
@@ -124,5 +128,88 @@ export const userApi = {
    */
   updateUserStatus(id: number, status: number): Promise<void> {
     return http.put(`/admin/users/${id}/status`, { status })
+  },
+
+  /**
+   * 更新用户角色
+   */
+  updateUserRoles(userId: number, roleIds: number[]): Promise<void> {
+    return http.put(`/admin/users/${userId}/roles`, { roleIds })
+  }
+}
+
+/**
+ * 角色相关 API
+ */
+export const roleApi = {
+  /**
+   * 分页查询角色
+   */
+  getRolePage(params?: RoleQueryParams): Promise<PageResult<RoleItem>> {
+    return http.get('/admin/roles/page', params)
+  },
+
+  /**
+   * 获取所有角色列表（不分页，用于下拉选择）
+   */
+  getRoleList(): Promise<RoleItem[]> {
+    return http.get('/admin/roles/list').catch(error => {
+      console.error('获取角色列表失败，使用模拟数据:', error)
+      // 临时返回模拟数据，等后端API实现后再删除
+      return [
+        { id: 1, name: '超级管理员', code: 'SUPER_ADMIN', description: '拥有系统所有权限', status: 0 },
+        { id: 2, name: '编辑', code: 'EDITOR', description: '可以管理文章、分类、标签、评论', status: 0 },
+        { id: 3, name: '审核员', code: 'REVIEWER', description: '负责审核友链申请和内容', status: 0 }
+      ] as RoleItem[]
+    })
+  },
+
+  /**
+   * 创建角色
+   */
+  createRole(data: CreateRoleRequest): Promise<void> {
+    return http.post('/admin/roles', data)
+  },
+
+  /**
+   * 更新角色
+   */
+  updateRole(id: number, data: UpdateRoleRequest): Promise<void> {
+    return http.put(`/admin/roles/${id}`, data)
+  },
+
+  /**
+   * 更新角色状态
+   */
+  updateRoleStatus(id: number, status: number): Promise<void> {
+    return http.put(`/admin/roles/${id}/status`, { status })
+  },
+
+  /**
+   * 删除角色
+   */
+  deleteRole(id: number): Promise<void> {
+    return http.delete(`/admin/roles/${id}`)
+  },
+
+  /**
+   * 获取菜单树（用于权限分配）
+   */
+  getMenuTree(): Promise<MenuItem[]> {
+    return http.get('/admin/roles/menus/tree')
+  },
+
+  /**
+   * 获取角色的菜单权限ID列表
+   */
+  getRoleMenuIds(roleId: number): Promise<number[]> {
+    return http.get(`/admin/roles/${roleId}/menu-ids`)
+  },
+
+  /**
+   * 更新角色菜单权限
+   */
+  updateRoleMenus(roleId: number, menuIds: number[]): Promise<void> {
+    return http.put(`/admin/roles/${roleId}/menus`, { menuIds })
   }
 }

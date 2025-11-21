@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authApi, userApi } from '@/api'
-import type { BackendUserInfo, LoginRequest, LoginResponse, UserInfo } from '@/types'
+import type { BackendUserInfo, LoginRequest, LoginResponse, UserInfo, AdminUserItem, UserQueryParams, RoleItem } from '@/types'
 
 /**
  * 用户状态管理
@@ -127,8 +127,9 @@ export const useUserStore = defineStore(
         avatar: raw.avatar || undefined,
         sex: normalizedSex,
         phone: (raw as any).phone || undefined,
-        type: (raw as any).type ?? undefined,
-        status: (raw as any).status ?? undefined
+        status: (raw as any).status ?? undefined,
+        roles: raw.roles || [],
+        permissions: raw.permissions || []
       }
 
       userInfo.value = normalized
@@ -173,7 +174,89 @@ export const useUserStore = defineStore(
       clearLoginInfo,
       refreshAccessToken,
       fetchCurrentUser,
-      applyUserInfo
+      applyUserInfo,
+
+      // 管理员用户管理功能
+      async fetchUserPage(params?: UserQueryParams) {
+        try {
+          const response = await userApi.getUserPage(params)
+          return response
+        } catch (error) {
+          console.error('获取用户列表失败:', error)
+          throw error
+        }
+      },
+
+      async updateUserStatus(userId: number, status: number) {
+        try {
+          await userApi.updateUserStatus(userId, status)
+          return true
+        } catch (error) {
+          console.error('更新用户状态失败:', error)
+          throw error
+        }
+      },
+
+      async updateUserRoles(userId: number, roleIds: number[]) {
+        try {
+          await userApi.updateUserRoles(userId, roleIds)
+          return true
+        } catch (error) {
+          console.error('更新用户角色失败:', error)
+          throw error
+        }
+      },
+
+      // 角色检查功能
+      hasRole(roleCode: string): boolean {
+        if (!userInfo.value || !userInfo.value.roles) {
+          return false
+        }
+        return userInfo.value.roles.some((role: RoleItem) => role.code === roleCode)
+      },
+
+      hasAnyRole(roleCodes: string[]): boolean {
+        if (!userInfo.value || !userInfo.value.roles) {
+          return false
+        }
+        return roleCodes.some(code => this.hasRole(code))
+      },
+
+      hasAllRoles(roleCodes: string[]): boolean {
+        if (!userInfo.value || !userInfo.value.roles) {
+          return false
+        }
+        return roleCodes.every(code => this.hasRole(code))
+      },
+
+      // 权限检查功能
+      hasPermission(permission: string): boolean {
+        if (!userInfo.value) {
+          return false
+        }
+
+        // 超级管理员拥有所有权限
+        if (this.hasRole('SUPER_ADMIN')) {
+          return true
+        }
+
+        // 检查用户权限列表
+        const permissions = userInfo.value.permissions || []
+
+        // 检查直接权限匹配
+        if (permissions.includes(permission)) {
+          return true
+        }
+
+        // 检查通配符权限匹配
+        return permissions.some(p => {
+          if (p.endsWith(':*')) {
+            const prefix = p.slice(0, -1) // 移除 '*'
+            return permission.startsWith(prefix)
+          }
+          return false
+        })
+      }
     }
   },
   {

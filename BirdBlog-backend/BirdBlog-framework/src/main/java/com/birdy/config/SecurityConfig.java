@@ -83,6 +83,10 @@ public class SecurityConfig {
                     "/comment/**",
                     "/link/**"
                 ).permitAll()
+                // 管理后台认证接口放行
+                .requestMatchers(
+                    "/admin/auth/**"
+                ).permitAll()
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()
             )

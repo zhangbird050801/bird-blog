@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 用户信息 VO
  *
@@ -45,4 +47,14 @@ public class UserInfoVO {
      * 用户类型：0普通用户，1管理员
      */
     private Integer type;
+
+    /**
+     * 用户角色列表
+     */
+    private List<RoleVO> roles;
+
+    /**
+     * 用户权限标识列表
+     */
+    private List<String> permissions;
 }

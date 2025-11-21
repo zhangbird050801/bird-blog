@@ -3,6 +3,7 @@ package com.birdy.domain.vo;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 后台用户管理 VO
@@ -15,8 +16,12 @@ public class AdminUserVO {
     private String email;
     private String phone;
     private Integer status;
-    private Integer type;
     private Integer sex;
     private Date createTime;
     private Date updateTime;
+
+    /**
+     * 用户角色列表
+     */
+    private List<RoleVO> roles;
 }
