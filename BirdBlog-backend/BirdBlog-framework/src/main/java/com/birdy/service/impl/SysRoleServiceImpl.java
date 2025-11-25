@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -238,27 +238,30 @@ public class SysRoleServiceImpl implements SysRoleService {
                 return CommonResult.error(HttpCodeEnum.NOT_FOUND, "角色不存在");
             }
 
-            if ("SUPER_ADMIN".equals(role.getCode())) {
-                return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "不能修改超级管理员角色权限");
+            // 注释掉这个限制，允许超级管理员修改任何角色的权限
+            // if ("SUPER_ADMIN".equals(role.getCode())) {
+            //     return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "不能修改超级管理员角色权限");
+            // }
+
+            // 使用事务安全的方式：先删除，再插入
+            // 删除该角色的所有菜单权限（物理删除，避免唯一键冲突）
+            roleMenuMapper.physicalDeleteByRoleId(roleId);
+
+            // 如果没有菜单权限要分配，直接返回
+            if (menuIds == null || menuIds.isEmpty()) {
+                return CommonResult.success();
             }
 
-            LambdaQueryWrapper<SysRoleMenu> deleteWrapper = new LambdaQueryWrapper<>();
-            deleteWrapper.eq(SysRoleMenu::getRoleId, roleId);
-            roleMenuMapper.delete(deleteWrapper);
+            // 构建智能的菜单权限列表
+            Set<Long> finalMenuIds = buildSmartMenuPermissions(menuIds);
 
-            if (menuIds != null && !menuIds.isEmpty()) {
-                List<SysRoleMenu> roleMenus = new ArrayList<>();
-                for (Long menuId : menuIds) {
-                    SysRoleMenu roleMenu = new SysRoleMenu();
-                    roleMenu.setRoleId(roleId);
-                    roleMenu.setMenuId(menuId);
-                    roleMenu.setCreator("system");
-                    roleMenus.add(roleMenu);
-                }
-
-                for (SysRoleMenu roleMenu : roleMenus) {
-                    roleMenuMapper.insert(roleMenu);
-                }
+            // 批量插入新的菜单权限
+            for (Long menuId : finalMenuIds) {
+                SysRoleMenu roleMenu = new SysRoleMenu();
+                roleMenu.setRoleId(roleId);
+                roleMenu.setMenuId(menuId);
+                // creator和updater会通过自动填充处理
+                roleMenuMapper.insert(roleMenu);
             }
 
             return CommonResult.success();
@@ -403,5 +406,122 @@ public class SysRoleServiceImpl implements SysRoleService {
         RoleVO roleVO = new RoleVO();
         BeanUtils.copyProperties(role, roleVO);
         return roleVO;
+    }
+
+    /**
+     * 构建智能的菜单权限列表
+     *
+     * 处理逻辑：
+     * 1. 如果用户选择了父菜单的所有子菜单，则只保存父菜单（简化权限）
+     * 2. 如果用户只选择了部分子菜单，则只保存子菜单（避免回显时父菜单被完全选中）
+     * 3. 如果用户只选择了父菜单，则保存父菜单（表示全选）
+     *
+     * @param selectedMenuIds 用户选择的菜单ID列表
+     * @return 处理后的菜单权限ID集合
+     */
+    private Set<Long> buildSmartMenuPermissions(List<Long> selectedMenuIds) {
+        if (selectedMenuIds == null || selectedMenuIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        try {
+            // 获取所有菜单信息
+            LambdaQueryWrapper<SysMenu> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SysMenu::getStatus, 0)
+                    .eq(SysMenu::getDeleted, false);
+            List<SysMenu> allMenus = menuMapper.selectList(queryWrapper);
+
+            // 构建菜单映射（ID -> 菜单实体）
+            Map<Long, SysMenu> menuMap = allMenus.stream()
+                    .collect(Collectors.toMap(SysMenu::getId, menu -> menu));
+
+            // 构建父子关系映射
+            Map<Long, List<Long>> parentToChildrenMap = new HashMap<>();
+            Set<Long> allMenuIds = new HashSet<>(selectedMenuIds);
+
+            for (SysMenu menu : allMenus) {
+                Long parentId = menu.getParentId();
+                if (parentId != null && parentId != 0) {
+                    parentToChildrenMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(menu.getId());
+                    allMenuIds.add(menu.getId());
+                }
+            }
+
+            Set<Long> result = new HashSet<>();
+            Set<Long> processedParents = new HashSet<>();
+
+            // 处理每个可能存在父子关系的菜单
+            for (Long parentId : parentToChildrenMap.keySet()) {
+                List<Long> children = parentToChildrenMap.get(parentId);
+
+                if (children == null || children.isEmpty()) {
+                    continue;
+                }
+
+                // 检查用户是否选择了这个父菜单
+                boolean parentSelected = selectedMenuIds.contains(parentId);
+
+                // 检查用户选择了哪些子菜单
+                List<Long> selectedChildren = children.stream()
+                        .filter(selectedMenuIds::contains)
+                        .collect(Collectors.toList());
+
+                if (parentSelected) {
+                    // 用户选择了父菜单
+                    if (selectedChildren.size() == children.size()) {
+                        // 选择了父菜单和所有子菜单，只保留父菜单
+                        result.add(parentId);
+                        processedParents.add(parentId);
+                    } else if (selectedChildren.isEmpty()) {
+                        // 只选择了父菜单，表示全选
+                        result.add(parentId);
+                        processedParents.add(parentId);
+                    } else {
+                        // 选择了父菜单和部分子菜单，只保留子菜单
+                        result.addAll(selectedChildren);
+                        processedParents.add(parentId);
+                    }
+                } else {
+                    // 用户没有选择父菜单，只保留选择的子菜单
+                    result.addAll(selectedChildren);
+                    processedParents.add(parentId);
+                }
+            }
+
+            // 添加没有子菜单的菜单（叶子节点）或不在任何父子关系中的菜单
+            for (Long menuId : selectedMenuIds) {
+                if (!parentToChildrenMap.containsKey(menuId) && !processedParents.contains(menuId)) {
+                    result.add(menuId);
+                }
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            log.error("构建智能菜单权限失败，使用原始选择", e);
+            // 如果出错，至少返回去重后的用户选择
+            return new HashSet<>(selectedMenuIds);
+        }
+    }
+
+    /**
+     * 递归添加菜单的所有父菜单
+     */
+    private void addParentMenus(Long menuId, Map<Long, SysMenu> menuMap, Set<Long> parentIds) {
+        if (menuId == null || !menuMap.containsKey(menuId)) {
+            return;
+        }
+
+        SysMenu menu = menuMap.get(menuId);
+        Long parentId = menu.getParentId();
+
+        // 如果存在父菜单且父菜单不是根菜单（parent_id != 0）
+        if (parentId != null && parentId != 0) {
+            if (menuMap.containsKey(parentId)) {
+                parentIds.add(parentId);
+                // 递归查找上级父菜单
+                addParentMenus(parentId, menuMap, parentIds);
+            }
+        }
     }
 }

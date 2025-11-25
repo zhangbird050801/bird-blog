@@ -189,9 +189,15 @@ public class SecurityUtils {
         }
 
         try {
+            System.out.println("SecurityUtils: 正在获取用户 " + user.getUsername() + " 的完整信息...");
             // 使用UserService获取完整的用户信息（包括角色）
-            return userService.getUserInfo(user.getId());
+            UserInfoVO userInfoVO = userService.getUserInfo(user.getId());
+            System.out.println("SecurityUtils: 获取到用户信息，角色数量: " +
+                (userInfoVO.getRoles() != null ? userInfoVO.getRoles().size() : 0));
+            return userInfoVO;
         } catch (Exception e) {
+            System.err.println("SecurityUtils: 获取完整用户信息失败，使用基本信息: " + e.getMessage());
+            e.printStackTrace();
             // 如果获取完整信息失败，返回基本信息
             UserInfoVO userInfoVO = new UserInfoVO();
             userInfoVO.setId(user.getId());
@@ -199,7 +205,7 @@ public class SecurityUtils {
             userInfoVO.setAvatar(user.getAvatar());
             userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
             userInfoVO.setEmail(user.getEmail());
-            userInfoVO.setType(user.getType());
+            // 移除type字段设置，通过角色来管理用户权限
             return userInfoVO;
         }
     }

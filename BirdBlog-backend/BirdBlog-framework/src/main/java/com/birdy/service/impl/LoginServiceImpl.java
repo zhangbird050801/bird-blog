@@ -7,12 +7,16 @@ import com.birdy.domain.CommonResult;
 import com.birdy.domain.dto.LoginRequestDTO;
 import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.entity.User;
+import com.birdy.domain.entity.SysRole;
+import com.birdy.domain.entity.SysUserRole;
 import com.birdy.domain.vo.LoginVO;
 import com.birdy.domain.vo.RegisterVO;
 import com.birdy.domain.vo.UserInfoVO;
 import com.birdy.enums.HttpCodeEnum;
 import com.birdy.enums.LoginScene;
 import com.birdy.mapper.UserMapper;
+import com.birdy.mapper.SysRoleMapper;
+import com.birdy.mapper.SysUserRoleMapper;
 import com.birdy.service.LoginService;
 import com.birdy.utils.CaptchaUtil;
 import com.birdy.utils.JwtUtil;
@@ -30,7 +34,9 @@ import cn.hutool.core.bean.BeanUtil;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 登录 Service 实现类
@@ -56,6 +62,12 @@ public class LoginServiceImpl implements LoginService {
 
     @Autowired
     private JwtProperties jwtProperties;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private SysRoleMapper sysRoleMapper;
 
     @Override
     public CommonResult<LoginVO> login(LoginRequestDTO loginRequestDTO, LoginScene loginScene) {
@@ -92,9 +104,13 @@ public class LoginServiceImpl implements LoginService {
             return CommonResult.error(HttpCodeEnum.USER_BANNED);
         }
 
-        // 5.1 根据登录场景校验权限 - 访客不能登录后台，其他角色可以
-        if (scene == LoginScene.ADMIN && Objects.equals(user.getType(), USER_TYPE_VISITOR)) {
-            return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "访客用户不能登录后台");
+        // 5.1 根据登录场景校验权限 - 通过角色检查而非type字段
+        if (scene == LoginScene.ADMIN) {
+            // 检查用户是否有管理员权限（超级管理员、编辑、审核员可以登录后台）
+            boolean hasAdminAccess = hasAdminRole(user.getId());
+            if (!hasAdminAccess) {
+                return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "访客用户不能登录后台");
+            }
         }
 
         // 6. 生成双 Token
@@ -230,7 +246,7 @@ public class LoginServiceImpl implements LoginService {
         newUser.setNickName(registerRequestDTO.getUserName());
         newUser.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         newUser.setEmail(registerRequestDTO.getEmail());
-        newUser.setType(USER_TYPE_VISITOR);
+        // 移除type字段设置，新用户默认为访客角色，通过角色表管理
         newUser.setStatus(USER_STATUS_NORMAL);
         newUser.setSex(USER_SEX_UNKNOWN);
         newUser.setDeleted(USER_NOT_DELETED);
@@ -266,12 +282,64 @@ public class LoginServiceImpl implements LoginService {
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtil.copyProperties(user, userInfoVO);
         userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : String.valueOf(USER_SEX_UNKNOWN));
-        userInfoVO.setType(user.getType());
+        // 移除type字段设置，通过角色来管理用户权限
 
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(accessToken);
         loginVO.setRefreshToken(refreshToken);
         loginVO.setUserInfo(userInfoVO);
         return loginVO;
+    }
+
+    /**
+     * 检查用户是否有管理员权限（可以登录后台）
+     * 超级管理员、编辑、审核员可以登录后台
+     * 访客不能登录后台
+     *
+     * @param userId 用户ID
+     * @return 是否有管理员权限
+     */
+    private boolean hasAdminRole(Long userId) {
+        try {
+            // 1. 查询用户的角色
+            LambdaQueryWrapper<SysUserRole> userRoleWrapper = new LambdaQueryWrapper<>();
+            userRoleWrapper.eq(SysUserRole::getUserId, userId)
+                    .eq(SysUserRole::getDeleted, false);
+
+            List<SysUserRole> userRoles = sysUserRoleMapper.selectList(userRoleWrapper);
+            if (userRoles.isEmpty()) {
+                // 如果没有角色，默认为访客，不能登录后台
+                return false;
+            }
+
+            // 2. 获取角色ID列表
+            List<Long> roleIds = userRoles.stream()
+                    .map(SysUserRole::getRoleId)
+                    .collect(Collectors.toList());
+
+            // 3. 查询角色信息
+            LambdaQueryWrapper<SysRole> roleWrapper = new LambdaQueryWrapper<>();
+            roleWrapper.in(SysRole::getId, roleIds)
+                    .eq(SysRole::getStatus, 0)  // 状态正常
+                    .eq(SysRole::getDeleted, false);
+
+            List<SysRole> roles = sysRoleMapper.selectList(roleWrapper);
+            if (roles.isEmpty()) {
+                return false;
+            }
+
+            // 4. 检查是否有管理员角色
+            // 超级管理员、编辑、审核员可以登录后台
+            return roles.stream().anyMatch(role -> {
+                String roleCode = role.getCode();
+                return "SUPER_ADMIN".equals(roleCode)
+                    || "EDITOR".equals(roleCode)
+                    || "REVIEWER".equals(roleCode);
+            });
+
+        } catch (Exception e) {
+            // 异常情况下，拒绝访问
+            return false;
+        }
     }
 }

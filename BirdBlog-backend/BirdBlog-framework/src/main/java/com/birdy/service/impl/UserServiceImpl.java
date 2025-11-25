@@ -18,6 +18,10 @@ import com.birdy.enums.HttpCodeEnum;
 import com.birdy.mapper.UserMapper;
 import com.birdy.mapper.SysRoleMapper;
 import com.birdy.mapper.SysUserRoleMapper;
+import com.birdy.mapper.SysRoleMenuMapper;
+import com.birdy.mapper.SysMenuMapper;
+import com.birdy.domain.entity.SysRoleMenu;
+import com.birdy.domain.entity.SysMenu;
 import com.birdy.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +43,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private SysUserRoleMapper userRoleMapper;
+
+    @Autowired
+    private SysRoleMenuMapper sysRoleMenuMapper;
+
+    @Autowired
+    private SysMenuMapper sysMenuMapper;
 
     @Override
     public CommonResult<PageResult<AdminUserVO>> getUserPage(UserQueryDTO queryDTO) {
@@ -213,7 +224,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userInfoVO.setAvatar(user.getAvatar());
             userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : "2");
             userInfoVO.setEmail(user.getEmail());
-            userInfoVO.setType(user.getType());
+            // 移除type字段设置，通过角色来管理用户权限
 
             // 3. 获取用户角色信息
             List<RoleVO> roles = getUserRoles(userId);
@@ -270,23 +281,67 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     private List<String> getUserPermissions(Long userId) {
         try {
-            // 获取用户的角色
-            List<RoleVO> roles = getUserRoles(userId);
-            if (roles.isEmpty()) {
+            // 获取用户的角色ID列表
+            LambdaQueryWrapper<SysUserRole> userRoleWrapper = new LambdaQueryWrapper<>();
+            userRoleWrapper.eq(SysUserRole::getUserId, userId)
+                    .eq(SysUserRole::getDeleted, false);
+
+            List<SysUserRole> userRoles = userRoleMapper.selectList(userRoleWrapper);
+            if (userRoles.isEmpty()) {
                 return new ArrayList<>();
             }
 
-            // 获取角色对应的权限标识
-            List<String> permissions = new ArrayList<>();
-            for (RoleVO role : roles) {
-                // 这里可以根据需要从角色菜单关联表中获取具体的权限标识
-                // 暂时返回角色编码作为权限标识
-                if (role.getCode() != null) {
-                    permissions.add(role.getCode().toLowerCase() + ":*");
-                }
+            List<Long> roleIds = userRoles.stream()
+                    .map(SysUserRole::getRoleId)
+                    .collect(Collectors.toList());
+
+            // 获取角色对应的菜单权限
+            LambdaQueryWrapper<SysRoleMenu> roleMenuWrapper = new LambdaQueryWrapper<>();
+            roleMenuWrapper.in(SysRoleMenu::getRoleId, roleIds)
+                    .eq(SysRoleMenu::getDeleted, false);
+
+            List<SysRoleMenu> roleMenus = sysRoleMenuMapper.selectList(roleMenuWrapper);
+            if (roleMenus.isEmpty()) {
+                return new ArrayList<>();
             }
 
-            return permissions.stream().distinct().collect(Collectors.toList());
+            List<Long> menuIds = roleMenus.stream()
+                    .map(SysRoleMenu::getMenuId)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            // 获取菜单的权限标识
+            LambdaQueryWrapper<SysMenu> menuWrapper = new LambdaQueryWrapper<>();
+            menuWrapper.in(SysMenu::getId, menuIds)
+                    .isNotNull(SysMenu::getPerms)
+                    .ne(SysMenu::getPerms, "")
+                    .eq(SysMenu::getDeleted, false)
+                    .eq(SysMenu::getStatus, 0);
+
+            List<SysMenu> menus = sysMenuMapper.selectList(menuWrapper);
+
+            // 提取权限标识
+            List<String> permissions = menus.stream()
+                    .map(SysMenu::getPerms)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            // 超级管理员添加所有权限
+            boolean isSuperAdmin = userRoles.stream()
+                    .anyMatch(ur -> {
+                        LambdaQueryWrapper<SysRole> roleWrapper = new LambdaQueryWrapper<>();
+                        roleWrapper.eq(SysRole::getId, ur.getRoleId())
+                                .eq(SysRole::getCode, "SUPER_ADMIN")
+                                .eq(SysRole::getDeleted, false);
+                        return roleMapper.selectCount(roleWrapper) > 0;
+                    });
+
+            if (isSuperAdmin) {
+                permissions.add("*:*");
+            }
+
+            return permissions;
         } catch (Exception e) {
             // 权限信息获取失败时返回空列表，不影响其他信息
             return new ArrayList<>();

@@ -43,11 +43,7 @@ public class UserInfoVO {
      */
     private String email;
 
-    /**
-     * 用户类型：0普通用户，1管理员
-     */
-    private Integer type;
-
+    
     /**
      * 用户角色列表
      */

@@ -5,6 +5,7 @@ import com.birdy.domain.dto.RoleCreateDTO;
 import com.birdy.domain.dto.RoleQueryDTO;
 import com.birdy.domain.dto.RoleUpdateDTO;
 import com.birdy.domain.dto.RoleStatusUpdateDTO;
+import com.birdy.domain.dto.RoleMenuUpdateDTO;
 import com.birdy.domain.vo.RoleVO;
 import com.birdy.domain.vo.PageResult;
 import com.birdy.domain.vo.MenuVO;
@@ -139,12 +140,12 @@ public class AdminRoleController {
      * 更新角色菜单权限
      */
     @PutMapping("/{roleId}/menus")
-    public CommonResult<Void> updateRoleMenus(@PathVariable Long roleId, @RequestBody List<Long> menuIds) {
+    public CommonResult<Void> updateRoleMenus(@PathVariable Long roleId, @RequestBody RoleMenuUpdateDTO roleMenuDTO) {
         // 检查角色是否存在
         if (!roleService.existsById(roleId)) {
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "角色不存在");
         }
 
-        return roleService.updateRoleMenus(roleId, menuIds);
+        return roleService.updateRoleMenus(roleId, roleMenuDTO.getMenuIds());
     }
 }

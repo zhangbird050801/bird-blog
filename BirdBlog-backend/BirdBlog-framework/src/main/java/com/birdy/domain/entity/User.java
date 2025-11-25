@@ -35,11 +35,7 @@ public class User {
      */
     private String password;
 
-    /**
-     * 用户类型：0访客，1作者
-     */
-    private Integer type;
-
+    
     /**
      * 账号状态：0正常，1停用
      */
@@ -106,8 +102,7 @@ public class User {
             && (this.getUsername() == null ? other.getUsername() == null : this.getUsername().equals(other.getUsername()))
             && (this.getNickName() == null ? other.getNickName() == null : this.getNickName().equals(other.getNickName()))
             && (this.getPassword() == null ? other.getPassword() == null : this.getPassword().equals(other.getPassword()))
-            && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
-            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+                        && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
             && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail()))
             && (this.getPhone() == null ? other.getPhone() == null : this.getPhone().equals(other.getPhone()))
             && (this.getSex() == null ? other.getSex() == null : this.getSex().equals(other.getSex()))
@@ -127,8 +122,7 @@ public class User {
         result = prime * result + ((getUsername() == null) ? 0 : getUsername().hashCode());
         result = prime * result + ((getNickName() == null) ? 0 : getNickName().hashCode());
         result = prime * result + ((getPassword() == null) ? 0 : getPassword().hashCode());
-        result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
-        result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
+                result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
         result = prime * result + ((getEmail() == null) ? 0 : getEmail().hashCode());
         result = prime * result + ((getPhone() == null) ? 0 : getPhone().hashCode());
         result = prime * result + ((getSex() == null) ? 0 : getSex().hashCode());
@@ -151,8 +145,7 @@ public class User {
         sb.append(", username=").append(username);
         sb.append(", nickName=").append(nickName);
         sb.append(", password=").append(password);
-        sb.append(", type=").append(type);
-        sb.append(", status=").append(status);
+                sb.append(", status=").append(status);
         sb.append(", email=").append(email);
         sb.append(", phone=").append(phone);
         sb.append(", sex=").append(sex);
