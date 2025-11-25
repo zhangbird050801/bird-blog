@@ -35,7 +35,6 @@ export interface BackendUserInfo {
   avatar?: string | null
   sex?: string | null
   email?: string | null
-  type?: number
   roles?: RoleItem[]
   permissions?: string[]
 }

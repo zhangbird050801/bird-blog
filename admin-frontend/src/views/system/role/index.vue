@@ -178,6 +178,7 @@ import { onMounted, reactive, ref, nextTick } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules, TreeInstance } from 'element-plus'
 import { Search, Refresh, Plus, Edit, Delete, Switch, Key } from '@element-plus/icons-vue'
 import { roleApi } from '@/api'
+import { useUserStore } from '@/stores/user'
 import type { RoleItem, RoleQueryParams, MenuItem } from '@/types'
 
 const loading = ref(false)
@@ -338,7 +339,13 @@ async function handlePermission(row: RoleItem) {
   permissionDialogVisible.value = true
 
   try {
+    // 每次打开权限对话框时重新获取最新的菜单树
+    await fetchMenuTree()
+
     const menuIds = await roleApi.getRoleMenuIds(row.id)
+
+    // 使用 nextTick 确保菜单树更新后再设置选中状态
+    await nextTick()
     checkedMenuIds.value = menuIds
   } catch (error) {
     console.error('获取角色菜单权限失败:', error)
@@ -352,10 +359,35 @@ async function handleSavePermissions() {
     savingPermissions.value = true
     const checkedKeys = permissionTreeRef.value.getCheckedKeys()
     const halfCheckedKeys = permissionTreeRef.value.getHalfCheckedKeys()
+
+    // 合并完全选中和半选中的菜单ID
     const allMenuIds = [...(checkedKeys as number[]), ...(halfCheckedKeys as number[])]
 
     await roleApi.updateRoleMenus(currentRole.value.id, allMenuIds)
-    ElMessage.success('权限保存成功')
+
+    // 清除用户信息缓存，强制刷新权限（如果修改的是当前用户的角色）
+    const userStore = useUserStore()
+    if (userStore.userInfo) {
+      // 检查是否修改了当前用户的某个角色
+      const currentUserRoles = userStore.userInfo.roles || []
+      const isCurrentUserRole = currentUserRoles.some((role: any) => role.id === currentRole.value?.id)
+
+      if (isCurrentUserRole) {
+        // 清除用户信息缓存，下次访问时会重新获取
+        userStore.clearLoginInfo()
+        ElMessage.success('权限保存成功，由于修改了当前用户权限，需要重新登录')
+        // 这里可以跳转到登录页面或自动刷新页面
+        // window.location.reload()
+      } else {
+        ElMessage.success('权限保存成功')
+      }
+    } else {
+      ElMessage.success('权限保存成功')
+    }
+
+    // 强制清除菜单树缓存，确保下次重新获取
+    menuTree.value = []
+
     permissionDialogVisible.value = false
   } catch (error) {
     ElMessage.error('权限保存失败')

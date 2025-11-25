@@ -26,6 +26,15 @@ const constantRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/test-permission',
+    name: 'PermissionTest',
+    component: () => import('@/views/Test/PermissionTest.vue'),
+    meta: {
+      title: '权限测试',
+      hidden: true
+    }
+  },
+  {
     path: '/',
     redirect: '/dashboard'
   }
@@ -111,15 +120,20 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.roles && Array.isArray(to.meta.roles) && to.meta.roles.length > 0) {
     const requiredRoles = to.meta.roles as string[]
     console.log('路由需要权限:', requiredRoles)
+    console.log('当前用户信息:', userStore.userInfo)
+    console.log('用户角色:', userStore.userInfo?.roles)
+    console.log('用户权限:', userStore.userInfo?.permissions)
 
     // 检查用户是否有所需权限
     const hasPermission = requiredRoles.some(role => {
       // 检查角色权限
       if (userStore.hasRole(role)) {
+        console.log('用户拥有角色:', role)
         return true
       }
       // 检查具体权限
       if (userStore.hasPermission(role)) {
+        console.log('用户拥有权限:', role)
         return true
       }
       return false
@@ -127,6 +141,7 @@ router.beforeEach(async (to, from, next) => {
 
     if (!hasPermission) {
       console.warn('用户没有访问权限，需要:', requiredRoles)
+      console.warn('用户当前角色:', userStore.userInfo?.roles?.map(r => r.code))
       next({ path: '/403' })
       return
     }
