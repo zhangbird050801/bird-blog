@@ -3,9 +3,15 @@ package com.birdy.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.birdy.domain.dto.MenuFormDTO;
 import com.birdy.domain.entity.SysMenu;
+import com.birdy.domain.entity.SysRole;
+import com.birdy.domain.entity.SysRoleMenu;
+import com.birdy.domain.entity.SysUserRole;
 import com.birdy.domain.vo.MenuVO;
 import com.birdy.mapper.SysMenuMapper;
+import com.birdy.mapper.SysRoleMenuMapper;
+import com.birdy.mapper.SysUserRoleMapper;
 import com.birdy.service.SysMenuService;
+import com.birdy.utils.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,19 +34,44 @@ public class SysMenuServiceImpl implements SysMenuService {
     @Autowired
     private SysMenuMapper sysMenuMapper;
 
+    @Autowired
+    private SysRoleMenuMapper sysRoleMenuMapper;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+
     @Override
     public List<Map<String, Object>> getRoutes() {
-        // 1. 查询所有正常状态且可见的菜单
+        // 1. 获取当前用户信息
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        // 2. 获取当前用户的角色ID列表
+        List<Long> userRoleIds = getUserRoleIds(userId);
+        if (userRoleIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 3. 根据角色获取菜单权限
+        List<Long> menuIds = getMenuIdsByRoles(userRoleIds);
+        if (menuIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 4. 查询用户有权限的菜单
         LambdaQueryWrapper<SysMenu> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(SysMenu::getStatus, 0)      // 状态：0正常
-                   .eq(SysMenu::getVisible, 0)      // 显示：0显示
-                   .eq(SysMenu::getDeleted, false)  // 未删除
+        queryWrapper.in(SysMenu::getId, menuIds)     // 只查询有权限的菜单
+                   .eq(SysMenu::getStatus, 0)          // 状态：0正常
+                   .eq(SysMenu::getVisible, 0)          // 显示：0显示
+                   .eq(SysMenu::getDeleted, false)      // 未删除
                    .orderByAsc(SysMenu::getOrderNum, SysMenu::getId);
-        
-        List<SysMenu> allMenus = sysMenuMapper.selectList(queryWrapper);
-        
-        // 2. 构建树形结构
-        return buildMenuTree(allMenus, null);
+
+        List<SysMenu> userMenus = sysMenuMapper.selectList(queryWrapper);
+
+        // 5. 构建树形结构
+        return buildMenuTree(userMenus, null);
     }
 
     /**
@@ -315,5 +346,46 @@ public class SysMenuServiceImpl implements SysMenuService {
         }
         
         return options;
+    }
+
+    /**
+     * 获取用户的角色ID列表
+     *
+     * @param userId 用户ID
+     * @return 角色ID列表
+     */
+    private List<Long> getUserRoleIds(Long userId) {
+        try {
+            LambdaQueryWrapper<SysUserRole> userRoleWrapper = new LambdaQueryWrapper<>();
+            userRoleWrapper.eq(SysUserRole::getUserId, userId);
+
+            List<SysUserRole> userRoles = sysUserRoleMapper.selectList(userRoleWrapper);
+            return userRoles.stream()
+                    .map(SysUserRole::getRoleId)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * 根据角色ID列表获取菜单权限ID列表
+     *
+     * @param roleIds 角色ID列表
+     * @return 菜单ID列表
+     */
+    private List<Long> getMenuIdsByRoles(List<Long> roleIds) {
+        try {
+            LambdaQueryWrapper<SysRoleMenu> roleMenuWrapper = new LambdaQueryWrapper<>();
+            roleMenuWrapper.in(SysRoleMenu::getRoleId, roleIds);
+
+            List<SysRoleMenu> roleMenus = sysRoleMenuMapper.selectList(roleMenuWrapper);
+            return roleMenus.stream()
+                    .map(SysRoleMenu::getMenuId)
+                    .distinct()  // 去重
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 }

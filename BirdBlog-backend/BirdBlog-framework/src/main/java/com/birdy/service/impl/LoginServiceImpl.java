@@ -92,9 +92,9 @@ public class LoginServiceImpl implements LoginService {
             return CommonResult.error(HttpCodeEnum.USER_BANNED);
         }
 
-        // 5.1 根据登录场景校验权限
-        if (scene == LoginScene.ADMIN && !Objects.equals(user.getType(), USER_TYPE_AUTHOR)) {
-            return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "仅管理员可登录后台");
+        // 5.1 根据登录场景校验权限 - 访客不能登录后台，其他角色可以
+        if (scene == LoginScene.ADMIN && Objects.equals(user.getType(), USER_TYPE_VISITOR)) {
+            return CommonResult.error(HttpCodeEnum.NO_OPERATOR_AUTH, "访客用户不能登录后台");
         }
 
         // 6. 生成双 Token

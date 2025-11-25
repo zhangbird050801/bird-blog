@@ -53,9 +53,11 @@ public class SysConstants {
     // 密码最小长度
     public static final int PASSWORD_MIN_LENGTH = 6;
 
-    // 用户相关默认值 (0访客，1作者)
+    // 用户类型常量 (0访客，1作者，2编辑，3审核员)
     public static final int USER_TYPE_VISITOR = 0;
     public static final int USER_TYPE_AUTHOR = 1;
+    public static final int USER_TYPE_EDITOR = 2;
+    public static final int USER_TYPE_REVIEWER = 3;
     public static final int USER_STATUS_NORMAL = 0;
     public static final int USER_STATUS_DISABLE = 1;
     public static final int USER_SEX_UNKNOWN = 2;
