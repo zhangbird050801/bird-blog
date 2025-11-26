@@ -9,6 +9,7 @@ import LgInput from '@/components/base/LgInput.vue'
 import LgButton from '@/components/base/LgButton.vue'
 import { fetchCategories } from '@/api'
 import type { Category } from '@/api'
+import ChangePasswordModal from '@/components/blog/common/ChangePasswordModal.vue'
 
 const search = ref('')
 const router = useRouter()
@@ -22,6 +23,9 @@ const categoryDropdownRef = ref<HTMLElement | null>(null)
 // 用户菜单
 const showUserMenu = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
+
+// 修改密码弹窗
+const showChangePasswordModal = ref(false)
 
 // 提供简单导航跳转
 const navItems = [
@@ -81,6 +85,18 @@ async function handleLogout() {
     closeUserMenu()
     router.push('/')
   }
+}
+
+// 打开修改密码弹窗
+function handleChangePassword() {
+  closeUserMenu()
+  showChangePasswordModal.value = true
+}
+
+// 修改密码成功回调
+function onChangePasswordSuccess() {
+  // 可以添加成功提示
+  console.log('密码修改成功')
 }
 
 // 检查分类是否被激活
@@ -256,6 +272,15 @@ onBeforeUnmount(() => {
               </div>
             </div>
             <div class="user-menu-divider"></div>
+            <button class="user-menu-item" @click="handleChangePassword">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  fill="currentColor"
+                  d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"
+                />
+              </svg>
+              修改密码
+            </button>
             <button class="user-menu-item" @click="handleLogout">
               <svg viewBox="0 0 24 24" width="18" height="18">
                 <path
@@ -269,6 +294,12 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
+
+    <!-- 修改密码弹窗 -->
+    <ChangePasswordModal
+      v-model:show="showChangePasswordModal"
+      @success="onChangePasswordSuccess"
+    />
   </header>
 </template>
 

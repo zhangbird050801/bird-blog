@@ -84,6 +84,15 @@ async function handleLogin() {
     const response = await login(formData.value)
 
     console.log('登录 API 响应:', response)
+    console.log('response.token:', response.token)
+    console.log('response.refreshToken:', response.refreshToken)
+    console.log('response.userInfo:', response.userInfo)
+
+    // 检查响应结构
+    if (!response.token) {
+      console.error('登录响应中没有token字段')
+      throw new Error('登录响应格式错误：缺少token')
+    }
 
     // 保存登录信息（包含 token、refreshToken 和 userInfo）
     setAuth(response.token, response.refreshToken, response.userInfo)

@@ -19,8 +19,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        // 代理转发时去掉 /api
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        // 代理转发时去掉 /api 并添加 /admin
+        rewrite: (path) => path.replace(/^\/api/, '/admin'),
       },
     },
   },

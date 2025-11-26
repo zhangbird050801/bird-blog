@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.birdy.config.JwtProperties;
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.ChangePasswordRequestDTO;
 import com.birdy.domain.dto.LoginRequestDTO;
 import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.entity.User;
@@ -289,6 +290,102 @@ public class LoginServiceImpl implements LoginService {
         loginVO.setRefreshToken(refreshToken);
         loginVO.setUserInfo(userInfoVO);
         return loginVO;
+    }
+
+    @Override
+    public CommonResult<String> changePassword(ChangePasswordRequestDTO changePasswordRequestDTO) {
+        try {
+            System.out.println("开始修改密码...");
+
+            // 1. 参数校验
+            String oldPassword = changePasswordRequestDTO.getOldPassword();
+            String newPassword = changePasswordRequestDTO.getNewPassword();
+            String confirmPassword = changePasswordRequestDTO.getConfirmPassword();
+            System.out.println("参数校验: oldPassword=" + (oldPassword != null ? "已输入" : "空") +
+                             ", newPassword=" + (newPassword != null ? "已输入" : "空") +
+                             ", confirmPassword=" + (confirmPassword != null ? "已输入" : "空"));
+
+            if (!StringUtils.hasText(oldPassword) || !StringUtils.hasText(newPassword) || !StringUtils.hasText(confirmPassword)) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "密码不能为空");
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "两次输入的密码不一致");
+            }
+
+            if (newPassword.length() < PASSWORD_MIN_LENGTH) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "密码长度不能少于" + PASSWORD_MIN_LENGTH + "位");
+            }
+
+            // 2. 获取当前用户
+            Long currentUserId = null;
+            String token = null;
+
+            // 尝试从请求中获取Token
+            try {
+                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                if (attributes != null) {
+                    HttpServletRequest request = attributes.getRequest();
+                    String authHeader = request.getHeader("Authorization");
+                    System.out.println("Authorization header: " + (authHeader != null ? authHeader.substring(0, Math.min(20, authHeader.length())) + "..." : "null"));
+
+                    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                        token = authHeader.substring(7);
+                        System.out.println("提取到token: " + (token.length() > 20 ? token.substring(0, 20) + "..." : token));
+
+                        Claims claims = JwtUtil.parseJWT(token);
+                        System.out.println("解析JWT成功，subject: " + claims.getSubject());
+
+                        if (claims != null && claims.getSubject() != null) {
+                            currentUserId = Long.parseLong(claims.getSubject());
+                            System.out.println("获取到用户ID: " + currentUserId);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("从Token获取用户ID失败: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            if (currentUserId == null) {
+                return CommonResult.error(HttpCodeEnum.NEED_LOGIN, "请先登录");
+            }
+
+            // 3. 查询用户信息
+            User currentUser = userMapper.selectById(currentUserId);
+            if (currentUser == null) {
+                return CommonResult.error(HttpCodeEnum.NOT_FOUND, "用户不存在");
+            }
+            System.out.println("查询到用户: " + currentUser.getUsername());
+
+            // 4. 验证旧密码
+            if (!passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "旧密码错误");
+            }
+
+            // 5. 检查新密码是否与旧密码相同
+            if (passwordEncoder.matches(newPassword, currentUser.getPassword())) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "新密码不能与旧密码相同");
+            }
+
+            // 6. 更新密码
+            String encodedNewPassword = passwordEncoder.encode(newPassword);
+            currentUser.setPassword(encodedNewPassword);
+            currentUser.setUpdater(currentUser.getUsername());
+            currentUser.setUpdateTime(new java.util.Date());
+
+            int updateResult = userMapper.updateById(currentUser);
+            if (updateResult <= 0) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "密码修改失败");
+            }
+
+            System.out.println("密码修改成功");
+            return CommonResult.success("密码修改成功");
+        } catch (Exception e) {
+            System.err.println("修改密码异常: " + e.getMessage());
+            e.printStackTrace();
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "密码修改失败：" + e.getMessage());
+        }
     }
 
     /**

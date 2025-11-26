@@ -83,9 +83,12 @@ public class SecurityConfig {
                     "/comment/**",
                     "/link/**"
                 ).permitAll()
-                // 管理后台认证接口放行
+                // 管理后台认证接口放行（除了修改密码）
                 .requestMatchers(
-                    "/admin/auth/**"
+                    "/admin/auth/login",
+                    "/admin/auth/captcha",
+                    "/admin/auth/logout",
+                    "/admin/auth/refresh-token"
                 ).permitAll()
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()

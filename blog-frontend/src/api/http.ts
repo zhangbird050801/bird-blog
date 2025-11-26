@@ -69,8 +69,11 @@ export async function request<T = any>(
   // 如果需要认证，添加 token
   if (auth) {
     const token = localStorage.getItem(TOKEN_KEY)
+    console.log('Token check:', TOKEN_KEY, token ? 'exists' : 'not found')
     if (token) {
       requestHeaders['Authorization'] = `Bearer ${token}`
+    } else {
+      console.warn('No token found for authenticated request')
     }
   }
 

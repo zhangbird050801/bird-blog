@@ -1,6 +1,7 @@
 package com.birdy.service;
 
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.ChangePasswordRequestDTO;
 import com.birdy.domain.dto.LoginRequestDTO;
 import com.birdy.domain.dto.RegisterRequestDTO;
 import com.birdy.domain.vo.LoginVO;
@@ -49,4 +50,12 @@ public interface LoginService {
      * @return
      */
     CommonResult<RegisterVO> register(RegisterRequestDTO registerRequestDTO);
+
+    /**
+     * 修改密码
+     *
+     * @param changePasswordRequestDTO 修改密码请求参数
+     * @return 修改结果
+     */
+    CommonResult<String> changePassword(ChangePasswordRequestDTO changePasswordRequestDTO);
 }

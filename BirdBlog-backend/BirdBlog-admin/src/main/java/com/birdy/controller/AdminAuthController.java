@@ -1,6 +1,7 @@
 package com.birdy.controller;
 
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.ChangePasswordRequestDTO;
 import com.birdy.domain.dto.LoginRequestDTO;
 import com.birdy.domain.vo.CaptchaVO;
 import com.birdy.domain.vo.LoginVO;
@@ -70,5 +71,17 @@ public class AdminAuthController {
     @PostMapping("/refresh-token")
     public CommonResult<LoginVO> refreshToken(@RequestParam String refreshToken) {
         return loginService.refreshToken(refreshToken);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param changePasswordRequestDTO 修改密码请求参数
+     * @return 修改结果
+     */
+    @PostMapping("/change-password")
+    public CommonResult<String> changePassword(@RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
+        System.out.println("AdminAuthController: 收到修改密码请求");
+        return loginService.changePassword(changePasswordRequestDTO);
     }
 }

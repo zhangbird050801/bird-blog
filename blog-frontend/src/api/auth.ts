@@ -62,6 +62,15 @@ export interface RegisterResponse {
 }
 
 /**
+ * 修改密码请求参数
+ */
+export interface ChangePasswordRequest {
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+/**
  * 获取验证码
  */
 export async function fetchCaptcha(): Promise<CaptchaResponse> {
@@ -133,6 +142,25 @@ export async function refreshToken(refreshToken: string): Promise<LoginResponse>
     return handleApiResponse(response)
   } catch (error) {
     console.error('刷新Token失败:', error)
+    throw error
+  }
+}
+
+/**
+ * 修改密码
+ */
+export async function changePassword(data: ChangePasswordRequest): Promise<string> {
+  try {
+    console.log('发起修改密码请求...', data)
+    const response = await request<ApiResponse<string>>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: true,
+    })
+    console.log('修改密码响应:', response)
+    return handleApiResponse(response)
+  } catch (error) {
+    console.error('修改密码失败:', error)
     throw error
   }
 }

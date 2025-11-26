@@ -40,14 +40,22 @@ export function useAuth() {
    * 设置登录信息
    */
   function setAuth(newToken: string, newRefreshToken: string, newUserInfo: UserInfo) {
+    console.log('setAuth called with:', {
+      token: newToken?.substring(0, 20) + '...',
+      refreshToken: newRefreshToken?.substring(0, 20) + '...',
+      userInfo: newUserInfo
+    })
+
     token.value = newToken
     refreshToken.value = newRefreshToken
     userInfo.value = newUserInfo
-    
+
     // 保存到 localStorage
     localStorage.setItem(TOKEN_KEY, newToken)
     localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
     localStorage.setItem(USER_INFO_KEY, JSON.stringify(newUserInfo))
+
+    console.log('Token stored in localStorage:', !!localStorage.getItem(TOKEN_KEY))
   }
 
   /**

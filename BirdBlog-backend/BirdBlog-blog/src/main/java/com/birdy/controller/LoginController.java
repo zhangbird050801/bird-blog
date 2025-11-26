@@ -77,12 +77,23 @@ public class LoginController {
 
     /**
      * 注册用户
-     * 
+     *
      * @param registerRequestDTO 注册请求参数（包含用户名、邮箱、密码、验证码）
      * @return 注册结果
      */
     @PostMapping("/register")
     public CommonResult<RegisterVO> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
         return loginService.register(registerRequestDTO);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param changePasswordRequestDTO 修改密码请求参数
+     * @return 修改结果
+     */
+    @PostMapping("/change-password")
+    public CommonResult<String> changePassword(@RequestBody com.birdy.domain.dto.ChangePasswordRequestDTO changePasswordRequestDTO) {
+        return loginService.changePassword(changePasswordRequestDTO);
     }
 }
