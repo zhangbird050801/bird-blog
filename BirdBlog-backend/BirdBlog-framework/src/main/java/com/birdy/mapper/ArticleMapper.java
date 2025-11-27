@@ -84,6 +84,22 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return 下一篇文章
      */
     AdjacentArticleVO selectNextArticle(@Param("publishedTime") String publishedTime);
+
+    /**
+     * 增加文章点赞数
+     *
+     * @param id 文章ID
+     * @return 影响行数
+     */
+    int incrementLikeCount(@Param("id") Long id);
+
+    /**
+     * 减少文章点赞数
+     *
+     * @param id 文章ID
+     * @return 影响行数
+     */
+    int decrementLikeCount(@Param("id") Long id);
 }
 
 

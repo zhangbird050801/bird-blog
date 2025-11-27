@@ -10,10 +10,12 @@ import ArticleToc from '@/components/blog/article/ArticleToc.vue'
 import ReadingProgress from '@/components/blog/article/ReadingProgress.vue'
 import ArticleNavigation from '@/components/blog/article/ArticleNavigation.vue'
 import RelatedArticles from '@/components/blog/article/RelatedArticles.vue'
-import { fetchArticleDetail, fetchComments } from '@/api'
+import LgToast from '@/components/base/LgToast.vue'
+import { fetchArticleDetail, fetchComments, likeArticle, unlikeArticle, checkLikeStatus, getLikeCount } from '@/api'
 import type { ArticleDetailVO, CommentVO } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { useMarkdown } from '@/composables/useMarkdown'
+import { useToast } from '@/composables/useToast'
 // import 'highlight.js/styles/atom-one-dark.css' // 代码高亮样式主题
 import '../assets/atom-one-dark.css' 
 
@@ -24,6 +26,12 @@ const articleState = useAsyncData<ArticleDetailVO>()
 const commentsState = useAsyncData<CommentVO[]>()
 const showDonate = ref(false)
 const { render: renderMarkdown } = useMarkdown()
+const { show: showToast, toastMessage, toastType, showToast: showToastRef } = useToast()
+
+// 点赞相关状态
+const isLiked = ref(false)
+const likeCount = ref(0)
+const isLikeLoading = ref(false)
 
 // 渲染后的 Markdown 内容
 const renderedContent = computed(() => {
@@ -37,6 +45,69 @@ async function refreshComments() {
   const articleId = articleState.data.value?.id
   if (articleId) {
     await commentsState.run(() => fetchComments(articleId))
+  }
+}
+
+// 处理点赞
+async function handleLike() {
+  const articleId = articleState.data.value?.id
+  if (!articleId) return
+
+  isLikeLoading.value = true
+  try {
+    if (isLiked.value) {
+      // 取消点赞
+      const success = await unlikeArticle(articleId)
+      if (success) {
+        isLiked.value = false
+        likeCount.value = Math.max(0, likeCount.value - 1)
+        showToast('取消点赞成功', 'success')
+      }
+    } else {
+      // 点赞
+      const success = await likeArticle(articleId)
+      if (success) {
+        isLiked.value = true
+        likeCount.value += 1
+        showToast('点赞成功', 'success')
+      }
+    }
+  } catch (error: any) {
+    console.error('点赞操作失败:', error)
+
+    // 处理不同的错误情况
+    if (error.message?.includes('401')) {
+      showToast('请先登录后再点赞', 'warning')
+    } else if (error.message?.includes('400')) {
+      showToast(error.message, 'warning')
+    } else {
+      showToast('操作失败，请稍后重试', 'error')
+    }
+  } finally {
+    isLikeLoading.value = false
+  }
+}
+
+// 初始化点赞状态
+async function initLikeStatus() {
+  const articleId = articleState.data.value?.id
+  if (!articleId) return
+
+  try {
+    // 获取点赞状态（需要登录）
+    try {
+      const liked = await checkLikeStatus(articleId)
+      isLiked.value = liked
+    } catch (error) {
+      // 用户未登录，忽略错误
+      isLiked.value = false
+    }
+
+    // 获取点赞数量（不需要登录）
+    const count = await getLikeCount(articleId)
+    likeCount.value = count
+  } catch (error) {
+    console.error('初始化点赞状态失败:', error)
   }
 }
 
@@ -56,6 +127,8 @@ async function load(slug: string) {
   const detail = await articleState.run(() => fetchArticleDetail(slug))
   if (detail) {
     await commentsState.run(() => fetchComments(detail.id))
+    // 初始化点赞状态
+    await initLikeStatus()
   }
 }
 
@@ -88,9 +161,9 @@ watch(
           <i class="fa fa-eye"></i>
           {{ articleState.data.value.viewCount ?? 0 }} 次围观
         </span>
-        <span class="meta-item">
-          <i class="fa fa-heart-o"></i>
-          {{ articleState.data.value.likeCount ?? 0 }} 次点赞
+        <span class="meta-item like-item" @click="handleLike" :class="{ 'is-liked': isLiked, 'is-loading': isLikeLoading }">
+          <i :class="isLiked ? 'fa fa-heart' : 'fa fa-heart-o'"></i>
+          {{ likeCount ?? 0 }} 次点赞
         </span>
         <span class="meta-item" v-if="articleState.data.value.categoryName">
           <i class="fa fa-folder-o"></i>
@@ -183,6 +256,14 @@ watch(
 <!--    <i class="fa fa-spinner fa-spin"></i>-->
 <!--    正在加载 BirdBlog 文章...-->
 <!--  </div>-->
+
+  <!-- Toast 消息提示 -->
+  <LgToast
+    v-model:show="showToastRef"
+    :message="toastMessage"
+    :type="toastType"
+    :duration="3000"
+  />
 </template>
 
 <style scoped>
@@ -233,6 +314,51 @@ html {
 
 .meta-item i {
   color: var(--sg-primary);
+}
+
+/* 点赞按钮样式 */
+.like-item {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.like-item:hover {
+  color: var(--sg-danger);
+  transform: scale(1.05);
+}
+
+.like-item.is-liked {
+  color: var(--sg-danger);
+}
+
+.like-item.is-liked i {
+  color: var(--sg-danger);
+  animation: heartBeat 0.5s ease-in-out;
+}
+
+.like-item.is-loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .article-container {

@@ -79,4 +79,9 @@ public class ArticleDetailVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date publishedTime;
+
+    /**
+     * 当前用户是否已点赞（仅当用户登录时返回）
+     */
+    private Boolean isLiked;
 }

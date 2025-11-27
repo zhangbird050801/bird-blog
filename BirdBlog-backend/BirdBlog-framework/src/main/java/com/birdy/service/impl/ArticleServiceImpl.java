@@ -15,6 +15,7 @@ import com.birdy.domain.vo.*;
 import com.birdy.enums.HttpCodeEnum;
 import com.birdy.mapper.CategoryMapper;
 import com.birdy.mapper.UserMapper;
+import com.birdy.service.ArticleLikeService;
 import com.birdy.service.ArticleService;
 import com.birdy.mapper.ArticleMapper;
 import com.birdy.utils.SecurityUtils;
@@ -48,6 +49,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ArticleLikeService articleLikeService;
 
     @Override
     public CommonResult<List<HotArticleVO>> hot() {
@@ -95,6 +99,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
         // 增加浏览量
         articleMapper.incrementViewCount(id);
+
+        // 设置点赞状态（如果用户已登录）
+        try {
+            Long userId = SecurityUtils.getUserId();
+            if (userId != null) {
+                boolean isLiked = articleLikeService.isLiked(id, userId);
+                articleDetail.setIsLiked(isLiked);
+            }
+        } catch (Exception e) {
+            // 用户未登录或其他异常，不设置点赞状态
+        }
+
         return CommonResult.success(articleDetail);
     }
 
@@ -110,6 +126,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         }
 
         articleMapper.incrementViewCount(articleDetail.getId());
+
+        // 设置点赞状态（如果用户已登录）
+        try {
+            Long userId = SecurityUtils.getUserId();
+            if (userId != null) {
+                boolean isLiked = articleLikeService.isLiked(articleDetail.getId(), userId);
+                articleDetail.setIsLiked(isLiked);
+            }
+        } catch (Exception e) {
+            // 用户未登录或其他异常，不设置点赞状态
+        }
+
         return CommonResult.success(articleDetail);
     }
 

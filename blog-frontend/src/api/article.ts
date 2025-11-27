@@ -1,4 +1,4 @@
-import { get, type ApiResponse, handleApiResponse } from './http'
+import { get, type ApiResponse, handleApiResponse, post, del } from './http'
 import type { PageResultVO } from './types'
 
 /**
@@ -35,6 +35,7 @@ export interface ArticleDetailVO {
   commentCount?: number
   isComment?: boolean
   publishedTime?: string
+  isLiked?: boolean
 }
 
 /**
@@ -207,5 +208,51 @@ export async function searchArticles(keyword: string): Promise<ArticleVO[]> {
   params.set('keyword', keyword.trim())
 
   const response = await get<ApiResponse<ArticleVO[]>>(`/article/search?${params.toString()}`)
+  return handleApiResponse(response)
+}
+
+/**
+ * 点赞文章
+ * @param articleId 文章ID
+ * @returns 点赞结果
+ */
+export async function likeArticle(articleId: number): Promise<boolean> {
+  const response = await post<ApiResponse<boolean>>(`/article/like/${articleId}`, null, {
+    auth: true
+  })
+  return handleApiResponse(response)
+}
+
+/**
+ * 取消点赞文章
+ * @param articleId 文章ID
+ * @returns 取消点赞结果
+ */
+export async function unlikeArticle(articleId: number): Promise<boolean> {
+  const response = await del<ApiResponse<boolean>>(`/article/like/${articleId}`, {
+    auth: true
+  })
+  return handleApiResponse(response)
+}
+
+/**
+ * 检查文章点赞状态
+ * @param articleId 文章ID
+ * @returns 是否已点赞
+ */
+export async function checkLikeStatus(articleId: number): Promise<boolean> {
+  const response = await get<ApiResponse<boolean>>(`/article/like/status/${articleId}`, {
+    auth: true
+  })
+  return handleApiResponse(response)
+}
+
+/**
+ * 获取文章点赞数
+ * @param articleId 文章ID
+ * @returns 点赞数量
+ */
+export async function getLikeCount(articleId: number): Promise<number> {
+  const response = await get<ApiResponse<number>>(`/article/like/count/${articleId}`)
   return handleApiResponse(response)
 }

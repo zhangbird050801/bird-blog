@@ -221,4 +221,25 @@
         LIMIT 1
     </select>
 
+    <!-- 增加文章点赞数 -->
+    <update id="incrementLikeCount">
+        UPDATE bg_article
+        SET like_count = like_count + 1,
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <!-- 减少文章点赞数 -->
+    <update id="decrementLikeCount">
+        UPDATE bg_article
+        SET like_count = CASE
+            WHEN like_count &gt; 0 THEN like_count - 1
+            ELSE 0
+        END,
+        update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
 </mapper>
