@@ -161,7 +161,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Edit, Delete, View, Check, DocumentCopy } from '@element-plus/icons-vue'
-import { getArticlePage, deleteArticle, toggleArticleTop, Article, ArticleQueryParams } from '@/api/article'
+import { getArticlePage, deleteArticle, toggleArticleTop, publishArticle, draftArticle, Article, ArticleQueryParams } from '@/api/article'
 import { getCategoryPage } from '@/api/category'
 import type { Category } from '@/types'
 import { useUserStore } from '@/stores/user'
@@ -314,8 +314,14 @@ const handleTogglePublish = async (row: Article) => {
       }
     )
 
-    ElMessage.info(`${action}文章功能开发中...`)
-    // TODO: 实现发布/草稿功能
+    if (row.status === 1) {
+      await publishArticle(row.id)
+      ElMessage.success('发布成功')
+    } else {
+      await draftArticle(row.id)
+      ElMessage.success('已设为草稿')
+    }
+    getList()
   } catch (error: any) {
     if (error !== 'cancel') {
       console.error(`${action}失败:`, error)

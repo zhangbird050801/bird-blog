@@ -277,4 +277,16 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
             return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除标签失败：" + e.getMessage());
         }
     }
+
+    @Override
+    public CommonResult<Tag> getDetail(Long id) {
+        if (id == null) {
+            return CommonResult.error(com.birdy.enums.HttpCodeEnum.PARAM_ERROR, "标签ID不能为空");
+        }
+        Tag tag = getById(id);
+        if (tag == null || Boolean.TRUE.equals(tag.getDeleted())) {
+            return CommonResult.error(com.birdy.enums.HttpCodeEnum.NOT_FOUND, "标签不存在");
+        }
+        return CommonResult.success(tag);
+    }
 }

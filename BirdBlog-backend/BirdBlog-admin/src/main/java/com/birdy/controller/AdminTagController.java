@@ -53,11 +53,10 @@ public class AdminTagController {
 
     /**
      * 获取标签详情
-     * 暂未实现
      */
     @GetMapping("/{id}")
     public CommonResult<?> getById(@PathVariable Long id) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "标签详情功能暂未实现");
+        return tagService.getDetail(id);
     }
 
     /**

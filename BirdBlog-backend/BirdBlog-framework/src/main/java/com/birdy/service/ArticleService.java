@@ -93,7 +93,7 @@ public interface ArticleService extends IService<Article> {
      * @param article 文章信息
      * @return 创建结果
      */
-    CommonResult<Long> createArticle(Article article);
+    CommonResult<Long> createArticle(Article article, List<Long> tagIds, List<String> newTags, List<com.birdy.domain.dto.TagCreateDTO> newTagsDetail, String newTagRemark, String newCategoryName, String newCategoryRemark);
 
     /**
      * 更新文章
@@ -101,5 +101,31 @@ public interface ArticleService extends IService<Article> {
      * @param article 文章信息
      * @return 更新结果
      */
-    CommonResult<Void> updateArticle(Article article);
+    CommonResult<Void> updateArticle(Article article, List<Long> tagIds, List<String> newTags, List<com.birdy.domain.dto.TagCreateDTO> newTagsDetail, String newTagRemark, String newCategoryName, String newCategoryRemark);
+
+    /**
+     * 同步文章标签
+     * @param articleId 文章ID
+     * @param tagIds 标签ID列表
+     */
+    CommonResult<Void> updateArticleTags(Long articleId, List<Long> tagIds);
+
+    /**
+     * 发布文章（状态置为发布并回填发布时间）
+     * @param id 文章ID
+     */
+    CommonResult<Void> publishArticle(Long id);
+
+    /**
+     * 将文章设为草稿
+     * @param id 文章ID
+     */
+    CommonResult<Void> draftArticle(Long id);
+
+    /**
+     * 置顶/取消置顶文章
+     * @param id 文章ID
+     * @param isTop 是否置顶
+     */
+    CommonResult<Void> toggleTop(Long id, Boolean isTop);
 }

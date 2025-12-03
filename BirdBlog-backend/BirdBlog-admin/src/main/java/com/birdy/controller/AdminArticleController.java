@@ -10,6 +10,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * @author Birdy
  * @date 2025/11/2 18:11
@@ -55,7 +57,15 @@ public class AdminArticleController {
         // 转换 VO 为 Entity
         Article article = new Article();
         BeanUtils.copyProperties(articleVO, article);
-        return articleService.createArticle(article);
+        return articleService.createArticle(
+                article,
+                articleVO.getTagIds(),
+                articleVO.getNewTags(),
+                articleVO.getNewTagsDetail(),
+                articleVO.getNewTagRemark(),
+                articleVO.getNewCategoryName(),
+                articleVO.getNewCategoryRemark()
+        );
     }
 
     /**
@@ -71,7 +81,15 @@ public class AdminArticleController {
         Article article = new Article();
         BeanUtils.copyProperties(articleVO, article);
         article.setId(id);
-        return articleService.updateArticle(article);
+        return articleService.updateArticle(
+                article,
+                articleVO.getTagIds(),
+                articleVO.getNewTags(),
+                articleVO.getNewTagsDetail(),
+                articleVO.getNewTagRemark(),
+                articleVO.getNewCategoryName(),
+                articleVO.getNewCategoryRemark()
+        );
     }
 
     /**
@@ -88,5 +106,41 @@ public class AdminArticleController {
         } else {
             return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除失败");
         }
+    }
+
+    /**
+     * 发布文章
+     *
+     * @param id 文章ID
+     */
+    @PutMapping("/{id}/publish")
+    public CommonResult<Void> publishArticle(@PathVariable Long id) {
+        return articleService.publishArticle(id);
+    }
+
+    /**
+     * 将文章设为草稿
+     *
+     * @param id 文章ID
+     */
+    @PutMapping("/{id}/draft")
+    public CommonResult<Void> draftArticle(@PathVariable Long id) {
+        return articleService.draftArticle(id);
+    }
+
+    /**
+     * 置顶/取消置顶
+     *
+     * @param id 文章ID
+     * @param body 请求体，包含 isTop
+     */
+    @PutMapping("/{id}/top")
+    public CommonResult<Void> toggleTop(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Object flag = body.get("isTop");
+        if (flag == null) {
+            return CommonResult.error(com.birdy.enums.HttpCodeEnum.PARAM_ERROR, "isTop 不能为空");
+        }
+        boolean isTop = Boolean.TRUE.equals(flag) || "true".equalsIgnoreCase(flag.toString());
+        return articleService.toggleTop(id, isTop);
     }
 }

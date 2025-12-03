@@ -65,4 +65,11 @@ public interface CommentService extends IService<Comment> {
      * @return 操作结果
      */
     CommonResult<Void> deleteComments(String ids);
+
+    /**
+     * 获取单条评论详情（包含用户与关联对象信息）
+     * @param id 评论ID
+     * @return 评论详情
+     */
+    CommonResult<CommentVO> getDetail(Long id);
 }

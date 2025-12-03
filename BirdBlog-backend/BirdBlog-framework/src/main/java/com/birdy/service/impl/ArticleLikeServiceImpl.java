@@ -3,7 +3,6 @@ package com.birdy.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.birdy.domain.entity.ArticleLike;
 import com.birdy.mapper.ArticleLikeMapper;
-import com.birdy.mapper.ArticleMapper;
 import com.birdy.service.ArticleLikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,6 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
 
     @Autowired
     private ArticleLikeMapper articleLikeMapper;
-
-    @Autowired
-    private ArticleMapper articleMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -39,12 +35,7 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
 
         // 保存点赞记录
         int insertCount = articleLikeMapper.insert(articleLike);
-        if (insertCount > 0) {
-            // 更新文章的点赞数
-            articleMapper.incrementLikeCount(articleId);
-            return true;
-        }
-        return false;
+        return insertCount > 0;
     }
 
     @Override
@@ -58,12 +49,7 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
 
         // 删除点赞记录
         int deleteCount = articleLikeMapper.deleteByArticleIdAndUserId(articleId, userId);
-        if (deleteCount > 0) {
-            // 更新文章的点赞数
-            articleMapper.decrementLikeCount(articleId);
-            return true;
-        }
-        return false;
+        return deleteCount > 0;
     }
 
     @Override

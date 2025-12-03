@@ -358,4 +358,16 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "删除友链失败：" + e.getMessage());
         }
     }
+
+    @Override
+    public CommonResult<Link> getDetail(Long id) {
+        if (id == null) {
+            return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "友链ID不能为空");
+        }
+        Link link = getById(id);
+        if (link == null || Boolean.TRUE.equals(link.getDeleted())) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "友链不存在");
+        }
+        return CommonResult.success(link);
+    }
 }

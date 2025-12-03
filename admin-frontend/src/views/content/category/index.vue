@@ -91,8 +91,8 @@
           :page-sizes="[10, 20, 50, 100]"
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleQuery"
-          @current-change="handleQuery"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
         />
       </div>
     </el-card>
@@ -254,6 +254,23 @@ const getList = async () => {
  * 搜索
  */
 const handleQuery = () => {
+  queryParams.pageNum = 1
+  getList()
+}
+
+/**
+ * 分页页码变化
+ */
+const handlePageChange = (page: number) => {
+  queryParams.pageNum = page
+  getList()
+}
+
+/**
+ * 分页大小变化
+ */
+const handleSizeChange = (size: number) => {
+  queryParams.pageSize = size
   queryParams.pageNum = 1
   getList()
 }

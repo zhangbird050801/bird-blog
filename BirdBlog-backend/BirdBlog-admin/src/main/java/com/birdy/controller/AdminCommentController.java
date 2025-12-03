@@ -56,11 +56,10 @@ public class AdminCommentController {
 
     /**
      * 获取评论详情
-     * 暂未实现
      */
     @GetMapping("/{id}")
     public CommonResult<?> getById(@PathVariable Long id) {
-        return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "评论详情功能暂未实现");
+        return commentService.getDetail(id);
     }
 
     /**

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 管理员文章列表 VO
@@ -48,6 +49,11 @@ public class AdminArticleVO {
      * 分类ID
      */
     private Long categoryId;
+
+    /**
+     * 新增分类名称（仅创建/更新时使用）
+     */
+    private String newCategoryName;
 
     /**
      * 分类名称
@@ -131,6 +137,35 @@ public class AdminArticleVO {
      * 更新者
      */
     private String updater;
+
+    /**
+     * 绑定的标签ID列表
+     */
+    private List<Long> tagIds;
+
+    /**
+     * 新增的标签名称列表（仅创建/更新时使用）
+     */
+    private List<String> newTags;
+
+    /**
+     * 新增标签详情（名称+备注）
+     */
+    private List<com.birdy.domain.dto.TagCreateDTO> newTagsDetail;
+    /**
+     * 新增标签备注（可选，作用于本次所有新建标签）
+     */
+    private String newTagRemark;
+
+    /**
+     * 新增分类名称（仅创建/更新时使用）
+     */
+    private String newCategoryName;
+
+    /**
+     * 新增分类备注（可选）
+     */
+    private String newCategoryRemark;
 
     /**
      * 获取状态描述

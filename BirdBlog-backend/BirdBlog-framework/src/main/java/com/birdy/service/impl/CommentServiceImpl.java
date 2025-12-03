@@ -419,6 +419,51 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         }
     }
 
+    @Override
+    public CommonResult<CommentVO> getDetail(Long id) {
+        if (id == null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "评论ID不能为空");
+        }
+        Comment comment = getById(id);
+        if (comment == null || Boolean.TRUE.equals(comment.getDeleted())) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "评论不存在");
+        }
+
+        // 预取关联的用户/文章/友链
+        Map<Long, User> userMap = new HashMap<>();
+        if (comment.getFromUserId() != null) {
+            User from = userMapper.selectById(comment.getFromUserId());
+            if (from != null) {
+                userMap.put(from.getId(), from);
+            }
+        }
+        if (comment.getToUserId() != null) {
+            User to = userMapper.selectById(comment.getToUserId());
+            if (to != null) {
+                userMap.put(to.getId(), to);
+            }
+        }
+
+        Map<Long, Article> articleMap = new HashMap<>();
+        if (comment.getArticleId() != null) {
+            Article article = articleMapper.selectById(comment.getArticleId());
+            if (article != null) {
+                articleMap.put(article.getId(), article);
+            }
+        }
+
+        Map<Long, Link> linkMap = new HashMap<>();
+        if (comment.getLinkId() != null) {
+            Link link = linkMapper.selectById(comment.getLinkId());
+            if (link != null) {
+                linkMap.put(link.getId(), link);
+            }
+        }
+
+        CommentVO vo = toCommentVOWithUserInfo(comment, userMap, articleMap, linkMap);
+        return CommonResult.success(vo);
+    }
+
       /**
      * 将Comment实体转换为CommentVO（用于管理后台，包含完整信息）
      */

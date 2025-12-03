@@ -56,11 +56,10 @@ public class AdminLinkController {
 
     /**
      * 获取友链详情
-     * 暂未实现
      */
     @GetMapping("/{id}")
     public CommonResult<?> getById(@PathVariable Long id) {
-        return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "友链详情功能暂未实现");
+        return linkService.getDetail(id);
     }
 
     /**

@@ -29,6 +29,12 @@ export interface Article {
   creator?: string
   updater?: string
   deleted?: boolean
+  tagIds?: number[]
+  newTags?: string[]
+  newTagsDetail?: { name: string; remark?: string }[]
+  newCategoryName?: string
+  newTagRemark?: string
+  newCategoryRemark?: string
 }
 
 /**
@@ -104,6 +110,13 @@ export function deleteArticle(ids: string): Promise<void> {
  */
 export function publishArticle(id: string | number): Promise<void> {
   return http.put(`/admin/article/${id}/publish`)
+}
+
+/**
+ * 将文章设为草稿
+ */
+export function draftArticle(id: string | number): Promise<void> {
+  return http.put(`/admin/article/${id}/draft`)
 }
 
 /**

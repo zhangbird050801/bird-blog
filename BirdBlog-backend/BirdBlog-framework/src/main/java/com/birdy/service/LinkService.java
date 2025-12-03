@@ -60,4 +60,11 @@ public interface LinkService extends IService<Link> {
      */
     CommonResult<String> deleteLinks(List<Long> ids);
 
+    /**
+     * 获取友链详情
+     * @param id 友链ID
+     * @return 友链信息
+     */
+    CommonResult<Link> getDetail(Long id);
+
 }

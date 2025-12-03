@@ -53,7 +53,9 @@
                   v-model="formData.categoryId"
                   placeholder="请选择分类"
                   clearable
+                  filterable
                   style="width: 100%"
+                  @change="handleCategoryChange"
                 >
                   <el-option
                     v-for="category in categoryOptions"
@@ -62,6 +64,23 @@
                     :value="category.id"
                   />
                 </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="新建分类">
+                <div class="inline-actions">
+                  <el-button type="primary" plain @click="openCategoryDialog">新建分类</el-button>
+                  <div class="chip-list">
+                    <el-tag
+                      v-if="pendingNewCategory"
+                      closable
+                      @close="clearPendingCategory"
+                      class="chip"
+                    >
+                      {{ pendingNewCategory }}<span v-if="pendingNewCategoryRemark">（{{ pendingNewCategoryRemark }}）</span>
+                    </el-tag>
+                  </div>
+                </div>
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -75,6 +94,48 @@
             <el-col :span="8">
               <el-form-item label="是否置顶">
                 <el-switch v-model="formData.isTop" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="24">
+              <el-form-item label="标签">
+                <el-select
+                  v-model="formData.tagIds"
+                  multiple
+                  filterable
+                  clearable
+                  :loading="tagLoading"
+                  placeholder="选择已有标签"
+                  style="width: 100%"
+                  @change="handleTagChange"
+                >
+                  <el-option
+                    v-for="tag in tagOptions"
+                    :key="tag.id"
+                    :label="tag.name"
+                    :value="tag.id"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="新标签">
+                <div class="inline-actions">
+                  <el-button type="primary" plain @click="openTagDialog">新建标签</el-button>
+                  <div class="chip-list">
+                    <el-tag
+                      v-for="tag in pendingNewTagsDetail"
+                      :key="tag.name + tag.remark"
+                      closable
+                      @close="removePendingTag(tag.name)"
+                      class="chip"
+                    >
+                      {{ tag.name }}<span v-if="tag.remark">（{{ tag.remark }}）</span>
+                    </el-tag>
+                  </div>
+                </div>
               </el-form-item>
             </el-col>
           </el-row>
@@ -196,6 +257,38 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 新建标签弹窗 -->
+  <el-dialog v-model="tagDialogVisible" title="新建标签" width="420px">
+    <el-form label-width="80px">
+      <el-form-item label="名称" required>
+        <el-input v-model="tagDialogForm.name" placeholder="请输入标签名称" />
+      </el-form-item>
+      <el-form-item label="备注">
+        <el-input v-model="tagDialogForm.remark" type="textarea" :rows="2" placeholder="可选" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="tagDialogVisible = false">取消</el-button>
+      <el-button type="primary" @click="submitTagDialog">确定</el-button>
+    </template>
+  </el-dialog>
+
+  <!-- 新建分类弹窗 -->
+  <el-dialog v-model="categoryDialogVisible" title="新建分类" width="420px">
+    <el-form label-width="80px">
+      <el-form-item label="名称" required>
+        <el-input v-model="categoryDialogForm.name" placeholder="请输入分类名称" />
+      </el-form-item>
+      <el-form-item label="备注">
+        <el-input v-model="categoryDialogForm.remark" type="textarea" :rows="2" placeholder="可选" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="categoryDialogVisible = false">取消</el-button>
+      <el-button type="primary" @click="submitCategoryDialog">确定</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -207,9 +300,10 @@ import 'md-editor-v3/lib/style.css'
 import { useMarkdown } from '@/composables/useMarkdown'
 import { updateArticle, createArticle, Article } from '@/api/article'
 import { getCategoryPage } from '@/api/category'
+import { getTagPage } from '@/api/tag'
 import { uploadImage, uploadThumbnail } from '@/api/upload'
 import type { UploadResponse } from '@/api/upload'
-import type { Category } from '@/types'
+import type { Category, Tag } from '@/types'
 
 interface Props {
   modelValue: boolean
@@ -232,6 +326,16 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 const saving = ref(false)
 const categoryOptions = ref<Category[]>([])
+const tagOptions = ref<Tag[]>([])
+const tagLoading = ref(false)
+const pendingNewTags = ref<string[]>([])
+const pendingNewCategory = ref<string>('')
+const pendingNewTagsDetail = ref<{ name: string; remark?: string }[]>([])
+const pendingNewCategoryRemark = ref('')
+const tagDialogVisible = ref(false)
+const categoryDialogVisible = ref(false)
+const tagDialogForm = reactive({ name: '', remark: '' })
+const categoryDialogForm = reactive({ name: '', remark: '' })
 const thumbnailFileInput = ref<HTMLInputElement>()
 
 // 上传配置
@@ -268,7 +372,8 @@ const formData = reactive({
   categoryId: undefined as number | undefined,
   status: 1, // 默认草稿
   isTop: false,
-  thumbnail: ''
+  thumbnail: '',
+  tagIds: [] as Array<number | string>
 })
 
 // 表单验证规则
@@ -282,7 +387,16 @@ const formRules: FormRules = {
     { min: 10, message: '文章内容至少需要 10 个字符', trigger: 'blur' }
   ],
   categoryId: [
-    { required: true, message: '请选择文章分类', trigger: 'change' }
+    {
+      validator: (_rule, _value, callback) => {
+        if (formData.categoryId || pendingNewCategory.value) {
+          callback()
+        } else {
+          callback(new Error('请选择文章分类或新建一个分类'))
+        }
+      },
+      trigger: 'change'
+    }
   ]
 }
 
@@ -358,8 +472,13 @@ watch(visible, (isVisible) => {
         categoryId: props.article.categoryId,
         status: props.article.status,
         isTop: props.article.isTop || false,
-        thumbnail: props.article.thumbnail || ''
+        thumbnail: props.article.thumbnail || '',
+        tagIds: props.article.tagIds || []
       })
+      pendingNewCategory.value = ''
+      pendingNewCategoryRemark.value = ''
+      pendingNewTags.value = []
+      pendingNewTagsDetail.value = []
     } else {
       // 新增模式：重置表单
       resetForm()
@@ -378,8 +497,13 @@ watch(() => props.article, (newArticle) => {
       categoryId: newArticle.categoryId,
       status: newArticle.status,
       isTop: newArticle.isTop || false,
-      thumbnail: newArticle.thumbnail || ''
+      thumbnail: newArticle.thumbnail || '',
+      tagIds: newArticle.tagIds || []
     })
+    pendingNewCategory.value = ''
+    pendingNewCategoryRemark.value = ''
+    pendingNewTags.value = []
+    pendingNewTagsDetail.value = []
   }
 }, { deep: true })
 
@@ -395,8 +519,13 @@ const resetForm = () => {
     categoryId: undefined,
     status: 1,
     isTop: false,
-    thumbnail: ''
+    thumbnail: '',
+    tagIds: []
   })
+  pendingNewCategory.value = ''
+  pendingNewCategoryRemark.value = ''
+  pendingNewTags.value = []
+  pendingNewTagsDetail.value = []
   formRef.value?.clearValidate()
 }
 
@@ -407,9 +536,33 @@ const getCategoryOptions = async () => {
   try {
     const result = await getCategoryPage({ pageNum: 1, pageSize: 1000 })
     categoryOptions.value = result.rows
+    // 如果新建的分类刚被创建，刷新后尝试自动选中
+    if (pendingNewCategory.value) {
+      const match = categoryOptions.value.find(c => c.name === pendingNewCategory.value)
+      if (match) {
+        formData.categoryId = match.id
+        pendingNewCategory.value = ''
+      }
+    }
   } catch (error) {
     console.error('获取分类选项失败:', error)
     ElMessage.error('获取分类选项失败')
+  }
+}
+
+/**
+ * 获取标签选项
+ */
+const getTagOptions = async () => {
+  try {
+    tagLoading.value = true
+    const result = await getTagPage({ pageNum: 1, pageSize: 500 })
+    tagOptions.value = result.rows || []
+  } catch (error) {
+    console.error('获取标签选项失败:', error)
+    ElMessage.error('获取标签选项失败')
+  } finally {
+    tagLoading.value = false
   }
 }
 
@@ -457,7 +610,18 @@ const handleSave = async () => {
 
   saving.value = true
   try {
-    const articleData = { ...formData }
+    const cleanTagIds = formData.tagIds.filter((v): v is number => typeof v === 'number')
+    const articleData = {
+      ...formData,
+      tagIds: cleanTagIds,
+      newCategoryName: pendingNewCategory.value || undefined,
+      newCategoryRemark: pendingNewCategoryRemark.value || undefined,
+      newTags: Array.from(new Set(pendingNewTags.value.map(name => name.trim()).filter(Boolean))),
+      newTagsDetail: pendingNewTagsDetail.value.map(t => ({
+        name: t.name.trim(),
+        remark: t.remark?.trim() || ''
+      }))
+    }
 
     if (isEdit.value) {
       await updateArticle(props.article!.id, articleData)
@@ -467,6 +631,8 @@ const handleSave = async () => {
       ElMessage.success('文章创建成功')
     }
 
+    await getTagOptions()
+    await getCategoryOptions()
     emit('success')
     handleClose()
   } catch (error: any) {
@@ -566,13 +732,98 @@ const handleClose = () => {
   resetForm()
 }
 
+/**
+ * 标签变化时处理新增标签
+ */
+const handleTagChange = (values: Array<number | string>) => {
+  const selectedIds = values.filter((v): v is number => typeof v === 'number')
+  formData.tagIds = selectedIds
+}
+
+/**
+ * 分类选择/创建
+ */
+const handleCategoryChange = (value: number | string | undefined) => {
+  if (typeof value === 'number') {
+    pendingNewCategory.value = ''
+    pendingNewCategoryRemark.value = ''
+    formData.categoryId = value
+  }
+}
+
+const openTagDialog = () => {
+  tagDialogVisible.value = true
+  tagDialogForm.name = ''
+  tagDialogForm.remark = ''
+}
+
+const submitTagDialog = () => {
+  const name = tagDialogForm.name.trim()
+  if (!name) {
+    ElMessage.warning('请输入标签名称')
+    return
+  }
+  pendingNewTagsDetail.value.push({
+    name,
+    remark: tagDialogForm.remark.trim() || undefined
+  })
+  // 让新标签在选择器中可见
+  pendingNewTags.value.push(name)
+  tagDialogVisible.value = false
+}
+
+const removePendingTag = (name: string) => {
+  pendingNewTagsDetail.value = pendingNewTagsDetail.value.filter(t => t.name !== name)
+}
+
+const openCategoryDialog = () => {
+  categoryDialogVisible.value = true
+  categoryDialogForm.name = ''
+  categoryDialogForm.remark = ''
+}
+
+const submitCategoryDialog = () => {
+  const name = categoryDialogForm.name.trim()
+  if (!name) {
+    ElMessage.warning('请输入分类名称')
+    return
+  }
+  pendingNewCategory.value = name
+  pendingNewCategoryRemark.value = categoryDialogForm.remark.trim() || ''
+  formData.categoryId = undefined
+  categoryDialogVisible.value = false
+}
+
+const clearPendingCategory = () => {
+  pendingNewCategory.value = ''
+  pendingNewCategoryRemark.value = ''
+}
+
 // 页面加载时获取分类选项
 onMounted(() => {
   getCategoryOptions()
+  getTagOptions()
 })
 </script>
 
 <style scoped>
+/* 弹窗内快速操作布局 */
+.inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  margin: 2px 0;
+}
+
 /* 缩略图上传样式 */
 .thumbnail-upload-container {
   display: flex;

@@ -57,4 +57,11 @@ public interface TagService extends IService<Tag> {
      * @return 删除结果
      */
     CommonResult<String> deleteTags(List<Long> ids);
+
+    /**
+     * 获取标签详情
+     * @param id 标签ID
+     * @return 标签信息
+     */
+    CommonResult<Tag> getDetail(Long id);
 }

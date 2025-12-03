@@ -4,30 +4,41 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.assist.ISqlRunner;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.birdy.constants.SysConstants;
 import com.birdy.domain.CommonResult;
 import com.birdy.domain.dto.ArticleQueryDTO;
 import com.birdy.domain.entity.Article;
 import com.birdy.domain.entity.Category;
 import com.birdy.domain.entity.User;
+import com.birdy.domain.entity.ArticleTag;
+import com.birdy.domain.entity.Tag;
 import com.birdy.domain.vo.*;
 import com.birdy.enums.HttpCodeEnum;
 import com.birdy.mapper.CategoryMapper;
+import com.birdy.mapper.TagMapper;
 import com.birdy.mapper.UserMapper;
+import com.birdy.mapper.ArticleTagMapper;
 import com.birdy.service.ArticleLikeService;
 import com.birdy.service.ArticleService;
 import com.birdy.mapper.ArticleMapper;
 import com.birdy.utils.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
 import static com.birdy.constants.SysConstants.*;
@@ -49,6 +60,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ArticleTagMapper articleTagMapper;
+
+    @Autowired
+    private TagMapper tagMapper;
 
     @Autowired
     private ArticleLikeService articleLikeService;
@@ -329,12 +346,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         BeanUtils.copyProperties(article, adminArticleVO);
         adminArticleVO.setCategoryName(categoryName);
         adminArticleVO.setAuthorName(authorName);
+        adminArticleVO.setTagIds(getArticleTagIds(id));
 
         return CommonResult.success(adminArticleVO);
     }
 
     @Override
-    public CommonResult<Long> createArticle(Article article) {
+    @Transactional(rollbackFor = Exception.class)
+    public CommonResult<Long> createArticle(Article article, List<Long> tagIds, List<String> newTags, List<com.birdy.domain.dto.TagCreateDTO> newTagsDetail, String newTagRemark, String newCategoryName, String newCategoryRemark) {
         // 获取当前登录用户ID
         Long currentUserId = SecurityUtils.getUserId();
         if (currentUserId == null) {
@@ -343,6 +362,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
         // 设置作者ID
         article.setAuthorId(currentUserId);
+
+        // 处理分类：如果传入新分类名称则创建/复用并回填 categoryId
+        CommonResult<Void> categoryResult = resolveCategory(article, newCategoryName, newCategoryRemark);
+        if (categoryResult != null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, categoryResult.getMsg());
+        }
+
+        // 处理 slug：生成或规整后校验唯一
+        CommonResult<Void> slugCheck = normalizeAndCheckSlug(article, null);
+        if (slugCheck != null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, slugCheck.getMsg());
+        }
 
         // 设置默认值
         if (article.getViewCount() == null) {
@@ -361,15 +392,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         }
 
         boolean success = save(article);
-        if (success) {
-            return CommonResult.success(article.getId());
-        } else {
+        if (!success) {
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "文章创建失败");
         }
+
+        // 统一创建缺失标签并绑定文章，保证同一事务内一致
+        List<Long> finalTagIds = resolveTagIds(tagIds, newTags, newTagsDetail, newTagRemark);
+        replaceArticleTags(article.getId(), finalTagIds);
+        return CommonResult.success(article.getId());
     }
 
     @Override
-    public CommonResult<Void> updateArticle(Article article) {
+    @Transactional(rollbackFor = Exception.class)
+    public CommonResult<Void> updateArticle(Article article, List<Long> tagIds, List<String> newTags, List<com.birdy.domain.dto.TagCreateDTO> newTagsDetail, String newTagRemark, String newCategoryName, String newCategoryRemark) {
         if (article.getId() == null || article.getId() <= 0) {
             return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
         }
@@ -397,17 +432,375 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         article.setAuthorId(existingArticle.getAuthorId());
         article.setCreateTime(existingArticle.getCreateTime());
 
+        // 处理分类：如果传入新分类名称则创建/复用并回填 categoryId
+        CommonResult<Void> categoryResult = resolveCategory(article, newCategoryName, newCategoryRemark);
+        if (categoryResult != null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, categoryResult.getMsg());
+        }
+
         // 如果状态改为发布且发布时间为空，设置当前时间
         if (article.getStatus() != null && article.getStatus() == ARTICLE_STATUS_RELEASE &&
             (article.getPublishedTime() == null || existingArticle.getStatus() == null || existingArticle.getStatus() != ARTICLE_STATUS_RELEASE)) {
             article.setPublishedTime(new java.util.Date());
         }
 
+        // 处理 slug：生成或规整后校验唯一（排除自身）
+        CommonResult<Void> slugCheck = normalizeAndCheckSlug(article, article.getId());
+        if (slugCheck != null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, slugCheck.getMsg());
+        }
+
         boolean success = updateById(article);
-        if (success) {
-            return CommonResult.success();
-        } else {
+        if (!success) {
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "文章更新失败");
+        }
+
+        // 同步标签（包含新建标签）放在同一事务内
+        List<Long> finalTagIds = resolveTagIds(tagIds, newTags, newTagsDetail, newTagRemark);
+        replaceArticleTags(article.getId(), finalTagIds);
+        return CommonResult.success();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public CommonResult<Void> updateArticleTags(Long articleId, List<Long> tagIds) {
+        if (articleId == null || articleId <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+        Article existingArticle = getById(articleId);
+        if (existingArticle == null || Boolean.TRUE.equals(existingArticle.getDeleted())) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+        replaceArticleTags(articleId, tagIds);
+        return CommonResult.success();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public CommonResult<Void> publishArticle(Long id) {
+        if (id == null || id <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+        Article article = getById(id);
+        if (article == null || Boolean.TRUE.equals(article.getDeleted())) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        Article toUpdate = new Article();
+        toUpdate.setId(id);
+        toUpdate.setStatus(ARTICLE_STATUS_RELEASE);
+        // 若此前未发布则补充发布时间
+        if (article.getPublishedTime() == null) {
+            toUpdate.setPublishedTime(new java.util.Date());
+        }
+        boolean success = updateById(toUpdate);
+        return success ? CommonResult.success() : CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "发布失败");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public CommonResult<Void> draftArticle(Long id) {
+        if (id == null || id <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+        Article article = getById(id);
+        if (article == null || Boolean.TRUE.equals(article.getDeleted())) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+        Article toUpdate = new Article();
+        toUpdate.setId(id);
+        toUpdate.setStatus(ARTICLE_STATUS_DRAFT);
+        boolean success = updateById(toUpdate);
+        return success ? CommonResult.success() : CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "设为草稿失败");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public CommonResult<Void> toggleTop(Long id, Boolean isTop) {
+        if (id == null || id <= 0) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
+        }
+        if (isTop == null) {
+            return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "isTop 不能为空");
+        }
+        Article article = getById(id);
+        if (article == null || Boolean.TRUE.equals(article.getDeleted())) {
+            return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
+        Article toUpdate = new Article();
+        toUpdate.setId(id);
+        toUpdate.setIsTop(isTop);
+        toUpdate.setPinnedTime(isTop ? new java.util.Date() : null);
+        boolean success = updateById(toUpdate);
+        return success ? CommonResult.success() : CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "置顶状态更新失败");
+    }
+
+    /**
+     * 构建最终标签ID集合，包含已选择的标签及需要新建的标签
+     */
+    private List<Long> resolveTagIds(List<Long> tagIds, List<String> newTagNames, List<com.birdy.domain.dto.TagCreateDTO> newTagsDetail, String newTagRemark) {
+        List<Long> resolved = new ArrayList<>();
+        if (tagIds != null) {
+            resolved.addAll(tagIds.stream().filter(Objects::nonNull).toList());
+        }
+
+        List<String> pendingNames = new ArrayList<>();
+        if (newTagNames != null) {
+            pendingNames.addAll(newTagNames.stream()
+                    .filter(StringUtils::hasText)
+                    .map(String::trim)
+                    .toList());
+        }
+
+        // 追加 detail 中的名称，保留对应 remark
+        List<com.birdy.domain.dto.TagCreateDTO> detailList = newTagsDetail == null ? List.of() : newTagsDetail;
+        for (com.birdy.domain.dto.TagCreateDTO dto : detailList) {
+            if (dto != null && StringUtils.hasText(dto.getName())) {
+                pendingNames.add(dto.getName().trim());
+            }
+        }
+        // 去重
+        pendingNames = pendingNames.stream().filter(StringUtils::hasText).distinct().toList();
+
+        if (!pendingNames.isEmpty()) {
+            java.util.Date now = new java.util.Date();
+            for (String name : pendingNames) {
+                // 若已存在未删除的同名标签则复用
+                LambdaQueryWrapper<Tag> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(Tag::getName, name)
+                        .and(wrapper ->
+                                wrapper.isNull(Tag::getDeleted)
+                                        .or()
+                                        .eq(Tag::getDeleted, false)
+                                        .or()
+                                        .eq(Tag::getDeleted, 0)
+                        );
+                Tag existing = tagMapper.selectOne(queryWrapper);
+                if (existing != null) {
+                    resolved.add(existing.getId());
+                    continue;
+                }
+
+                String remarkForName = findRemarkForName(detailList, name);
+                if (!StringUtils.hasText(remarkForName)) {
+                    remarkForName = StringUtils.hasText(newTagRemark) ? newTagRemark.trim() : "";
+                }
+                Tag tag = new Tag();
+                tag.setName(name);
+                tag.setRemark(remarkForName);
+                tag.setCreator("admin");
+                tag.setUpdater("admin");
+                tag.setCreateTime(now);
+                tag.setUpdateTime(now);
+                tag.setDeleted(false);
+                tagMapper.insert(tag);
+                resolved.add(tag.getId());
+            }
+        }
+
+        return resolved.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+    }
+
+    /**
+     * 规范化 slug 并检查唯一性；返回 null 表示通过
+     */
+    private CommonResult<Void> normalizeAndCheckSlug(Article article, Long excludeId) {
+        String originalSlug = article.getSlug();
+        if (!StringUtils.hasText(originalSlug)) {
+            String generated = generateSlugFromTitle(article.getTitle());
+            if (!StringUtils.hasText(generated)) {
+                return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "slug 不能为空且标题无法生成 slug");
+            }
+            originalSlug = generated;
+        }
+
+        String normalized = normalizeSlug(originalSlug);
+        if (!StringUtils.hasText(normalized)) {
+            return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "slug 不能为空");
+        }
+
+        String uniqueSlug = findUniqueSlug(normalized, excludeId);
+        if (uniqueSlug == null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "slug 已存在，请更换后重试");
+        }
+
+        article.setSlug(uniqueSlug);
+        return null;
+    }
+
+    /**
+     * 基于标题生成默认 slug
+     */
+    private String generateSlugFromTitle(String title) {
+        if (!StringUtils.hasText(title)) {
+            return null;
+        }
+        String slug = normalizeSlug(title.toLowerCase());
+        if (!StringUtils.hasText(slug)) {
+            // 避免空 slug，回退到时间戳
+            slug = "article-" + System.currentTimeMillis();
+        }
+        return slug;
+    }
+
+    /**
+     * 规范化 slug：去除两端连字符，连字符归一
+     */
+    private String normalizeSlug(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String normalized = raw.trim().toLowerCase();
+        // 非字母数字全部替换为 "-"
+        normalized = normalized.replaceAll("[^a-z0-9]+", "-");
+        // 连续 "-" 合并
+        normalized = normalized.replaceAll("-{2,}", "-");
+        // 去掉首尾 "-"
+        normalized = normalized.replaceAll("^-+|-+$", "");
+        return normalized;
+    }
+
+    /**
+     * 在数据库中查找唯一 slug，必要时追加序号
+     */
+    private String findUniqueSlug(String baseSlug, Long excludeId) {
+        String candidate = baseSlug;
+        int counter = 1;
+        while (slugExists(candidate, excludeId)) {
+            candidate = baseSlug + "-" + counter;
+            counter++;
+            // 防止极端循环
+            if (counter > 1000) {
+                return null;
+            }
+        }
+        return candidate;
+    }
+
+    private boolean slugExists(String slug, Long excludeId) {
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getSlug, slug);
+        if (excludeId != null) {
+            queryWrapper.ne(Article::getId, excludeId);
+        }
+        queryWrapper.eq(Article::getDeleted, false);
+        return articleMapper.selectCount(queryWrapper) > 0;
+    }
+
+    private String findRemarkForName(List<com.birdy.domain.dto.TagCreateDTO> detailList, String name) {
+        if (detailList == null || detailList.isEmpty()) {
+            return "";
+        }
+        for (com.birdy.domain.dto.TagCreateDTO dto : detailList) {
+            if (dto == null || dto.getName() == null) {
+                continue;
+            }
+            if (dto.getName().trim().equals(name)) {
+                return dto.getRemark() == null ? "" : dto.getRemark().trim();
+            }
+        }
+        return "";
+    }
+
+    /**
+     * 处理分类：复用已有分类或创建新分类，并回填 article.categoryId
+     */
+    private CommonResult<Void> resolveCategory(Article article, String newCategoryName, String newCategoryRemark) {
+        // 优先使用传入的 categoryId；若缺失且提供了新分类名，则创建
+        if (article.getCategoryId() != null) {
+            return null;
+        }
+        if (!StringUtils.hasText(newCategoryName)) {
+            return null;
+        }
+        String name = newCategoryName.trim();
+        if (name.isEmpty()) {
+            return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "分类名称不能为空");
+        }
+
+        // 复用未删除的同名分类
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Category::getName, name)
+                .and(wrapper ->
+                        wrapper.isNull(Category::getDeleted)
+                                .or()
+                                .eq(Category::getDeleted, false)
+                                .or()
+                                .eq(Category::getDeleted, 0)
+                );
+        Category existing = categoryMapper.selectOne(queryWrapper);
+        if (existing != null) {
+            article.setCategoryId(existing.getId());
+            return null;
+        }
+
+        Category category = new Category();
+        category.setName(name);
+        category.setPid(null);
+        category.setDescription(StringUtils.hasText(newCategoryRemark) ? newCategoryRemark.trim() : "");
+        category.setStatus(SysConstants.CATEGORY_STATUS_ENABLE);
+        category.setCount(0);
+        category.setCreator("admin");
+        category.setUpdater("admin");
+        category.setCreateTime(new java.util.Date());
+        category.setUpdateTime(new java.util.Date());
+        category.setDeleted(false);
+        int inserted = categoryMapper.insert(category);
+        if (inserted <= 0 || category.getId() == null) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "分类创建失败");
+        }
+        article.setCategoryId(category.getId());
+        return null;
+    }
+
+    /**
+     * 获取文章绑定的标签ID列表
+     */
+    private List<Long> getArticleTagIds(Long articleId) {
+        if (articleId == null) {
+            return List.of();
+        }
+        return articleTagMapper.selectList(
+            new LambdaQueryWrapper<ArticleTag>()
+                .eq(ArticleTag::getArticleId, articleId)
+                .eq(ArticleTag::getDeleted, false)
+        ).stream().map(ArticleTag::getTagId).collect(Collectors.toList());
+    }
+
+    /**
+     * 替换文章标签：软删旧关联，写入新关联
+     */
+    private void replaceArticleTags(Long articleId, List<Long> tagIds) {
+        List<Long> safeTagIds = tagIds == null ? List.of() :
+                tagIds.stream().filter(java.util.Objects::nonNull).distinct().collect(Collectors.toList());
+
+        // 软删旧标签
+        articleTagMapper.update(null,
+                new LambdaUpdateWrapper<ArticleTag>()
+                        .eq(ArticleTag::getArticleId, articleId)
+                        .set(ArticleTag::getDeleted, true)
+                        .set(ArticleTag::getUpdateTime, new java.util.Date())
+        );
+
+        if (safeTagIds.isEmpty()) {
+            return;
+        }
+
+        java.util.Date now = new java.util.Date();
+        for (Long tagId : safeTagIds) {
+            ArticleTag at = new ArticleTag();
+            at.setArticleId(articleId);
+            at.setTagId(tagId);
+            at.setDeleted(false);
+            at.setCreateTime(now);
+            at.setUpdateTime(now);
+            at.setCreator("system");
+            at.setUpdater("system");
+            articleTagMapper.insert(at);
         }
     }
 
@@ -479,7 +872,3 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         return adminArticleVO;
     }
 }
-
-
-
-
