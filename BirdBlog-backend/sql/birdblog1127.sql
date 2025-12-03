@@ -799,4 +799,107 @@ END
 ;;
 delimiter ;
 
+-- ----------------------------
+-- 补充索引以优化常用查询
+-- ----------------------------
+ALTER TABLE `bg_comment`
+    ADD INDEX `idx_comment_article_state`(`article_id`, `status`, `deleted`, `create_time`);
+
+ALTER TABLE `bg_link`
+    ADD INDEX `idx_link_status`(`status`, `deleted`, `update_time`);
+
+ALTER TABLE `bg_article`
+    ADD INDEX `idx_article_top`(`is_top`, `pinned_time`);
+
+ALTER TABLE `bg_article_like`
+    ADD INDEX `idx_like_article_deleted`(`article_id`, `deleted`);
+
+-- ----------------------------
+-- 视图：前台/后台常用只读入口
+-- ----------------------------
+DROP VIEW IF EXISTS `vw_bg_link_public`;
+CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `vw_bg_link_public` AS
+SELECT id,
+       name,
+       logo,
+       description,
+       url,
+       status,
+       create_time,
+       update_time
+FROM `bg_link`
+WHERE status = 0 AND deleted = b'0';
+
+DROP VIEW IF EXISTS `vw_bg_comment_public`;
+CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `vw_bg_comment_public` AS
+SELECT id,
+       type,
+       article_id,
+       link_id,
+       root_id,
+       parent_id,
+       from_user_id,
+       to_user_id,
+       content,
+       status,
+       like_count,
+       create_time,
+       update_time
+FROM `bg_comment`
+WHERE status = 0 AND deleted = b'0';
+
+DROP VIEW IF EXISTS `vw_bg_tag_usage`;
+CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `vw_bg_tag_usage` AS
+SELECT t.id,
+       t.name,
+       COUNT(at.article_id) AS article_count,
+       MAX(at.update_time) AS last_used_time
+FROM `bg_tag` t
+LEFT JOIN `bg_article_tag` at ON t.id = at.tag_id AND at.deleted = b'0'
+WHERE t.deleted = b'0'
+GROUP BY t.id, t.name;
+
+-- ----------------------------
+-- 触发器：点赞计数与软删同步
+-- ----------------------------
+DROP TRIGGER IF EXISTS `trg_article_like_after_insert`;
+delimiter ;;
+CREATE TRIGGER `trg_article_like_after_insert` AFTER INSERT ON `bg_article_like` FOR EACH ROW BEGIN
+    IF NEW.deleted = b'0' THEN
+        UPDATE bg_article SET like_count = like_count + 1 WHERE id = NEW.article_id;
+    END IF;
+END
+;;
+delimiter ;
+
+DROP TRIGGER IF EXISTS `trg_article_like_after_update`;
+delimiter ;;
+CREATE TRIGGER `trg_article_like_after_update` AFTER UPDATE ON `bg_article_like` FOR EACH ROW BEGIN
+    IF OLD.deleted = b'0' AND NEW.deleted = b'1' THEN
+        UPDATE bg_article SET like_count = like_count - 1 WHERE id = NEW.article_id;
+    ELSEIF OLD.deleted = b'1' AND NEW.deleted = b'0' THEN
+        UPDATE bg_article SET like_count = like_count + 1 WHERE id = NEW.article_id;
+    END IF;
+END
+;;
+delimiter ;
+
+DROP TRIGGER IF EXISTS `trg_article_like_after_delete`;
+delimiter ;;
+CREATE TRIGGER `trg_article_like_after_delete` AFTER DELETE ON `bg_article_like` FOR EACH ROW BEGIN
+    IF OLD.deleted = b'0' THEN
+        UPDATE bg_article SET like_count = like_count - 1 WHERE id = OLD.article_id;
+    END IF;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- 可选：环境侧最小权限账号（按需执行）
+-- ----------------------------
+-- CREATE USER 'birdblog_app'@'%' IDENTIFIED BY '强密码';
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON birdblog.* TO 'birdblog_app'@'%';
+-- GRANT CREATE VIEW, TRIGGER ON birdblog.* TO 'birdblog_app'@'%';
+-- FLUSH PRIVILEGES;
+
 SET FOREIGN_KEY_CHECKS = 1;
