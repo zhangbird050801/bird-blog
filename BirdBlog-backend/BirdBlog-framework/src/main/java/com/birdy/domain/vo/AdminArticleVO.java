@@ -51,11 +51,6 @@ public class AdminArticleVO {
     private Long categoryId;
 
     /**
-     * 新增分类名称（仅创建/更新时使用）
-     */
-    private String newCategoryName;
-
-    /**
      * 分类名称
      */
     private String categoryName;
@@ -166,6 +161,17 @@ public class AdminArticleVO {
      * 新增分类备注（可选）
      */
     private String newCategoryRemark;
+
+    /**
+     * 显式提供分类/作者 setter，避免 Lombok 处理异常影响编译
+     */
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
 
     /**
      * 获取状态描述
