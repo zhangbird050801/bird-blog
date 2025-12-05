@@ -1,6 +1,7 @@
 package com.birdy.service;
 
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.dto.UpdateUserInfoRequest;
 import com.birdy.domain.dto.UserQueryDTO;
 import com.birdy.domain.dto.UserRoleUpdateDTO;
 import com.birdy.domain.entity.User;
@@ -35,4 +36,19 @@ public interface UserService extends IService<User> {
      * 获取用户详细信息（包括角色和权限）
      */
     UserInfoVO getUserInfo(Long userId);
+
+    /**
+     * 获取当前用户个人信息
+     */
+    CommonResult getCurrentUserInfo();
+
+    /**
+     * 更新用户个人信息
+     */
+    CommonResult updateUserInfo(UpdateUserInfoRequest request);
+
+    /**
+     * 上传用户头像
+     */
+    CommonResult uploadAvatar(org.springframework.web.multipart.MultipartFile file);
 }

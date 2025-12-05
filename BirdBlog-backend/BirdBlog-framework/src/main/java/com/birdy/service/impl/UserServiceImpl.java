@@ -50,6 +50,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private SysMenuMapper sysMenuMapper;
 
+    @Autowired
+    private com.birdy.mapper.ArticleFavoriteMapper articleFavoriteMapper;
+
+    @Autowired
+    private com.birdy.mapper.ArticleLikeMapper articleLikeMapper;
+
     @Override
     public CommonResult<PageResult<AdminUserVO>> getUserPage(UserQueryDTO queryDTO) {
         if (queryDTO == null) {
@@ -345,6 +351,145 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } catch (Exception e) {
             // 权限信息获取失败时返回空列表，不影响其他信息
             return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public CommonResult getCurrentUserInfo() {
+        try {
+            Long userId = com.birdy.utils.SecurityUtils.getUserId();
+            User user = getById(userId);
+            if (user == null) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "用户不存在");
+            }
+
+            // 获取收藏和点赞数量
+            Long favoriteCount = getFavoriteCount(userId);
+            Long likeCount = getLikeCount(userId);
+
+            com.birdy.domain.vo.UserProfileVO userProfile = new com.birdy.domain.vo.UserProfileVO();
+            userProfile.setId(user.getId());
+            userProfile.setUsername(user.getUsername());
+            userProfile.setNickName(user.getNickName());
+            userProfile.setEmail(user.getEmail());
+            userProfile.setPhone(user.getPhone());
+            userProfile.setSex(user.getSex());
+            userProfile.setAvatar(user.getAvatar());
+            userProfile.setCreateTime(user.getCreateTime());
+            userProfile.setFavoriteCount(favoriteCount);
+            userProfile.setLikeCount(likeCount);
+
+            return CommonResult.success(userProfile);
+        } catch (Exception e) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "获取用户信息失败");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public CommonResult updateUserInfo(com.birdy.domain.dto.UpdateUserInfoRequest request) {
+        try {
+            Long userId = com.birdy.utils.SecurityUtils.getUserId();
+            User user = getById(userId);
+            if (user == null) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "用户不存在");
+            }
+
+            // 更新用户信息
+            if (StringUtils.hasText(request.getNickName())) {
+                user.setNickName(request.getNickName());
+            }
+            if (StringUtils.hasText(request.getEmail())) {
+                // 检查邮箱是否已被其他用户使用
+                LambdaQueryWrapper<User> emailWrapper = new LambdaQueryWrapper<>();
+                emailWrapper.eq(User::getEmail, request.getEmail())
+                           .ne(User::getId, userId)
+                           .eq(User::getDeleted, false);
+                if (count(emailWrapper) > 0) {
+                    return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "邮箱已被使用");
+                }
+                user.setEmail(request.getEmail());
+            }
+            if (StringUtils.hasText(request.getPhone())) {
+                user.setPhone(request.getPhone());
+            }
+            if (request.getSex() != null) {
+                user.setSex(request.getSex());
+            }
+            if (StringUtils.hasText(request.getAvatar())) {
+                user.setAvatar(request.getAvatar());
+            }
+
+            user.setUpdateTime(new Date());
+            updateById(user);
+
+            return CommonResult.success("更新成功");
+        } catch (Exception e) {
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "更新用户信息失败");
+        }
+    }
+
+    @Autowired
+    private com.birdy.utils.CosUtils cosUtils;
+
+    @Override
+    public CommonResult uploadAvatar(org.springframework.web.multipart.MultipartFile file) {
+        try {
+            // 验证文件类型
+            String extension = com.birdy.utils.FileUploadUtils.getExtension(file);
+            if (!com.birdy.utils.FileUploadUtils.isValidExtension(extension)) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "不支持的文件类型，仅支持图片格式");
+            }
+
+            // 上传到腾讯云COS
+            String key = cosUtils.uploadImgToCos(file, "avatar");
+            
+            // 生成带签名的访问URL（私有读写需要签名）
+            String avatarUrl = cosUtils.getSignedFileUrl(key);
+            
+            // 更新用户头像
+            Long userId = com.birdy.utils.SecurityUtils.getUserId();
+            User user = getById(userId);
+            if (user == null) {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "用户不存在");
+            }
+
+            user.setAvatar(avatarUrl);
+            user.setUpdateTime(new Date());
+            updateById(user);
+
+            return CommonResult.success(avatarUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "头像上传失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取用户收藏数量
+     */
+    private Long getFavoriteCount(Long userId) {
+        try {
+            LambdaQueryWrapper<com.birdy.domain.entity.ArticleFavorite> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(com.birdy.domain.entity.ArticleFavorite::getUserId, userId)
+                   .eq(com.birdy.domain.entity.ArticleFavorite::getDeleted, false);
+            return articleFavoriteMapper.selectCount(wrapper);
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    /**
+     * 获取用户点赞数量
+     */
+    private Long getLikeCount(Long userId) {
+        try {
+            LambdaQueryWrapper<com.birdy.domain.entity.ArticleLike> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(com.birdy.domain.entity.ArticleLike::getUserId, userId)
+                   .eq(com.birdy.domain.entity.ArticleLike::getDeleted, false);
+            return articleLikeMapper.selectCount(wrapper);
+        } catch (Exception e) {
+            return 0L;
         }
     }
 }

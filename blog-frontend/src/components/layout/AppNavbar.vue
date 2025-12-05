@@ -272,6 +272,15 @@ onBeforeUnmount(() => {
               </div>
             </div>
             <div class="user-menu-divider"></div>
+            <router-link to="/profile" class="user-menu-item" @click="closeUserMenu">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  fill="currentColor"
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                />
+              </svg>
+              个人中心
+            </router-link>
             <button class="user-menu-item" @click="handleChangePassword">
               <svg viewBox="0 0 24 24" width="18" height="18">
                 <path

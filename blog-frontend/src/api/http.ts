@@ -61,9 +61,14 @@ export async function request<T = any>(
 
   // 构建请求头
   const requestHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
     ...(headers as Record<string, string>),
+  }
+
+  // 只有在不是 FormData 时才设置 Content-Type
+  // FormData 需要浏览器自动设置 Content-Type (包含 boundary)
+  if (!(restOptions.body instanceof FormData)) {
+    requestHeaders['Content-Type'] = 'application/json'
   }
 
   // 如果需要认证，添加 token

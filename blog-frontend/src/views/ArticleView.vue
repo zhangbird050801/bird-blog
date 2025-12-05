@@ -11,6 +11,7 @@ import ReadingProgress from '@/components/blog/article/ReadingProgress.vue'
 import ArticleNavigation from '@/components/blog/article/ArticleNavigation.vue'
 import RelatedArticles from '@/components/blog/article/RelatedArticles.vue'
 import LgToast from '@/components/base/LgToast.vue'
+import FavoriteButton from '@/components/FavoriteButton.vue'
 import { fetchArticleDetail, fetchComments, likeArticle, unlikeArticle, checkLikeStatus, getLikeCount } from '@/api'
 import type { ArticleDetailVO, CommentVO } from '@/api'
 import { useAsyncData } from '@/composables/useAsyncData'
@@ -165,6 +166,11 @@ watch(
           <i :class="isLiked ? 'fa fa-heart' : 'fa fa-heart-o'"></i>
           {{ likeCount ?? 0 }} 次点赞
         </span>
+        <FavoriteButton 
+          v-if="articleState.data.value?.id" 
+          :articleId="articleState.data.value.id" 
+          class="meta-item"
+        />
         <span class="meta-item" v-if="articleState.data.value.categoryName">
           <i class="fa fa-folder-o"></i>
           {{ articleState.data.value.categoryName }}

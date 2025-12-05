@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.birdy.mapper.ArticleLikeMapper">
+
+    <select id="selectByArticleIdAndUserId" resultType="com.birdy.domain.entity.ArticleLike">
+        SELECT * FROM bg_article_like 
+        WHERE article_id = #{articleId} AND user_id = #{userId} AND deleted = 0
+    </select>
+
+    <delete id="deleteByArticleIdAndUserId">
+        UPDATE bg_article_like SET deleted = 1 
+        WHERE article_id = #{articleId} AND user_id = #{userId}
+    </delete>
+
+    <select id="countByArticleId" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM bg_article_like 
+        WHERE article_id = #{articleId} AND deleted = 0
+    </select>
+
+    <select id="selectLikedArticlesByUserId" resultType="com.birdy.domain.vo.ArticleVO">
+        SELECT 
+            a.id,
+            a.title,
+            a.slug,
+            a.summary,
+            a.thumbnail,
+            a.is_top as isTop,
+            a.view_count as viewCount,
+            a.like_count as likeCount,
+            a.published_time as publishedTime,
+            c.name as categoryName
+        FROM bg_article_like al
+        LEFT JOIN bg_article a ON al.article_id = a.id
+        LEFT JOIN bg_category c ON a.category_id = c.id
+        WHERE al.user_id = #{userId}
+          AND al.deleted = 0
+          AND a.deleted = 0
+          AND a.status = 0
+        ORDER BY al.create_time DESC
+    </select>
+
+</mapper>

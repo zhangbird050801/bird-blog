@@ -1,5 +1,6 @@
 package com.birdy.service;
 
+import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.ArticleLike;
 
 /**
@@ -52,4 +53,13 @@ public interface ArticleLikeService {
      * @return 点赞记录
      */
     ArticleLike getLikeByArticleIdAndUserId(Long articleId, Long userId);
+
+    /**
+     * 获取用户点赞的文章列表
+     *
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 点赞的文章列表
+     */
+    CommonResult getLikedArticles(Integer pageNum, Integer pageSize);
 }

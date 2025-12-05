@@ -1,9 +1,6 @@
 package com.birdy.enums;
 
-
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author Birdy
@@ -11,7 +8,6 @@ import lombok.Setter;
  * @description HttpCodeEnum 封装 code 和 msg
  */
 @Getter
-@AllArgsConstructor
 public enum HttpCodeEnum {
 
     SUCCESS(200, "操作成功"),
@@ -49,4 +45,9 @@ public enum HttpCodeEnum {
 
     private final int code;
     private final String msg;
+
+    HttpCodeEnum(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
 }

@@ -1,7 +1,10 @@
 package com.birdy.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.birdy.domain.entity.ArticleLike;
+import com.birdy.domain.vo.ArticleVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -38,4 +41,13 @@ public interface ArticleLikeMapper extends BaseMapper<ArticleLike> {
      * @return 点赞数量
      */
     Long countByArticleId(@Param("articleId") Long articleId);
+
+    /**
+     * 分页查询用户点赞的文章列表
+     *
+     * @param page 分页参数
+     * @param userId 用户ID
+     * @return 点赞的文章列表
+     */
+    IPage<ArticleVO> selectLikedArticlesByUserId(Page<ArticleVO> page, @Param("userId") Long userId);
 }

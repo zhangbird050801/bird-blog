@@ -1,9 +1,15 @@
 package com.birdy.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.birdy.domain.CommonResult;
 import com.birdy.domain.entity.ArticleLike;
+import com.birdy.domain.vo.ArticleVO;
+import com.birdy.domain.vo.PageResult;
 import com.birdy.mapper.ArticleLikeMapper;
 import com.birdy.service.ArticleLikeService;
+import com.birdy.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,5 +72,16 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
     @Override
     public ArticleLike getLikeByArticleIdAndUserId(Long articleId, Long userId) {
         return articleLikeMapper.selectByArticleIdAndUserId(articleId, userId);
+    }
+
+    @Override
+    public CommonResult getLikedArticles(Integer pageNum, Integer pageSize) {
+        Long userId = SecurityUtils.getUserId();
+        
+        Page<ArticleVO> page = new Page<>(pageNum, pageSize);
+        IPage<ArticleVO> articlePage = articleLikeMapper.selectLikedArticlesByUserId(page, userId);
+        
+        PageResult<ArticleVO> pageResult = new PageResult<>(articlePage.getTotal(), articlePage.getRecords(), pageNum, pageSize);
+        return CommonResult.success(pageResult);
     }
 }
