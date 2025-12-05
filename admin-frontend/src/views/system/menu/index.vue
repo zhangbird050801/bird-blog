@@ -154,15 +154,36 @@
           <el-input v-model="formData.name" placeholder="请输入菜单名称" />
         </el-form-item>
         <el-form-item v-if="formData.type !== 'F'" label="菜单图标">
-          <el-input v-model="formData.icon" placeholder="请输入图标名称">
-            <template #prepend>
-              <component
-                v-if="getIconComponent(formData.icon)"
-                :is="getIconComponent(formData.icon)"
-                style="width: 16px; height: 16px"
-              />
-            </template>
-          </el-input>
+          <div class="icon-field">
+            <el-input
+              v-model="formData.icon"
+              placeholder="选择或输入图标名称"
+              clearable
+            >
+              <template #prepend>
+                <component
+                  v-if="getIconComponent(formData.icon)"
+                  :is="getIconComponent(formData.icon)"
+                  class="icon-preview"
+                />
+              </template>
+              <template #append>
+                <el-button type="primary" text @click="openIconPicker">选择图标</el-button>
+              </template>
+            </el-input>
+            <div class="icon-hint">
+              <span>支持直接搜索 Element Plus 图标名称</span>
+              <el-button
+                v-if="formData.icon"
+                link
+                type="danger"
+                size="small"
+                @click="clearIcon"
+              >
+                清除
+              </el-button>
+            </div>
+          </div>
         </el-form-item>
         <el-form-item v-if="formData.type !== 'F'" label="路由地址" prop="path">
           <el-input v-model="formData.path" placeholder="请输入路由地址" />
@@ -204,6 +225,44 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 图标选择器 -->
+    <el-dialog
+      v-model="iconPickerVisible"
+      title="选择菜单图标"
+      width="760px"
+      append-to-body
+    >
+      <div class="icon-picker-header">
+        <el-input
+          v-model="iconKeyword"
+          placeholder="搜索图标名称（模糊匹配）"
+          clearable
+          class="icon-search"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
+      <el-scrollbar height="360px" class="icon-scroll">
+        <div class="icon-grid" v-if="filteredIconNames.length">
+          <div
+            v-for="iconName in filteredIconNames"
+            :key="iconName"
+            class="icon-item"
+            @click="handleIconSelect(iconName)"
+          >
+            <component :is="iconName" class="icon-preview" />
+            <span class="icon-name">{{ iconName }}</span>
+          </div>
+        </div>
+        <div v-else class="icon-empty">未找到匹配的图标</div>
+      </el-scrollbar>
+      <template #footer>
+        <el-button @click="iconPickerVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -212,6 +271,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { menuApi } from '@/api'
 import type { MenuItem } from '@/types'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 // 图标映射表
 const iconMap: Record<string, string> = {
@@ -272,6 +332,30 @@ const formData = reactive({
   icon: '',
   remark: ''
 })
+
+// 图标选择器状态
+const iconPickerVisible = ref(false)
+const iconKeyword = ref('')
+const iconNames = Object.keys(ElementPlusIconsVue).filter(name => name !== 'default')
+const filteredIconNames = computed(() => {
+  const keyword = iconKeyword.value.trim().toLowerCase()
+  if (!keyword) return iconNames
+  return iconNames.filter(name => name.toLowerCase().includes(keyword))
+})
+
+const openIconPicker = () => {
+  iconKeyword.value = ''
+  iconPickerVisible.value = true
+}
+
+const handleIconSelect = (iconName: string) => {
+  formData.icon = iconName
+  iconPickerVisible.value = false
+}
+
+const clearIcon = () => {
+  formData.icon = ''
+}
 
 // 表单验证规则
 const formRules: FormRules = {
@@ -463,5 +547,75 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: -18px;
+}
+
+.icon-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.icon-preview {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #909399;
+  font-size: 12px;
+}
+
+.icon-picker-header {
+  margin-bottom: 12px;
+}
+
+.icon-search {
+  width: 320px;
+}
+
+.icon-scroll {
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.icon-item {
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.icon-item:hover {
+  border-color: var(--el-color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.icon-name {
+  font-size: 12px;
+  color: #606266;
+  word-break: break-all;
+}
+
+.icon-empty {
+  text-align: center;
+  color: #909399;
+  padding: 24px 0;
 }
 </style>
