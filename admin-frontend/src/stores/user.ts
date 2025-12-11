@@ -124,7 +124,7 @@ export const useUserStore = defineStore(
         displayName: raw.nickName || extractFallbackName(raw),
         username: extractFallbackName(raw),
         email: raw.email || undefined,
-        avatar: raw.avatar || undefined,
+        avatar: raw.avatar || '/default-avatar.png',
         sex: normalizedSex,
         phone: (raw as any).phone || undefined,
         status: (raw as any).status ?? undefined,

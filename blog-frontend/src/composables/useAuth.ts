@@ -59,6 +59,18 @@ export function useAuth() {
   }
 
   /**
+   * 更新用户信息（头像/昵称等资料变更后调用）
+   */
+  function setUserInfo(newUserInfo: UserInfo | null) {
+    userInfo.value = newUserInfo
+    if (newUserInfo) {
+      localStorage.setItem(USER_INFO_KEY, JSON.stringify(newUserInfo))
+    } else {
+      localStorage.removeItem(USER_INFO_KEY)
+    }
+  }
+
+  /**
    * 清除登录信息
    */
   function clearAuth() {
@@ -115,5 +127,6 @@ export function useAuth() {
     getRefreshToken,
     getUserInfo,
     updateTokens,
+    setUserInfo,
   }
 }

@@ -8,16 +8,26 @@
         FROM bg_article_like
         WHERE article_id = #{articleId}
           AND user_id = #{userId}
-          AND deleted = 0
         LIMIT 1
     </select>
 
-    <!-- 根据文章ID和用户ID删除点赞记录 -->
-    <delete id="deleteByArticleIdAndUserId">
-        DELETE FROM bg_article_like
+    <!-- 根据文章ID和用户ID删除点赞记录（逻辑标记） -->
+    <update id="deleteByArticleIdAndUserId">
+        UPDATE bg_article_like
+        SET deleted = 1,
+            update_time = NOW()
         WHERE article_id = #{articleId}
           AND user_id = #{userId}
-    </delete>
+    </update>
+
+    <!-- 更新删除标记，支持恢复点赞 -->
+    <update id="updateDeletedByArticleIdAndUserId">
+        UPDATE bg_article_like
+        SET deleted = #{deleted},
+            update_time = NOW()
+        WHERE article_id = #{articleId}
+          AND user_id = #{userId}
+    </update>
 
     <!-- 统计文章的点赞数量 -->
     <select id="countByArticleId" resultType="java.lang.Long">

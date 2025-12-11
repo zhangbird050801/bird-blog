@@ -211,9 +211,10 @@ import { userApi, type UserProfile, type UpdateUserInfoRequest } from '@/api/use
 import type { Article } from '@/api/types'
 import ArticleCard from '@/components/ArticleCard.vue'
 import LgToast from '@/components/base/LgToast.vue'
+import { useAuth } from '@/composables/useAuth'
 
 // 响应式数据
-const userInfo = ref<UserProfile | null>(null)
+const { userInfo, setUserInfo } = useAuth()
 const showEditModal = ref(false)
 const showAvatarModal = ref(false)
 const updating = ref(false)
@@ -248,7 +249,7 @@ const fetchUserInfo = async () => {
   try {
     const response = await userApi.getUserInfo()
     if (response.code === 200) {
-      userInfo.value = response.data
+      setUserInfo(response.data)
       // 初始化编辑表单
       editForm.nickName = response.data.nickName
       editForm.email = response.data.email || ''

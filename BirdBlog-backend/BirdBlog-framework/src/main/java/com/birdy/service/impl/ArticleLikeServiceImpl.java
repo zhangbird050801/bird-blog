@@ -30,14 +30,20 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
     public boolean likeArticle(Long articleId, Long userId) {
         // 检查是否已点赞
         ArticleLike existingLike = articleLikeMapper.selectByArticleIdAndUserId(articleId, userId);
-        if (existingLike != null) {
-            return false; // 已点赞过
+        if (existingLike != null && !Boolean.TRUE.equals(existingLike.getDeleted())) {
+            return false; // 已点赞过且未删除
+        }
+
+        // 如果曾经点过赞但被标记删除，则恢复该记录
+        if (existingLike != null && Boolean.TRUE.equals(existingLike.getDeleted())) {
+            return articleLikeMapper.updateDeletedByArticleIdAndUserId(articleId, userId, false) > 0;
         }
 
         // 创建新的点赞记录
         ArticleLike articleLike = new ArticleLike();
         articleLike.setArticleId(articleId);
         articleLike.setUserId(userId);
+        articleLike.setDeleted(false);
 
         // 保存点赞记录
         int insertCount = articleLikeMapper.insert(articleLike);
@@ -49,19 +55,19 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
     public boolean unlikeArticle(Long articleId, Long userId) {
         // 检查是否有点赞记录
         ArticleLike existingLike = articleLikeMapper.selectByArticleIdAndUserId(articleId, userId);
-        if (existingLike == null) {
+        if (existingLike == null || Boolean.TRUE.equals(existingLike.getDeleted())) {
             return false; // 未点赞过
         }
 
-        // 删除点赞记录
-        int deleteCount = articleLikeMapper.deleteByArticleIdAndUserId(articleId, userId);
+        // 标记删除点赞记录
+        int deleteCount = articleLikeMapper.updateDeletedByArticleIdAndUserId(articleId, userId, true);
         return deleteCount > 0;
     }
 
     @Override
     public boolean isLiked(Long articleId, Long userId) {
         ArticleLike articleLike = articleLikeMapper.selectByArticleIdAndUserId(articleId, userId);
-        return articleLike != null;
+        return articleLike != null && !Boolean.TRUE.equals(articleLike.getDeleted());
     }
 
     @Override

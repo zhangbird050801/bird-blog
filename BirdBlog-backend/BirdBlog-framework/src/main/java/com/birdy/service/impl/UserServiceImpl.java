@@ -35,6 +35,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.birdy.utils.RedisUtil;
+import com.alibaba.fastjson.JSON;
+
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
@@ -55,6 +58,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private com.birdy.mapper.ArticleLikeMapper articleLikeMapper;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
     public CommonResult<PageResult<AdminUserVO>> getUserPage(UserQueryDTO queryDTO) {
@@ -422,6 +428,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
             user.setUpdateTime(new Date());
             updateById(user);
+            // 同步刷新登录缓存，确保头像等信息即时生效
+            refreshLoginCache(user);
 
             return CommonResult.success("更新成功");
         } catch (Exception e) {
@@ -457,11 +465,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setAvatar(avatarUrl);
             user.setUpdateTime(new Date());
             updateById(user);
+            // 同步刷新登录缓存，确保头像在已登录会话中即时更新
+            refreshLoginCache(user);
 
             return CommonResult.success(avatarUrl);
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "头像上传失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 刷新登录态缓存，保证头像/昵称等信息在已登录会话中即时更新
+     */
+    private void refreshLoginCache(User user) {
+        if (user == null || user.getId() == null || redisUtil == null) {
+            return;
+        }
+        String loginKey = "login:" + user.getId();
+        long ttl = redisUtil.getExpire(loginKey);
+        String serialized = JSON.toJSONString(user);
+        if (ttl > 0) {
+            redisUtil.set(loginKey, serialized, ttl);
+        } else {
+            // 未找到原 TTL 时直接写入，交由默认过期策略
+            redisUtil.set(loginKey, serialized);
         }
     }
 

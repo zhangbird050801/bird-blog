@@ -3,14 +3,27 @@
 <mapper namespace="com.birdy.mapper.ArticleLikeMapper">
 
     <select id="selectByArticleIdAndUserId" resultType="com.birdy.domain.entity.ArticleLike">
-        SELECT * FROM bg_article_like 
-        WHERE article_id = #{articleId} AND user_id = #{userId} AND deleted = 0
+        SELECT * FROM bg_article_like
+        WHERE article_id = #{articleId}
+          AND user_id = #{userId}
+        LIMIT 1
     </select>
 
-    <delete id="deleteByArticleIdAndUserId">
-        UPDATE bg_article_like SET deleted = 1 
-        WHERE article_id = #{articleId} AND user_id = #{userId}
-    </delete>
+    <update id="deleteByArticleIdAndUserId">
+        UPDATE bg_article_like
+        SET deleted = 1,
+            update_time = NOW()
+        WHERE article_id = #{articleId}
+          AND user_id = #{userId}
+    </update>
+
+    <update id="updateDeletedByArticleIdAndUserId">
+        UPDATE bg_article_like
+        SET deleted = #{deleted},
+            update_time = NOW()
+        WHERE article_id = #{articleId}
+          AND user_id = #{userId}
+    </update>
 
     <select id="countByArticleId" resultType="java.lang.Long">
         SELECT COUNT(*) FROM bg_article_like 

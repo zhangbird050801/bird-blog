@@ -18,4 +18,14 @@ public interface ArticleFavoriteMapper extends BaseMapper<ArticleFavorite> {
      * 分页查询用户收藏的文章列表
      */
     IPage<ArticleVO> selectFavoriteArticlesByUserId(Page<ArticleVO> page, @Param("userId") Long userId);
+
+    /**
+     * 根据文章ID和用户ID查询收藏记录（包含已逻辑删除）
+     */
+    ArticleFavorite selectByArticleIdAndUserId(@Param("articleId") Long articleId, @Param("userId") Long userId);
+
+    /**
+     * 更新收藏记录的删除标记
+     */
+    int updateDeletedByArticleIdAndUserId(@Param("articleId") Long articleId, @Param("userId") Long userId, @Param("deleted") Boolean deleted);
 }

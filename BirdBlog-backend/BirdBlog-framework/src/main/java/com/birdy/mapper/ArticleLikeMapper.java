@@ -35,6 +35,16 @@ public interface ArticleLikeMapper extends BaseMapper<ArticleLike> {
     int deleteByArticleIdAndUserId(@Param("articleId") Long articleId, @Param("userId") Long userId);
 
     /**
+     * 按文章和用户更新删除标记
+     *
+     * @param articleId 文章ID
+     * @param userId 用户ID
+     * @param deleted 删除标记
+     * @return 影响的行数
+     */
+    int updateDeletedByArticleIdAndUserId(@Param("articleId") Long articleId, @Param("userId") Long userId, @Param("deleted") Boolean deleted);
+
+    /**
      * 统计文章的点赞数量
      *
      * @param articleId 文章ID

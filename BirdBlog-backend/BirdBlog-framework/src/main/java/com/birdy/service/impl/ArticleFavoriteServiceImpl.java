@@ -25,23 +25,24 @@ public class ArticleFavoriteServiceImpl extends ServiceImpl<ArticleFavoriteMappe
     @Override
     public CommonResult toggleFavorite(Long articleId) {
         Long userId = SecurityUtils.getUserId();
-        
-        // 查询是否已收藏
-        LambdaQueryWrapper<ArticleFavorite> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ArticleFavorite::getArticleId, articleId)
-                   .eq(ArticleFavorite::getUserId, userId);
-        
-        ArticleFavorite existingFavorite = getOne(queryWrapper);
-        
+
+        // 查询是否已收藏（包含已逻辑删除记录）
+        ArticleFavorite existingFavorite = baseMapper.selectByArticleIdAndUserId(articleId, userId);
+
         boolean isFavorited;
         if (existingFavorite == null) {
             // 添加收藏
             ArticleFavorite favorite = new ArticleFavorite(articleId, userId);
+            favorite.setDeleted(false);
             save(favorite);
             isFavorited = true;
+        } else if (Boolean.TRUE.equals(existingFavorite.getDeleted())) {
+            // 曾经收藏过但已删除，恢复收藏
+            baseMapper.updateDeletedByArticleIdAndUserId(articleId, userId, false);
+            isFavorited = true;
         } else {
-            // 取消收藏
-            removeById(existingFavorite.getId());
+            // 取消收藏，标记删除
+            baseMapper.updateDeletedByArticleIdAndUserId(articleId, userId, true);
             isFavorited = false;
         }
         

@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.birdy.mapper.ArticleFavoriteMapper">
 
+    <select id="selectByArticleIdAndUserId" resultType="com.birdy.domain.entity.ArticleFavorite">
+        SELECT *
+        FROM bg_article_favorite
+        WHERE article_id = #{articleId}
+          AND user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <update id="updateDeletedByArticleIdAndUserId">
+        UPDATE bg_article_favorite
+        SET deleted = #{deleted},
+            update_time = NOW()
+        WHERE article_id = #{articleId}
+          AND user_id = #{userId}
+    </update>
+
     <select id="selectFavoriteArticlesByUserId" resultType="com.birdy.domain.vo.ArticleVO">
         SELECT 
             a.id,
