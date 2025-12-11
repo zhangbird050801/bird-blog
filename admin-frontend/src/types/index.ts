@@ -87,6 +87,31 @@ export interface RoleQueryParams {
 }
 
 /**
+ * 文章排行数据
+ */
+export interface ArticleRankItem {
+  articleId: number
+  title: string
+  slug: string
+  viewCount: number
+  likeCount: number
+  favoriteCount: number
+  engagementScore?: number
+  publishedTime?: string
+}
+
+export interface CategoryStatItem {
+  name: string
+  value: number
+}
+
+export interface TagStatItem {
+  tagId: number
+  name: string
+  value: number
+}
+
+/**
  * 创建角色请求参数
  */
 export interface CreateRoleRequest {

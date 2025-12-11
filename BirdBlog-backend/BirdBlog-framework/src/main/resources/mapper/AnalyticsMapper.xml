@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.birdy.mapper.AnalyticsMapper">
+
+    <resultMap id="ArticleRankMap" type="com.birdy.domain.vo.ArticleRankVO">
+        <id column="article_id" property="articleId"/>
+        <result column="title" property="title"/>
+        <result column="slug" property="slug"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="engagement_score" property="engagementScore"/>
+        <result column="published_time" property="publishedTime"/>
+    </resultMap>
+
+    <select id="selectHotArticles" resultMap="ArticleRankMap">
+        SELECT 
+            article_id,
+            title,
+            slug,
+            view_count,
+            like_count,
+            favorite_count,
+            (like_count + favorite_count) AS engagement_score,
+            published_time
+        FROM v_hot_articles
+        ORDER BY view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectEngagementRank" resultMap="ArticleRankMap">
+        SELECT 
+            article_id,
+            title,
+            slug,
+            view_count,
+            like_count,
+            favorite_count,
+            engagement_score,
+            published_time
+        FROM v_article_engagement_rank
+        ORDER BY engagement_score DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectCommentRank" resultMap="ArticleRankMap">
+        SELECT 
+            article_id,
+            title,
+            slug,
+            view_count,
+            like_count,
+            favorite_count,
+            comment_count,
+            comment_count AS engagement_score,
+            published_time
+        FROM v_article_comment_rank
+        ORDER BY comment_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectOverviewMetrics" resultType="java.util.Map">
+        SELECT 
+            (SELECT COUNT(*) FROM bg_article WHERE deleted = 0 AND status = 0) AS totalArticles,
+            (SELECT IFNULL(SUM(view_count),0) FROM bg_article WHERE deleted = 0 AND status = 0) AS totalViews,
+            (SELECT COUNT(*) FROM bg_article_like WHERE deleted = 0) AS totalLikes,
+            (SELECT COUNT(*) FROM bg_article_favorite WHERE deleted = 0) AS totalFavorites
+    </select>
+
+    <select id="selectCategoryViewShare" resultType="com.birdy.domain.vo.CategoryStatVO">
+        SELECT 
+            c.name AS name,
+            IFNULL(SUM(a.view_count),0) AS value
+        FROM bg_category c
+        LEFT JOIN bg_article a ON a.category_id = c.id AND a.deleted = 0 AND a.status = 0
+        WHERE c.deleted = 0
+        GROUP BY c.id, c.name
+        ORDER BY value DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectTagUsage" resultType="com.birdy.domain.vo.TagStatVO">
+        SELECT 
+            tag_id,
+            name,
+            value
+        FROM v_tag_usage_rank
+        ORDER BY value DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

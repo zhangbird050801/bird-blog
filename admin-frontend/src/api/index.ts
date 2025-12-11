@@ -14,6 +14,7 @@ import type {
   CreateRoleRequest,
   UpdateRoleRequest
 } from '@/types'
+import type { ArticleRankItem } from '@/types'
 
 /**
  * 认证相关 API
@@ -102,6 +103,52 @@ export const menuApi = {
    */
   deleteMenu(id: number): Promise<void> {
     return http.delete(`/admin/menus/${id}`)
+  }
+}
+
+/**
+ * 数据看板 API
+ */
+export const analyticsApi = {
+  /**
+   * 热门文章（按浏览量）
+   */
+  getHotArticles(limit = 5): Promise<ArticleRankItem[]> {
+    return http.get('/admin/analytics/hot-articles', { limit })
+  },
+
+  /**
+   * 收藏/点赞互动排行
+   */
+  getEngagementRank(limit = 5): Promise<ArticleRankItem[]> {
+    return http.get('/admin/analytics/engagement-rank', { limit })
+  },
+
+  /**
+   * 评论排行榜
+   */
+  getCommentRank(limit = 5): Promise<ArticleRankItem[]> {
+    return http.get('/admin/analytics/comment-rank', { limit })
+  },
+
+  /**
+   * 总览数据
+   */
+  getOverview(categoryLimit = 6): Promise<{
+    totalArticles: number
+    totalViews: number
+    totalLikes: number
+    totalFavorites: number
+    categoryViewShare: { name: string; value: number }[]
+  }> {
+    return http.get('/admin/analytics/overview', { categoryLimit })
+  },
+
+  /**
+   * 标签云
+   */
+  getTagCloud(limit = 20): Promise<Array<{ tagId: number; name: string; value: number }>> {
+    return http.get('/admin/analytics/tag-cloud', { limit })
   }
 }
 

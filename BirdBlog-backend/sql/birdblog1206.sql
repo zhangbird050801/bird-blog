@@ -600,7 +600,7 @@ INSERT INTO `sys_menu` VALUES (1002, '分类管理', 1000, 2, 'category', 'conte
 INSERT INTO `sys_menu` VALUES (1003, '标签管理', 1000, 3, 'tag', 'content/tag/index', 1, 'C', 0, 0, 'content:tag:list', 'tag', '', 'system', '2025-10-24 23:15:53', 'system', '2025-10-24 23:15:53', b'0');
 INSERT INTO `sys_menu` VALUES (1004, '评论管理', 1000, 4, 'comment', 'content/comment/index', 1, 'C', 0, 0, 'content:comment:list', 'message-square', '', 'system', '2025-10-24 23:15:53', 'system', '2025-10-24 23:15:53', b'0');
 INSERT INTO `sys_menu` VALUES (1005, '友链管理', 1000, 5, 'link', 'content/link/index', 1, 'C', 0, 0, 'content:link:list', 'link', '', 'system', '2025-10-24 23:15:53', 'system', '2025-10-24 23:15:53', b'0');
-INSERT INTO `sys_menu` VALUES (1006, '友链审核', 1005, 1, 'approval', 'content/link/approval', 1, 'C', 0, 0, 'content:link:approval', 'shield-check', '友链审核管理', 'system', '2025-11-21 23:00:00', 'system', '2025-11-21 23:00:00', b'0');
+INSERT INTO `sys_menu` VALUES (1006, '友链审核', 1005, 1, '', NULL, 1, 'F', 1, 0, 'content:link:approval', '#', '友链审核权限（不展示菜单）', 'system', '2025-11-21 23:00:00', 'system', '2025-11-21 23:00:00', b'0');
 INSERT INTO `sys_menu` VALUES (2000, '系统管理', NULL, 10, '/system', 'Layout', 1, 'M', 0, 0, NULL, 'setting', '系统管理模块', 'system', '2025-10-31 17:12:05', 'system', '2025-10-31 17:12:05', b'0');
 INSERT INTO `sys_menu` VALUES (2001, '菜单管理', 2000, 1, 'menu', 'system/menu/index', 1, 'C', 0, 0, 'system:menu:list', 'tree-table', '菜单权限管理', 'system', '2025-10-31 17:12:05', 'system', '2025-10-31 17:12:05', b'0');
 INSERT INTO `sys_menu` VALUES (2002, '菜单查询', 2001, 1, '', NULL, 1, 'F', 0, 0, 'system:menu:query', '#', '菜单查询权限', 'system', '2025-10-31 17:12:05', 'system', '2025-10-31 17:12:05', b'0');
@@ -829,5 +829,128 @@ CREATE TRIGGER `trg_comment_after_update` AFTER UPDATE ON `bg_comment` FOR EACH 
 END
 ;;
 delimiter ;
+
+-- ----------------------------
+-- 视图：热门文章（按浏览量、点赞、收藏聚合）
+-- ----------------------------
+DROP VIEW IF EXISTS `v_hot_articles`;
+CREATE VIEW `v_hot_articles` AS
+SELECT 
+    a.id AS article_id,
+    a.title,
+    a.slug,
+    a.view_count,
+    IFNULL(l.like_count, 0)     AS like_count,
+    IFNULL(f.favorite_count, 0) AS favorite_count,
+    IFNULL(c.comment_count, 0)  AS comment_count,
+    a.published_time
+FROM bg_article a
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS like_count
+    FROM bg_article_like
+    WHERE deleted = 0
+    GROUP BY article_id
+) l ON l.article_id = a.id
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS favorite_count
+    FROM bg_article_favorite
+    WHERE deleted = 0
+    GROUP BY article_id
+) f ON f.article_id = a.id
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS comment_count
+    FROM bg_comment
+    WHERE deleted = 0
+    GROUP BY article_id
+) c ON c.article_id = a.id
+WHERE a.deleted = 0 AND a.status = 0;
+
+-- ----------------------------
+-- 视图：收藏/点赞排行榜（按互动总数排序）
+-- ----------------------------
+DROP VIEW IF EXISTS `v_article_engagement_rank`;
+CREATE VIEW `v_article_engagement_rank` AS
+SELECT 
+    a.id AS article_id,
+    a.title,
+    a.slug,
+    a.view_count,
+    IFNULL(l.like_count, 0)     AS like_count,
+    IFNULL(f.favorite_count, 0) AS favorite_count,
+    IFNULL(c.comment_count, 0)  AS comment_count,
+    (IFNULL(l.like_count, 0) + IFNULL(f.favorite_count, 0)) AS engagement_score,
+    a.published_time
+FROM bg_article a
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS like_count
+    FROM bg_article_like
+    WHERE deleted = 0
+    GROUP BY article_id
+) l ON l.article_id = a.id
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS favorite_count
+    FROM bg_article_favorite
+    WHERE deleted = 0
+    GROUP BY article_id
+) f ON f.article_id = a.id
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS comment_count
+    FROM bg_comment
+    WHERE deleted = 0
+    GROUP BY article_id
+) c ON c.article_id = a.id
+WHERE a.deleted = 0 AND a.status = 0;
+
+-- ----------------------------
+-- 视图：评论排行榜
+-- ----------------------------
+DROP VIEW IF EXISTS `v_article_comment_rank`;
+CREATE VIEW `v_article_comment_rank` AS
+SELECT 
+    a.id AS article_id,
+    a.title,
+    a.slug,
+    a.view_count,
+    IFNULL(l.like_count, 0)     AS like_count,
+    IFNULL(f.favorite_count, 0) AS favorite_count,
+    IFNULL(c.comment_count, 0)  AS comment_count,
+    a.published_time
+FROM bg_article a
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS like_count
+    FROM bg_article_like
+    WHERE deleted = 0
+    GROUP BY article_id
+) l ON l.article_id = a.id
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS favorite_count
+    FROM bg_article_favorite
+    WHERE deleted = 0
+    GROUP BY article_id
+) f ON f.article_id = a.id
+LEFT JOIN (
+    SELECT article_id, COUNT(*) AS comment_count
+    FROM bg_comment
+    WHERE deleted = 0
+    GROUP BY article_id
+) c ON c.article_id = a.id
+WHERE a.deleted = 0 AND a.status = 0
+ORDER BY comment_count DESC;
+
+-- ----------------------------
+-- 视图：标签使用次数
+-- ----------------------------
+DROP VIEW IF EXISTS `v_tag_usage_rank`;
+CREATE VIEW `v_tag_usage_rank` AS
+SELECT 
+    t.id AS tag_id,
+    t.name AS name,
+    COUNT(at.article_id) AS value
+FROM bg_tag t
+LEFT JOIN bg_article_tag at ON at.tag_id = t.id
+LEFT JOIN bg_article a ON a.id = at.article_id AND a.deleted = 0 AND a.status = 0
+WHERE t.deleted = 0
+GROUP BY t.id, t.name
+ORDER BY value DESC;
 
 SET FOREIGN_KEY_CHECKS = 1;
