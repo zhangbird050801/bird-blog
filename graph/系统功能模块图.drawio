@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.4">
   <diagram name="第 1 页" id="1Rp8NhGSqbVlNOOOa708">
-    <mxGraphModel dx="649" dy="562" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="528" dy="458" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -36,6 +36,66 @@
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="后台用户管理" vertex="1">
           <mxGeometry height="135" width="18" x="203" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="菜单权限管理" vertex="1">
+          <mxGeometry height="135" width="18" x="357" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="角色管理" vertex="1">
+          <mxGeometry height="135" width="18" x="405" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="用户角色分配" vertex="1">
+          <mxGeometry height="135" width="18" x="457" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="文章创作与编辑" vertex="1">
+          <mxGeometry height="135" width="18" x="545" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="文章发布" vertex="1">
+          <mxGeometry height="135" width="18" x="597" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="文章维护与搜索" vertex="1">
+          <mxGeometry height="135" width="18" x="643" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="文章置顶功能" vertex="1">
+          <mxGeometry height="135" width="18" x="688" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-20" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="分类管理" vertex="1">
+          <mxGeometry height="135" width="18" x="751" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-21" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="标签管理" vertex="1">
+          <mxGeometry height="135" width="18" x="801" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="文章标签" vertex="1">
+          <mxGeometry height="135" width="18" x="850" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="评论系统" vertex="1">
+          <mxGeometry height="135" width="18" x="921" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-24" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="点赞功能" vertex="1">
+          <mxGeometry height="135" width="18" x="975" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-25" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="收藏功能" vertex="1">
+          <mxGeometry height="135" width="18" x="1028" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-26" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="友情链接管理" vertex="1">
+          <mxGeometry height="135" width="18" x="1109" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-27" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="友情链接留言板" vertex="1">
+          <mxGeometry height="135" width="18" x="1159" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-28" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="友链申请与审核" vertex="1">
+          <mxGeometry height="135" width="18" x="1214" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-29" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="热门文章" vertex="1">
+          <mxGeometry height="135" width="18" x="1303" y="473" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-30" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="互动排行榜" vertex="1">
+          <mxGeometry height="135" width="18" x="1345" y="473" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-31" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="评论排行榜" vertex="1">
+          <mxGeometry height="135" width="18" x="1389" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="pyWBe-rrKYwo6TLK_z7Z-32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;direction=south;" value="标签使用统计" vertex="1">
+          <mxGeometry height="135" width="18" x="1432" y="473" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
