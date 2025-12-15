@@ -37,22 +37,22 @@
         </el-button>
       </div>
 
-      <el-table :data="roleList" v-loading="loading" border stripe>
-        <el-table-column prop="name" label="角色名称" width="160" />
-        <el-table-column prop="code" label="角色编码" width="160">
+      <el-table :data="roleList" v-loading="loading" border stripe :default-sort="{ prop: 'createTime', order: 'descending' }">
+        <el-table-column prop="name" label="角色名称" width="160" sortable />
+        <el-table-column prop="code" label="角色编码" width="160" sortable>
           <template #default="{ row }">
             <el-tag type="info" size="small">{{ row.code }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="status" label="状态" width="100" align="center" sortable>
           <template #default="{ row }">
             <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small">
               {{ row.status === 0 ? '正常' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column prop="createTime" label="创建时间" width="180" sortable />
         <el-table-column label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">

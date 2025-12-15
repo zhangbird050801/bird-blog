@@ -30,19 +30,19 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="userList" v-loading="loading" border stripe>
-        <el-table-column prop="username" label="用户名" width="160" />
-        <el-table-column prop="nickName" label="昵称" width="160" />
-        <el-table-column prop="email" label="邮箱" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="phone" label="手机号" width="160" />
-        <el-table-column prop="status" label="状态" width="100" align="center">
+      <el-table :data="userList" v-loading="loading" border stripe :default-sort="{ prop: 'createTime', order: 'descending' }">
+        <el-table-column prop="username" label="用户名" width="160" sortable />
+        <el-table-column prop="nickName" label="昵称" width="160" sortable />
+        <el-table-column prop="email" label="邮箱" min-width="200" show-overflow-tooltip sortable />
+        <el-table-column prop="phone" label="手机号" width="160" sortable />
+        <el-table-column prop="status" label="状态" width="100" align="center" sortable>
           <template #default="{ row }">
             <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small">
               {{ row.status === 0 ? '正常' : '停用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column prop="createTime" label="创建时间" width="180" sortable />
         <el-table-column label="角色" width="200" align="center">
           <template #default="{ row }">
             <div class="role-tags">

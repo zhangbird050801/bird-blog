@@ -42,18 +42,19 @@
         border
         style="width: 100%"
         @selection-change="handleSelectionChange"
+        :default-sort="{ prop: 'createTime', order: 'descending' }"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="name" label="标签名称" min-width="150" />
+        <el-table-column prop="id" label="ID" width="80" align="center" sortable />
+        <el-table-column prop="name" label="标签名称" min-width="150" sortable />
         <el-table-column prop="remark" label="备注" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="creator" label="创建者" width="120" align="center" />
-        <el-table-column prop="createTime" label="创建时间" width="180" align="center">
+        <el-table-column prop="creator" label="创建者" width="120" align="center" sortable />
+        <el-table-column prop="createTime" label="创建时间" width="180" align="center" sortable>
           <template #default="{ row }">
             {{ formatDate(row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column prop="updateTime" label="更新时间" width="180" align="center">
+        <el-table-column prop="updateTime" label="更新时间" width="180" align="center" sortable>
           <template #default="{ row }">
             {{ formatDate(row.updateTime) }}
           </template>

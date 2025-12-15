@@ -72,10 +72,11 @@
         border
         style="width: 100%"
         @selection-change="handleSelectionChange"
+        :default-sort="{ prop: 'createTime', order: 'descending' }"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="type" label="类型" width="100" align="center">
+        <el-table-column prop="id" label="ID" width="80" align="center" sortable />
+        <el-table-column prop="type" label="类型" width="100" align="center" sortable>
           <template #default="{ row }">
             <el-tag :type="row.type === 0 ? 'primary' : 'success'">
               {{ row.type === 0 ? '文章评论' : '友链评论' }}
@@ -89,33 +90,33 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="content" label="评论内容" min-width="300" show-overflow-tooltip />
-        <el-table-column prop="fromUserName" label="评论用户" width="120" align="center">
+        <el-table-column prop="content" label="评论内容" min-width="300" show-overflow-tooltip sortable />
+        <el-table-column prop="fromUserName" label="评论用户" width="120" align="center" sortable>
           <template #default="{ row }">
             <span v-if="row.fromUserName">{{ row.fromUserName }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="toUserName" label="回复用户" width="120" align="center">
+        <el-table-column prop="toUserName" label="回复用户" width="120" align="center" sortable>
           <template #default="{ row }">
             <span v-if="row.toUserName">{{ row.toUserName }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="likeCount" label="点赞数" width="80" align="center">
+        <el-table-column prop="likeCount" label="点赞数" width="80" align="center" sortable>
           <template #default="{ row }">
             <span v-if="row.likeCount">{{ row.likeCount }}</span>
             <span v-else>0</span>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="status" label="状态" width="100" align="center" sortable>
           <template #default="{ row }">
             <el-tag :type="row.status === 0 ? 'success' : 'danger'">
               {{ row.status === 0 ? '正常' : '屏蔽' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" align="center">
+        <el-table-column prop="createTime" label="创建时间" width="180" align="center" sortable>
           <template #default="{ row }">
             {{ formatDate(row.createTime) }}
           </template>

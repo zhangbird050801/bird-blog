@@ -53,20 +53,21 @@
         border
         style="width: 100%"
         @selection-change="handleSelectionChange"
+        :default-sort="{ prop: 'createTime', order: 'descending' }"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="name" label="分类名称" min-width="150" />
+        <el-table-column prop="id" label="ID" width="80" align="center" sortable />
+        <el-table-column prop="name" label="分类名称" min-width="150" sortable />
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="status" label="状态" width="100" align="center" sortable>
           <template #default="{ row }">
             <el-tag :type="row.status === 0 ? 'success' : 'danger'">
               {{ row.status === 0 ? '正常' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="count" label="文章数" width="100" align="center" />
-        <el-table-column prop="createTime" label="创建时间" width="180" align="center">
+        <el-table-column prop="count" label="文章数" width="100" align="center" sortable />
+        <el-table-column prop="createTime" label="创建时间" width="180" align="center" sortable>
           <template #default="{ row }">
             {{ formatDate(row.createTime) }}
           </template>

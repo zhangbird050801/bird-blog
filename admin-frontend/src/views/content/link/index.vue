@@ -54,10 +54,11 @@
         border
         style="width: 100%"
         @selection-change="handleSelectionChange"
+        :default-sort="{ prop: 'createTime', order: 'descending' }"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="name" label="网站名称" min-width="150" />
+        <el-table-column prop="id" label="ID" width="80" align="center" sortable />
+        <el-table-column prop="name" label="网站名称" min-width="150" sortable />
         <el-table-column prop="logo" label="Logo" width="100" align="center">
           <template #default="{ row }">
             <el-image
@@ -70,7 +71,7 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="url" label="网站地址" min-width="200">
+        <el-table-column prop="url" label="网站地址" min-width="200" sortable>
           <template #default="{ row }">
             <el-link :href="row.url" target="_blank" type="primary">
               {{ row.url }}
@@ -78,15 +79,15 @@
           </template>
         </el-table-column>
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="status" label="审核状态" width="100" align="center">
+        <el-table-column prop="status" label="审核状态" width="100" align="center" sortable>
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="creator" label="创建者" width="120" align="center" />
-        <el-table-column prop="createTime" label="创建时间" width="180" align="center">
+        <el-table-column prop="creator" label="创建者" width="120" align="center" sortable />
+        <el-table-column prop="createTime" label="创建时间" width="180" align="center" sortable>
           <template #default="{ row }">
             {{ formatDate(row.createTime) }}
           </template>
