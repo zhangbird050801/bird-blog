@@ -11,7 +11,7 @@
  Target Server Version : 80036 (8.0.36)
  File Encoding         : 65001
 
- Date: 12/12/2025 23:50:40
+ Date: 15/12/2025 19:20:09
 */
 
 SET NAMES utf8mb4;
@@ -73,7 +73,7 @@ CREATE TABLE `bg_article_favorite`  (
   INDEX `idx_favorite_article_deleted`(`article_id` ASC, `deleted` ASC) USING BTREE,
   CONSTRAINT `fk_favorite_article` FOREIGN KEY (`article_id`) REFERENCES `bg_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_favorite_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章收藏表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章收藏表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for bg_article_like
@@ -93,7 +93,7 @@ CREATE TABLE `bg_article_like`  (
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE,
   CONSTRAINT `fk_like_article` FOREIGN KEY (`article_id`) REFERENCES `bg_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章点赞表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章点赞表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for bg_article_tag
@@ -302,7 +302,7 @@ CREATE TABLE `sys_user`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_sys_user_username`(`username` ASC) USING BTREE,
   UNIQUE INDEX `uk_sys_user_email`(`email` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for sys_user_role
@@ -347,30 +347,6 @@ CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `v_hot_articles` AS selec
 -- ----------------------------
 DROP VIEW IF EXISTS `v_tag_usage_rank`;
 CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `v_tag_usage_rank` AS select `t`.`id` AS `tag_id`,`t`.`name` AS `name`,count(`at`.`article_id`) AS `value` from ((`bg_tag` `t` left join `bg_article_tag` `at` on((`at`.`tag_id` = `t`.`id`))) left join `bg_article` `a` on(((`a`.`id` = `at`.`article_id`) and (`a`.`deleted` = 0) and (`a`.`status` = 0)))) where (`t`.`deleted` = 0) group by `t`.`id`,`t`.`name` order by `value` desc;
-
--- ----------------------------
--- View structure for vw_bg_article_public
--- ----------------------------
-DROP VIEW IF EXISTS `vw_bg_article_public`;
-CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `vw_bg_article_public` AS select `a`.`id` AS `id`,`a`.`title` AS `title`,`a`.`slug` AS `slug`,`a`.`summary` AS `summary`,`a`.`category_id` AS `category_id`,`c`.`name` AS `category_name`,`a`.`author_id` AS `author_id`,`a`.`thumbnail` AS `thumbnail`,`a`.`view_count` AS `view_count`,`a`.`like_count` AS `like_count`,`a`.`comment_count` AS `comment_count`,`a`.`published_time` AS `published_time` from (`bg_article` `a` join `bg_category` `c` on((`a`.`category_id` = `c`.`id`))) where ((`a`.`status` = 0) and (`a`.`deleted` = 0x00));
-
--- ----------------------------
--- View structure for vw_bg_comment_public
--- ----------------------------
-DROP VIEW IF EXISTS `vw_bg_comment_public`;
-CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `vw_bg_comment_public` AS select `bg_comment`.`id` AS `id`,`bg_comment`.`type` AS `type`,`bg_comment`.`article_id` AS `article_id`,`bg_comment`.`link_id` AS `link_id`,`bg_comment`.`root_id` AS `root_id`,`bg_comment`.`parent_id` AS `parent_id`,`bg_comment`.`from_user_id` AS `from_user_id`,`bg_comment`.`to_user_id` AS `to_user_id`,`bg_comment`.`content` AS `content`,`bg_comment`.`status` AS `status`,`bg_comment`.`like_count` AS `like_count`,`bg_comment`.`create_time` AS `create_time`,`bg_comment`.`update_time` AS `update_time` from `bg_comment` where ((`bg_comment`.`status` = 0) and (`bg_comment`.`deleted` = 0x00));
-
--- ----------------------------
--- View structure for vw_bg_link_public
--- ----------------------------
-DROP VIEW IF EXISTS `vw_bg_link_public`;
-CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `vw_bg_link_public` AS select `bg_link`.`id` AS `id`,`bg_link`.`name` AS `name`,`bg_link`.`logo` AS `logo`,`bg_link`.`description` AS `description`,`bg_link`.`url` AS `url`,`bg_link`.`status` AS `status`,`bg_link`.`create_time` AS `create_time`,`bg_link`.`update_time` AS `update_time` from `bg_link` where ((`bg_link`.`status` = 0) and (`bg_link`.`deleted` = 0x00));
-
--- ----------------------------
--- View structure for vw_bg_tag_usage
--- ----------------------------
-DROP VIEW IF EXISTS `vw_bg_tag_usage`;
-CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `vw_bg_tag_usage` AS select `t`.`id` AS `id`,`t`.`name` AS `name`,count(`at`.`article_id`) AS `article_count`,max(`at`.`update_time`) AS `last_used_time` from (`bg_tag` `t` left join `bg_article_tag` `at` on(((`t`.`id` = `at`.`tag_id`) and (`at`.`deleted` = 0x00)))) where (`t`.`deleted` = 0x00) group by `t`.`id`,`t`.`name`;
 
 -- ----------------------------
 -- Procedure structure for sp_publish_article
