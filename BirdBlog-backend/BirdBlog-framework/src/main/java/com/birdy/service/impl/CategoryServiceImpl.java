@@ -53,8 +53,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
                 filter(category -> SysConstants.CATEGORY_STATUS_ENABLE == category.getStatus())
                 .collect(Collectors.toList());
 
-        //封装vo
-        List<CategoryVO> res = BeanUtil.copyToList(categories, CategoryVO.class);
+        //统计每个分类下的文章数量
+        java.util.Map<Long, Long> categoryCountMap = list.stream()
+                .collect(Collectors.groupingBy(Article::getCategoryId, Collectors.counting()));
+
+        //封装vo，并设置文章数量
+        List<CategoryVO> res = categories.stream()
+                .map(category -> {
+                    CategoryVO vo = new CategoryVO();
+                    vo.setId(category.getId());
+                    vo.setName(category.getName());
+                    // 设置该分类下的文章数量，如果没有则为0
+                    vo.setCount(categoryCountMap.getOrDefault(category.getId(), 0L).intValue());
+                    return vo;
+                })
+                .collect(Collectors.toList());
 
         return CommonResult.success(res);
     }
