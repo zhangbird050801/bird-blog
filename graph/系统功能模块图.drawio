@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.4">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.2.7">
   <diagram name="第 1 页" id="1Rp8NhGSqbVlNOOOa708">
-    <mxGraphModel dx="2840" dy="2460" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1306" dy="692" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -8,22 +8,22 @@
           <mxGeometry height="44" width="736" x="398" y="231" as="geometry" />
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="用户管理模块" vertex="1">
-          <mxGeometry height="44" width="135" x="168" y="366" as="geometry" />
+          <mxGeometry height="44" width="135" x="102" y="370" as="geometry" />
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="权限控制模块" vertex="1">
-          <mxGeometry height="44" width="135" x="357" y="366" as="geometry" />
+          <mxGeometry height="44" width="135" x="340" y="366" as="geometry" />
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="文章核心模块" vertex="1">
-          <mxGeometry height="44" width="135" x="545" y="366" as="geometry" />
+          <mxGeometry height="44" width="135" x="565" y="366" as="geometry" />
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="内容归档模块" vertex="1">
-          <mxGeometry height="44" width="135" x="733" y="366" as="geometry" />
+          <mxGeometry height="44" width="135" x="738" y="370" as="geometry" />
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="社交互动模块" vertex="1">
           <mxGeometry height="44" width="135" x="921" y="366" as="geometry" />
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="站点运营模块" vertex="1">
-          <mxGeometry height="44" width="135" x="1109" y="366" as="geometry" />
+          <mxGeometry height="44" width="135" x="1097" y="366" as="geometry" />
         </mxCell>
         <mxCell id="pyWBe-rrKYwo6TLK_z7Z-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="数据统计与分析模块" vertex="1">
           <mxGeometry height="44" width="135" x="1297" y="366" as="geometry" />
