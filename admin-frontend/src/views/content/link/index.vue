@@ -173,7 +173,6 @@
             <el-radio :label="1">审核不通过</el-radio>
             <el-radio :label="2">待审核</el-radio>
           </el-radio-group>
-          <div class="form-help-text">管理员添加的友链建议直接设为审核通过</div>
         </el-form-item>
       </el-form>
       <template #footer>
