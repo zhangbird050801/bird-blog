@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.2.7">
+  <diagram name="第 1 页" id="vUWcoc2ckCW_5LAtS4Se">
+    <mxGraphModel dx="1288" dy="577" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="b9ziaqcmbK_JBfwZ8lA5-1" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fontSize=14;" value="用户" vertex="1">
+          <mxGeometry height="80" width="120" x="-34" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="b9ziaqcmbK_JBfwZ8lA5-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=14;" value="BirdBlog个人博客管理系统" vertex="1">
+          <mxGeometry height="76" width="200" x="268" y="306" as="geometry" />
+        </mxCell>
+        <mxCell id="b9ziaqcmbK_JBfwZ8lA5-3" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fontSize=14;" value="系统后台数据库" vertex="1">
+          <mxGeometry height="80" width="120" x="650" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="b9ziaqcmbK_JBfwZ8lA5-4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=120;exitDy=50;exitPerimeter=0;fontSize=14;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="87" y="332.5" as="sourcePoint" />
+            <mxPoint x="268" y="332.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b9ziaqcmbK_JBfwZ8lA5-5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=120;exitDy=50;exitPerimeter=0;fontSize=14;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="468" y="332.5" as="sourcePoint" />
+            <mxPoint x="649" y="332.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b9ziaqcmbK_JBfwZ8lA5-7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.98;entryY=0.723;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=14;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="268" y="351.95" as="sourcePoint" />
+            <mxPoint x="85.60000000000002" y="351.7899999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b9ziaqcmbK_JBfwZ8lA5-8" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.98;entryY=0.723;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=14;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="649" y="351.74000000000007" as="sourcePoint" />
+            <mxPoint x="466.6" y="351.58" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
