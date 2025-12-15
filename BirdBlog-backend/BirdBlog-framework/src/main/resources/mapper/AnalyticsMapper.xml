@@ -20,9 +20,6 @@
             title,
             slug,
             view_count,
-            like_count,
-            favorite_count,
-            (like_count + favorite_count) AS engagement_score,
             published_time
         FROM v_hot_articles
         ORDER BY view_count DESC

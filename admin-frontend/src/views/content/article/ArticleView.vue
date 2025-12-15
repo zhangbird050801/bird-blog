@@ -53,8 +53,9 @@
         <el-image
           :src="article.thumbnail"
           :alt="article.title"
-          fit="cover"
-          style="width: 100%; max-height: 400px; border-radius: 8px;"
+          fit="contain"
+          :preview-src-list="[article.thumbnail]"
+          class="thumbnail-image"
         />
       </div>
 
@@ -242,6 +243,22 @@ const formatDate = (dateString: string) => {
 .article-thumbnail {
   margin-bottom: 24px;
   text-align: center;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thumbnail-image {
+  width: 100%;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.thumbnail-image :deep(img) {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .empty-state {

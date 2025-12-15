@@ -69,39 +69,45 @@
         border
         style="width: 100%"
         @selection-change="handleSelectionChange"
+        :default-sort="{ prop: 'updateTime', order: 'descending' }"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="categoryName" label="分类" width="120" align="center">
+        <el-table-column prop="id" label="ID" width="80" align="center" sortable />
+        <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip sortable />
+        <el-table-column prop="categoryName" label="分类" width="120" align="center" sortable>
           <template #default="{ row }">
             {{ row.categoryName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="authorName" label="作者" width="100" align="center">
+        <el-table-column prop="authorName" label="作者" width="100" align="center" sortable>
           <template #default="{ row }">
             {{ row.authorName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="status" label="状态" width="100" align="center" sortable>
           <template #default="{ row }">
             <el-tag :type="row.status === 0 ? 'success' : 'info'">
               {{ row.status === 0 ? '已发布' : '草稿' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="isTop" label="置顶" width="80" align="center">
+        <el-table-column prop="isTop" label="置顶" width="80" align="center" sortable>
           <template #default="{ row }">
             <el-tag v-if="row.isTop" type="warning" size="small">置顶</el-tag>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="viewCount" label="浏览量" width="100" align="center" />
-        <el-table-column prop="likeCount" label="点赞量" width="100" align="center" />
-        <el-table-column prop="commentCount" label="评论数" width="100" align="center" />
-        <el-table-column prop="publishedTime" label="发布时间" width="180" align="center">
+        <el-table-column prop="viewCount" label="浏览量" width="100" align="center" sortable />
+        <el-table-column prop="likeCount" label="点赞量" width="100" align="center" sortable />
+        <el-table-column prop="commentCount" label="评论数" width="100" align="center" sortable />
+        <el-table-column prop="publishedTime" label="发布时间" width="180" align="center" sortable>
           <template #default="{ row }">
             {{ formatDate(row.publishedTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="updateTime" label="更新时间" width="180" align="center" sortable>
+          <template #default="{ row }">
+            {{ formatDate(row.updateTime) }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="250" align="center" fixed="right">

@@ -114,14 +114,47 @@ async function initLikeStatus() {
 
 
 
-const publishDate = computed(() => {
-  const value = articleState.data.value?.publishedTime
-  if (!value) return ''
-  return new Date(value).toLocaleDateString(undefined, {
+/**
+ * 格式化日期
+ */
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
+}
+
+/**
+ * 发布时间标签
+ */
+const publishedLabel = computed(() => {
+  const article = articleState.data.value
+  if (!article || !article.publishedTime) return ''
+  return `发布于 ${formatDate(article.publishedTime)}`
+})
+
+/**
+ * 更新时间标签
+ */
+const updatedLabel = computed(() => {
+  const article = articleState.data.value
+  if (!article) return ''
+  
+  const { updateTime, publishedTime } = article
+  
+  // 如果有更新时间且与发布时间不同，则显示更新时间
+  if (updateTime && publishedTime) {
+    const updateDate = new Date(updateTime).getTime()
+    const publishDate = new Date(publishedTime).getTime()
+    
+    // 如果更新时间比发布时间晚超过1分钟，则显示更新时间
+    if (updateDate - publishDate > 60000) {
+      return `更新于 ${formatDate(updateTime)}`
+    }
+  }
+  
+  return ''
 })
 
 async function load(slug: string) {
@@ -154,9 +187,13 @@ watch(
     <header class="article-header">
       <h1 class="article-title">{{ articleState.data.value.title }}</h1>
       <div class="article-meta-bar">
-        <span class="meta-item">
+        <span class="meta-item" v-if="publishedLabel">
           <i class="fa fa-calendar-o"></i>
-          发表于 {{ publishDate }}
+          {{ publishedLabel }}
+        </span>
+        <span class="meta-item meta-item--updated" v-if="updatedLabel">
+          <i class="fa fa-refresh"></i>
+          {{ updatedLabel }}
         </span>
         <span class="meta-item">
           <i class="fa fa-eye"></i>
@@ -320,6 +357,14 @@ html {
 
 .meta-item i {
   color: var(--sg-primary);
+}
+
+.meta-item--updated {
+  color: var(--lg-text-tertiary);
+}
+
+.meta-item--updated i {
+  color: var(--lg-text-tertiary);
 }
 
 /* 点赞按钮样式 */

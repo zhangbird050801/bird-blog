@@ -40,4 +40,15 @@
         ORDER BY af.create_time DESC
     </select>
 
+    <!-- 统计用户有效的收藏数量（只统计未删除且已发布的文章） -->
+    <select id="countValidFavoritesByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*) 
+        FROM bg_article_favorite af 
+        INNER JOIN bg_article a ON af.article_id = a.id 
+        WHERE af.user_id = #{userId}
+          AND af.deleted = false
+          AND a.deleted = false
+          AND a.status = 0
+    </select>
+
 </mapper>

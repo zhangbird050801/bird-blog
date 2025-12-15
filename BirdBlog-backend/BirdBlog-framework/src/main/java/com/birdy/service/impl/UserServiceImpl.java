@@ -494,28 +494,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 获取用户收藏数量
+     * 获取用户有效的收藏数量（只统计未删除且已发布的文章）
      */
     private Long getFavoriteCount(Long userId) {
         try {
-            LambdaQueryWrapper<com.birdy.domain.entity.ArticleFavorite> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(com.birdy.domain.entity.ArticleFavorite::getUserId, userId)
-                   .eq(com.birdy.domain.entity.ArticleFavorite::getDeleted, false);
-            return articleFavoriteMapper.selectCount(wrapper);
+            return articleFavoriteMapper.countValidFavoritesByUserId(userId);
         } catch (Exception e) {
             return 0L;
         }
     }
 
     /**
-     * 获取用户点赞数量
+     * 获取用户有效的点赞数量（只统计未删除且已发布的文章）
      */
     private Long getLikeCount(Long userId) {
         try {
-            LambdaQueryWrapper<com.birdy.domain.entity.ArticleLike> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(com.birdy.domain.entity.ArticleLike::getUserId, userId)
-                   .eq(com.birdy.domain.entity.ArticleLike::getDeleted, false);
-            return articleLikeMapper.selectCount(wrapper);
+            return articleLikeMapper.countValidLikesByUserId(userId);
         } catch (Exception e) {
             return 0L;
         }

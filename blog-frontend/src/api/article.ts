@@ -14,6 +14,7 @@ export interface ArticleVO {
   viewCount?: number
   likeCount?: number
   publishedTime?: string
+  updateTime?: string
   isTop?: boolean
   tags?: Array<{ id: number; name: string; remark?: string }>
 }
@@ -35,6 +36,7 @@ export interface ArticleDetailVO {
   commentCount?: number
   isComment?: boolean
   publishedTime?: string
+  updateTime?: string
   isLiked?: boolean
 }
 

@@ -28,4 +28,9 @@ public interface ArticleFavoriteMapper extends BaseMapper<ArticleFavorite> {
      * 更新收藏记录的删除标记
      */
     int updateDeletedByArticleIdAndUserId(@Param("articleId") Long articleId, @Param("userId") Long userId, @Param("deleted") Boolean deleted);
+
+    /**
+     * 统计用户有效的收藏数量（只统计未删除且已发布的文章）
+     */
+    Long countValidFavoritesByUserId(@Param("userId") Long userId);
 }

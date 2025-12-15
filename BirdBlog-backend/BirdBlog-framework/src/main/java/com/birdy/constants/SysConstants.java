@@ -53,12 +53,6 @@ public class SysConstants {
     // 密码最小长度
     public static final int PASSWORD_MIN_LENGTH = 6;
 
-    // 移除用户类型常量，现在完全通过角色(RBAC)管理用户权限
-    // 角色定义在 sys_role 表中:
-    // - SUPER_ADMIN (超级管理员)
-    // - EDITOR (编辑)
-    // - REVIEWER (审核员)
-    // - VISITOR (访客)
     public static final int USER_STATUS_NORMAL = 0;
     public static final int USER_STATUS_DISABLE = 1;
     public static final int USER_SEX_UNKNOWN = 2;

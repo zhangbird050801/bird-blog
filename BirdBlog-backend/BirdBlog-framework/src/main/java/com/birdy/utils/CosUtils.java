@@ -211,8 +211,8 @@ public class CosUtils {
             return "";
         }
 
-        // 生成带签名的URL，有效期24小时（24*60*60*1000毫秒）
-        java.util.Date expirationTime = new java.util.Date(System.currentTimeMillis() + 24L * 60 * 60 * 1000);
+        // 生成带签名的URL，有效期30天（30*24*60*60*1000毫秒）
+        java.util.Date expirationTime = new java.util.Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000);
 
         return getCosClient().generatePresignedUrl(
             cosConfig.getBucketName(),

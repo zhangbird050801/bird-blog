@@ -12,13 +12,46 @@ const props = defineProps<{
 const tags = ref<Tag[]>([])
 const tagsLoading = ref(false)
 
-const publishedLabel = computed(() => {
-  if (!props.article.publishedTime) return '最新'
-  return new Date(props.article.publishedTime).toLocaleDateString(undefined, {
+/**
+ * 格式化日期
+ */
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   })
+}
+
+/**
+ * 发布时间标签
+ */
+const publishedLabel = computed(() => {
+  const { publishedTime } = props.article
+  if (publishedTime) {
+    return `发布于 ${formatDate(publishedTime)}`
+  }
+  return ''
+})
+
+/**
+ * 更新时间标签
+ */
+const updatedLabel = computed(() => {
+  const { updateTime, publishedTime } = props.article
+  
+  // 如果有更新时间且与发布时间不同，则显示更新时间
+  if (updateTime && publishedTime) {
+    const updateDate = new Date(updateTime).getTime()
+    const publishDate = new Date(publishedTime).getTime()
+    
+    // 如果更新时间比发布时间晚超过1分钟，则显示更新时间
+    if (updateDate - publishDate > 60000) {
+      return `更新于 ${formatDate(updateTime)}`
+    }
+  }
+  
+  return ''
 })
 
 // 加载文章标签
@@ -60,7 +93,10 @@ onMounted(() => {
               </LgBadge>
               <LgBadge tone="primary">{{ article.categoryName ?? '未分类' }}</LgBadge>
             </div>
-            <span class="article-card__date">{{ publishedLabel }}</span>
+            <div class="article-card__dates">
+              <span class="article-card__date" v-if="publishedLabel">{{ publishedLabel }}</span>
+              <span class="article-card__date article-card__date--updated" v-if="updatedLabel">{{ updatedLabel }}</span>
+            </div>
           </div>
           <h2 class="article-card__title">
             {{ article.title }}
@@ -192,14 +228,22 @@ onMounted(() => {
   filter: drop-shadow(0 2px 4px rgba(248, 113, 113, 0.4));
 }
 
-.article-card__date {
-  font-size: 15px;
-  color: var(--lg-text-secondary);
+.article-card__dates {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
 }
 
-.article-card__date::before {
-  content: '发表于 ';
-  margin-right: 4px;
+.article-card__date {
+  font-size: 14px;
+  color: var(--lg-text-secondary);
+  white-space: nowrap;
+}
+
+.article-card__date--updated {
+  font-size: 13px;
+  color: var(--lg-text-tertiary);
 }
 
 .article-card__title {

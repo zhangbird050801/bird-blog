@@ -81,6 +81,12 @@ public class ArticleDetailVO {
     private Date publishedTime;
 
     /**
+     * 更新时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
+
+    /**
      * 当前用户是否已点赞（仅当用户登录时返回）
      */
     private Boolean isLiked;

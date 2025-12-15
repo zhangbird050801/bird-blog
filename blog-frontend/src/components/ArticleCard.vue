@@ -7,7 +7,7 @@
     <div class="article-content">
       <div class="article-meta">
         <span class="category" v-if="article.categoryName">{{ article.categoryName }}</span>
-        <span class="date">{{ formatDate(article.publishedTime) }}</span>
+        <span class="date">{{ getDisplayDate() }}</span>
         <span class="badge top" v-if="article.isTop">置顶</span>
       </div>
       
@@ -41,13 +41,13 @@
 </template>
 
 <script setup lang="ts">
-import type { Article } from '@/api/types'
+import type { ArticleVO } from '@/api/article'
 
 interface Props {
-  article: Article
+  article: ArticleVO
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return ''
@@ -57,6 +57,26 @@ const formatDate = (dateString?: string) => {
     month: 'short',
     day: 'numeric'
   })
+}
+
+/**
+ * 获取显示的日期
+ * 优先显示更新时间,否则显示发布时间
+ */
+const getDisplayDate = () => {
+  const { publishedTime, updateTime } = props.article
+  
+  // 优先显示更新时间
+  if (updateTime) {
+    return `更新于 ${formatDate(updateTime)}`
+  }
+  
+  // 否则显示发布时间
+  if (publishedTime) {
+    return `更新于 ${formatDate(publishedTime)}`
+  }
+  
+  return ''
 }
 </script>
 

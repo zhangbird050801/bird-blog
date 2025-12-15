@@ -162,7 +162,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     public CommonResult<List<LatestArticleVO>> latest() {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getStatus, ARTICLE_STATUS_RELEASE);
-        queryWrapper.orderByDesc(Article::getPublishedTime);
+        // 按更新时间降序排序，显示最近更新的文章
+        queryWrapper.orderByDesc(Article::getUpdateTime);
         Page<Article> page = new Page<>(LATEST_ARTICLE_PAGE_NUM, LATEST_ARTICLE_PAGE_SIZE);
         page(page, queryWrapper);
 
@@ -238,8 +239,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
                    .like(Article::getContent, searchKeyword)
         );
 
-        // 按发布时间降序排序
-        queryWrapper.orderByDesc(Article::getPublishedTime);
+        // 按更新时间降序排序
+        queryWrapper.orderByDesc(Article::getUpdateTime);
 
         List<Article> articles = list(queryWrapper);
         List<ArticleVO> articleVOs = BeanUtil.copyToList(articles, ArticleVO.class);
@@ -282,9 +283,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
             queryWrapper.eq(Article::getIsTop, queryDTO.getIsTop());
         }
 
-        // 排序：置顶文章优先，然后按发布时间倒序
+        // 排序：置顶文章优先，然后按更新时间倒序
         queryWrapper.orderByDesc(Article::getIsTop)
-                .orderByDesc(Article::getPublishedTime);
+                .orderByDesc(Article::getUpdateTime);
 
         // 分页查询
         Page<Article> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
@@ -431,6 +432,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         // 设置不可修改的字段
         article.setAuthorId(existingArticle.getAuthorId());
         article.setCreateTime(existingArticle.getCreateTime());
+        // 手动设置更新时间（确保一定会更新）
+        article.setUpdateTime(java.time.LocalDateTime.now());
 
         // 处理分类：如果传入新分类名称则创建/复用并回填 categoryId
         CommonResult<Void> categoryResult = resolveCategory(article, newCategoryName, newCategoryRemark);
@@ -438,10 +441,20 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, categoryResult.getMsg());
         }
 
-        // 如果状态改为发布且发布时间为空，设置当前时间
-        if (article.getStatus() != null && article.getStatus() == ARTICLE_STATUS_RELEASE &&
-            (article.getPublishedTime() == null || existingArticle.getStatus() == null || existingArticle.getStatus() != ARTICLE_STATUS_RELEASE)) {
-            article.setPublishedTime(new java.util.Date());
+        // 只有在以下情况才设置发布时间：
+        // 1. 文章状态改为"已发布"
+        // 2. 且原来没有发布时间（首次发布）
+        // 3. 或原来的状态不是"已发布"（从草稿/待审核改为发布）
+        if (article.getStatus() != null && article.getStatus() == ARTICLE_STATUS_RELEASE) {
+            // 只有当原文章没有发布时间，或者原文章状态不是已发布时，才设置新的发布时间
+            if (existingArticle.getPublishedTime() == null || 
+                existingArticle.getStatus() == null || 
+                existingArticle.getStatus() != ARTICLE_STATUS_RELEASE) {
+                article.setPublishedTime(new java.util.Date());
+            } else {
+                // 已发布的文章，保持原发布时间不变
+                article.setPublishedTime(existingArticle.getPublishedTime());
+            }
         }
 
         // 处理 slug：生成或规整后校验唯一（排除自身）
@@ -478,23 +491,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CommonResult<Void> publishArticle(Long id) {
+        // 参数校验
         if (id == null || id <= 0) {
             return CommonResult.error(HttpCodeEnum.ARTICLE_ID_NOT_NULL);
         }
+        
+        // 检查文章是否存在且未删除
         Article article = getById(id);
         if (article == null || Boolean.TRUE.equals(article.getDeleted())) {
             return CommonResult.error(HttpCodeEnum.ARTICLE_NOT_FOUND);
         }
 
-        Article toUpdate = new Article();
-        toUpdate.setId(id);
-        toUpdate.setStatus(ARTICLE_STATUS_RELEASE);
-        // 若此前未发布则补充发布时间
-        if (article.getPublishedTime() == null) {
-            toUpdate.setPublishedTime(new java.util.Date());
-        }
-        boolean success = updateById(toUpdate);
-        return success ? CommonResult.success() : CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "发布失败");
+        // 传入 null 作为发布时间，存储过程会自动使用当前时间
+        articleMapper.publishArticleByProcedure(id, null);
+        
+        return CommonResult.success();
     }
 
     @Override
@@ -867,6 +878,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         // 设置作者名称
         if (article.getAuthorId() != null) {
             adminArticleVO.setAuthorName(userMap.get(article.getAuthorId()));
+        }
+
+        // 手动转换 LocalDateTime 到 Date（BeanUtils 不会自动转换类型不匹配的字段）
+        if (article.getCreateTime() != null) {
+            adminArticleVO.setCreateTime(java.sql.Timestamp.valueOf(article.getCreateTime()));
+        }
+        if (article.getUpdateTime() != null) {
+            adminArticleVO.setUpdateTime(java.sql.Timestamp.valueOf(article.getUpdateTime()));
         }
 
         return adminArticleVO;

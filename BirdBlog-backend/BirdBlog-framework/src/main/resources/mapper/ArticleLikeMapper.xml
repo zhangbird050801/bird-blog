@@ -52,4 +52,15 @@
         ORDER BY al.create_time DESC
     </select>
 
+    <!-- 统计用户有效的点赞数量（只统计未删除且已发布的文章） -->
+    <select id="countValidLikesByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*) 
+        FROM bg_article_like al 
+        INNER JOIN bg_article a ON al.article_id = a.id 
+        WHERE al.user_id = #{userId}
+          AND al.deleted = false
+          AND a.deleted = false
+          AND a.status = 0
+    </select>
+
 </mapper>

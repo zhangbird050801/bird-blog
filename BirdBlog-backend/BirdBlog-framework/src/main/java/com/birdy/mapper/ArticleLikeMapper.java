@@ -60,4 +60,9 @@ public interface ArticleLikeMapper extends BaseMapper<ArticleLike> {
      * @return 点赞的文章列表
      */
     IPage<ArticleVO> selectLikedArticlesByUserId(Page<ArticleVO> page, @Param("userId") Long userId);
+
+    /**
+     * 统计用户有效的点赞数量（只统计未删除且已发布的文章）
+     */
+    Long countValidLikesByUserId(@Param("userId") Long userId);
 }

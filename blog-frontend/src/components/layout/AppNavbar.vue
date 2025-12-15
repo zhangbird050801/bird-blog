@@ -29,7 +29,7 @@ const showChangePasswordModal = ref(false)
 
 // 提供简单导航跳转
 const navItems = [
-  { name: '主页', path: '/' },
+  { name: '首页', path: '/' },
 ]
 
 // 加载分类数据
@@ -210,6 +210,11 @@ onBeforeUnmount(() => {
         <router-link to="/links" class="nav-link">
           友链
         </router-link>
+
+        <!-- 关于链接（外部跳转） -->
+        <a href="https://www.birdyweb.top" target="_blank" rel="noopener noreferrer" class="nav-link">
+          关于
+        </a>
       </nav>
 
       <div class="nav-actions">

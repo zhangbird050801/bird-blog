@@ -100,6 +100,16 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return 影响行数
      */
     int decrementLikeCount(@Param("id") Long id);
+
+    /**
+     * 调用存储过程发布文章
+     * 将文章状态设置为已发布（status=0），并设置发布时间
+     *
+     * @param articleId 文章ID
+     * @param publishTime 发布时间（可选，传 null 则使用当前时间）
+     */
+    void publishArticleByProcedure(@Param("articleId") Long articleId, 
+                                   @Param("publishTime") java.util.Date publishTime);
 }
 
 

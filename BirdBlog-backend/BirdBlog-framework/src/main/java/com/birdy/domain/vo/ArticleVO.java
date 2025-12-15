@@ -61,4 +61,10 @@ public class ArticleVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date publishedTime;
+
+    /**
+     * 更新时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
 }

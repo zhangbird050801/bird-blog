@@ -27,7 +27,7 @@
     </div>
 
     <div class="grid">
-      <el-card class="card" shadow="hover">
+      <el-card class="card card-rank" shadow="hover">
         <div class="card-title">
           <div>
             <p class="card-caption">浏览量最高的文章</p>
@@ -66,16 +66,10 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="点赞" width="100">
-            <template #default="{ row }">{{ formatNumber(row.likeCount) }}</template>
-          </el-table-column>
-          <el-table-column label="收藏" width="100">
-            <template #default="{ row }">{{ formatNumber(row.favoriteCount) }}</template>
-          </el-table-column>
         </el-table>
       </el-card>
 
-      <el-card class="card" shadow="hover">
+      <el-card class="card card-rank" shadow="hover">
         <div class="card-title">
           <div>
             <p class="card-caption">互动综合（点赞+收藏）</p>
@@ -123,7 +117,7 @@
         </el-table>
       </el-card>
 
-      <el-card class="card" shadow="hover">
+      <el-card class="card card-rank" shadow="hover">
         <div class="card-title">
           <div>
             <p class="card-caption">评论数量最高</p>
@@ -355,7 +349,7 @@ h2 {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
@@ -370,6 +364,10 @@ h2 {
 .card-title small {
   color: #909399;
   font-weight: normal;
+}
+
+.card-rank {
+  /* 三个排行榜卡片，每个占1/3宽度 */
 }
 
 .card-wide {

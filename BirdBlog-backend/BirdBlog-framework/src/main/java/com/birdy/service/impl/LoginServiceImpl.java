@@ -78,11 +78,13 @@ public class LoginServiceImpl implements LoginService {
             return CommonResult.error(HttpCodeEnum.REQUIRE_USERNAME);
         }
 
-        // 2. 校验验证码
-        if (StringUtils.hasText(loginRequestDTO.getCode()) && StringUtils.hasText(loginRequestDTO.getUuid())) {
-            if (!captchaUtil.verifyCaptcha(loginRequestDTO.getUuid(), loginRequestDTO.getCode())) {
-                return CommonResult.error(HttpCodeEnum.CAPTCHA_ERROR_OR_EXPIRE);
-            }
+        // 2. 校验验证码（必填）
+        if (!StringUtils.hasText(loginRequestDTO.getCode()) || !StringUtils.hasText(loginRequestDTO.getUuid())) {
+            return CommonResult.error(HttpCodeEnum.CAPTCHA_REQUIRED);
+        }
+        
+        if (!captchaUtil.verifyCaptcha(loginRequestDTO.getUuid(), loginRequestDTO.getCode())) {
+            return CommonResult.error(HttpCodeEnum.CAPTCHA_ERROR_OR_EXPIRE);
         }
 
         // 3. 查询用户
@@ -247,7 +249,7 @@ public class LoginServiceImpl implements LoginService {
         newUser.setNickName(registerRequestDTO.getUserName());
         newUser.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         newUser.setEmail(registerRequestDTO.getEmail());
-        // 移除type字段设置，新用户默认为访客角色，通过角色表管理
+        // 新用户默认为访客角色
         newUser.setStatus(USER_STATUS_NORMAL);
         newUser.setSex(USER_SEX_UNKNOWN);
         newUser.setDeleted(USER_NOT_DELETED);
@@ -283,8 +285,6 @@ public class LoginServiceImpl implements LoginService {
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtil.copyProperties(user, userInfoVO);
         userInfoVO.setSex(user.getSex() != null ? user.getSex().toString() : String.valueOf(USER_SEX_UNKNOWN));
-        // 移除type字段设置，通过角色来管理用户权限
-
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(accessToken);
         loginVO.setRefreshToken(refreshToken);
@@ -295,8 +295,6 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public CommonResult<String> changePassword(ChangePasswordRequestDTO changePasswordRequestDTO) {
         try {
-            System.out.println("开始修改密码...");
-
             // 1. 参数校验
             String oldPassword = changePasswordRequestDTO.getOldPassword();
             String newPassword = changePasswordRequestDTO.getNewPassword();
