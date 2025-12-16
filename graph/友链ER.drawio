@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.7">
   <diagram name="第 1 页" id="cfOFSviXMO6xtNPgel6z">
-    <mxGraphModel dx="1891" dy="1276" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="-26" dy="208" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -252,6 +252,20 @@
             <mxPoint x="1191" y="338" as="sourcePoint" />
             <mxPoint x="999" y="584" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="sh8mSN18FttU4WEbD_Ye-48" edge="1" parent="1" source="sh8mSN18FttU4WEbD_Ye-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="905.9225298092689" y="627.0578978738668" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sh8mSN18FttU4WEbD_Ye-49" edge="1" parent="1" source="sh8mSN18FttU4WEbD_Ye-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="sh8mSN18FttU4WEbD_Ye-46" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="958" y="609" as="sourcePoint" />
+            <mxPoint x="958.5" y="537.931602819642" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sh8mSN18FttU4WEbD_Ye-46" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="拥有" vertex="1">
+          <mxGeometry height="48" width="65" x="926" y="531" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
