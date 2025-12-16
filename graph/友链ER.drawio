@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.7">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.7">
   <diagram name="第 1 页" id="cfOFSviXMO6xtNPgel6z">
-    <mxGraphModel dx="576" dy="152" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="864" dy="304" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -11,7 +11,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-3" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="友链ID" vertex="1">
-          <mxGeometry height="60" width="120" x="1008" y="473" as="geometry" />
+          <mxGeometry height="60" width="120" x="1005" y="482" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-4" edge="1" parent="1" source="T_xYJi46narDlsMS6XFd-18" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="T_xYJi46narDlsMS6XFd-1">
           <mxGeometry relative="1" as="geometry">
@@ -23,7 +23,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-6" parent="1" style="whiteSpace=wrap;html=1;rounded=0;shape=ellipse;perimeter=ellipsePerimeter;" value="网站名称" vertex="1">
-          <mxGeometry height="60" width="120" x="1008" y="562" as="geometry" />
+          <mxGeometry height="60" width="120" x="1008" y="555" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-10" edge="1" parent="1" source="T_xYJi46narDlsMS6XFd-12" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="T_xYJi46narDlsMS6XFd-1">
           <mxGeometry relative="1" as="geometry">
@@ -44,7 +44,7 @@
         <mxCell id="T_xYJi46narDlsMS6XFd-23" edge="1" parent="1" source="T_xYJi46narDlsMS6XFd-13" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="T_xYJi46narDlsMS6XFd-1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="T_xYJi46narDlsMS6XFd-13" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="更新时间update_time" vertex="1">
+        <mxCell id="T_xYJi46narDlsMS6XFd-13" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="更新时间" vertex="1">
           <mxGeometry height="60" width="120" x="435.0009756097563" y="773.9980487804879" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-22" edge="1" parent="1" source="T_xYJi46narDlsMS6XFd-14" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="T_xYJi46narDlsMS6XFd-1">
@@ -52,19 +52,19 @@
             <mxPoint x="720" y="665" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="T_xYJi46narDlsMS6XFd-14" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="更新者updator" vertex="1">
+        <mxCell id="T_xYJi46narDlsMS6XFd-14" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="更新者" vertex="1">
           <mxGeometry height="60" width="120" x="435" y="703" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-25" edge="1" parent="1" source="T_xYJi46narDlsMS6XFd-15" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="T_xYJi46narDlsMS6XFd-1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-15" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="LogoURL" vertex="1">
-          <mxGeometry height="60" width="120" x="1008" y="640" as="geometry" />
+          <mxGeometry height="60" width="120" x="1005" y="627" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-16" edge="1" parent="1" source="T_xYJi46narDlsMS6XFd-17" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="T_xYJi46narDlsMS6XFd-1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="T_xYJi46narDlsMS6XFd-17" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="是否删除deleted" vertex="1">
+        <mxCell id="T_xYJi46narDlsMS6XFd-17" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" value="是否删除" vertex="1">
           <mxGeometry height="60" width="120" x="435" y="850" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-18" parent="1" style="whiteSpace=wrap;html=1;rounded=0;shape=ellipse;perimeter=ellipsePerimeter;" value="审核状态" vertex="1">
@@ -74,13 +74,13 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-19" parent="1" style="whiteSpace=wrap;html=1;rounded=0;shape=ellipse;perimeter=ellipsePerimeter;" value="描述" vertex="1">
-          <mxGeometry height="60" width="120" x="1008" y="730" as="geometry" />
+          <mxGeometry height="60" width="120" x="1005" y="703" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-27" edge="1" parent="1" source="T_xYJi46narDlsMS6XFd-20" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="T_xYJi46narDlsMS6XFd-1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="T_xYJi46narDlsMS6XFd-20" parent="1" style="whiteSpace=wrap;html=1;rounded=0;shape=ellipse;perimeter=ellipsePerimeter;" value="网站地址" vertex="1">
-          <mxGeometry height="60" width="120" x="1008" y="830" as="geometry" />
+          <mxGeometry height="60" width="120" x="1008" y="779" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
