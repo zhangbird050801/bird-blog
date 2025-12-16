@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.7">
   <diagram name="第 1 页" id="jILHvGhs8MX0dpeiqC1f">
-    <mxGraphModel dx="516" dy="288" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
+    <mxGraphModel dx="4170" dy="2230" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -164,13 +164,13 @@
         <mxCell id="QwOwKgMsZQ-iMP6MJO6a-189" parent="1" style="ellipse;whiteSpace=wrap;html=1;flipV=1;flipH=1;fontSize=17;fontFamily=Comic Sans MS;" value="角色名称" vertex="1">
           <mxGeometry height="48" width="95" x="573" y="2564" as="geometry" />
         </mxCell>
-        <mxCell id="QwOwKgMsZQ-iMP6MJO6a-190" edge="1" parent="1" source="QwOwKgMsZQ-iMP6MJO6a-191" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=17;fontFamily=Comic Sans MS;" target="QwOwKgMsZQ-iMP6MJO6a-141">
+        <mxCell id="QwOwKgMsZQ-iMP6MJO6a-190" edge="1" parent="1" source="QwOwKgMsZQ-iMP6MJO6a-191" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.019;entryY=0.496;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=17;fontFamily=Comic Sans MS;entryPerimeter=0;" target="QwOwKgMsZQ-iMP6MJO6a-141">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="QwOwKgMsZQ-iMP6MJO6a-191" parent="1" style="ellipse;whiteSpace=wrap;html=1;flipV=1;flipH=1;fontSize=17;fontFamily=Comic Sans MS;" value="创建者" vertex="1">
           <mxGeometry height="48" width="95" x="573" y="2279" as="geometry" />
         </mxCell>
-        <mxCell id="QwOwKgMsZQ-iMP6MJO6a-192" edge="1" parent="1" source="QwOwKgMsZQ-iMP6MJO6a-193" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;fontSize=17;fontFamily=Comic Sans MS;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="QwOwKgMsZQ-iMP6MJO6a-141">
+        <mxCell id="QwOwKgMsZQ-iMP6MJO6a-192" edge="1" parent="1" source="QwOwKgMsZQ-iMP6MJO6a-193" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;fontSize=17;fontFamily=Comic Sans MS;entryX=-0.024;entryY=0.504;entryDx=0;entryDy=0;entryPerimeter=0;" target="QwOwKgMsZQ-iMP6MJO6a-141">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1044" y="2767.5" as="targetPoint" />
           </mxGeometry>
@@ -1118,6 +1118,18 @@
         </mxCell>
         <mxCell id="QwOwKgMsZQ-iMP6MJO6a-179" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=17;fontFamily=Comic Sans MS;" value="拥有" vertex="1">
           <mxGeometry height="80" width="80" x="1251" y="2592" as="geometry" />
+        </mxCell>
+        <mxCell id="QwOwKgMsZQ-iMP6MJO6a-540" edge="1" parent="1" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=17;fontFamily=Comic Sans MS;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="668" y="2363" as="sourcePoint" />
+            <mxPoint x="1249" y="2380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QwOwKgMsZQ-iMP6MJO6a-541" edge="1" parent="1" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=17;fontFamily=Comic Sans MS;entryX=-0.031;entryY=0.485;entryDx=0;entryDy=0;entryPerimeter=0;" target="QwOwKgMsZQ-iMP6MJO6a-141">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="668" y="2250" as="sourcePoint" />
+            <mxPoint x="1249" y="2267" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
