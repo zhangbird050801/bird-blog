@@ -108,7 +108,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="VqjT20no2Obsm_2DiAfV-85" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;rounded=0;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;" value="分类收录" vertex="1">
-          <mxGeometry height="151" width="308" x="74" y="377" as="geometry" />
+          <mxGeometry height="151" width="308" x="-4" y="369" as="geometry" />
         </mxCell>
         <mxCell id="VqjT20no2Obsm_2DiAfV-88" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;" value="文章" vertex="1">
           <mxGeometry height="65" width="177" x="759" y="377" as="geometry" />
