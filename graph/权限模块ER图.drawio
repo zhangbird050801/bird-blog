@@ -7,7 +7,7 @@
         <mxCell id="DRUGytFJdOCtqZsrUCT--1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;" value="角色" vertex="1">
           <mxGeometry height="60" width="120" x="667" y="-18.25" as="geometry" />
         </mxCell>
-        <mxCell id="DRUGytFJdOCtqZsrUCT--2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;" value="菜单权限" vertex="1">
+        <mxCell id="DRUGytFJdOCtqZsrUCT--2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;" value="菜单权限资源" vertex="1">
           <mxGeometry height="60" width="226" x="1788.67" y="-16.75" as="geometry" />
         </mxCell>
         <mxCell id="DRUGytFJdOCtqZsrUCT--6" edge="1" parent="1" source="DRUGytFJdOCtqZsrUCT--3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;strokeWidth=2;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;" target="DRUGytFJdOCtqZsrUCT--5">
