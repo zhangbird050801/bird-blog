@@ -13,7 +13,7 @@ module.exports = defineConfig({
     open: true,
     proxy: {
       '/admin': {
-        target: 'http://localhost:9090',
+        target: 'http://localhost:7777',
         changeOrigin: true
       },
     }

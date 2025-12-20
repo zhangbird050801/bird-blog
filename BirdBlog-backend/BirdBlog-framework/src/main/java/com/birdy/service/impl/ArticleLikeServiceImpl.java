@@ -1,13 +1,16 @@
 package com.birdy.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.birdy.domain.CommonResult;
+import com.birdy.domain.entity.Article;
 import com.birdy.domain.entity.ArticleLike;
 import com.birdy.domain.vo.ArticleVO;
 import com.birdy.domain.vo.PageResult;
 import com.birdy.mapper.ArticleLikeMapper;
+import com.birdy.mapper.ArticleMapper;
 import com.birdy.service.ArticleLikeService;
 import com.birdy.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,9 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
     @Autowired
     private ArticleLikeMapper articleLikeMapper;
 
+    @Autowired
+    private ArticleMapper articleMapper;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean likeArticle(Long articleId, Long userId) {
@@ -34,20 +40,30 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
             return false; // 已点赞过且未删除
         }
 
+        boolean success;
         // 如果曾经点过赞但被标记删除，则恢复该记录
         if (existingLike != null && Boolean.TRUE.equals(existingLike.getDeleted())) {
-            return articleLikeMapper.updateDeletedByArticleIdAndUserId(articleId, userId, false) > 0;
+            success = articleLikeMapper.updateDeletedByArticleIdAndUserId(articleId, userId, false) > 0;
+        } else {
+            // 创建新的点赞记录
+            ArticleLike articleLike = new ArticleLike();
+            articleLike.setArticleId(articleId);
+            articleLike.setUserId(userId);
+            articleLike.setDeleted(false);
+
+            // 保存点赞记录
+            success = articleLikeMapper.insert(articleLike) > 0;
         }
 
-        // 创建新的点赞记录
-        ArticleLike articleLike = new ArticleLike();
-        articleLike.setArticleId(articleId);
-        articleLike.setUserId(userId);
-        articleLike.setDeleted(false);
+        // 更新文章点赞数
+        if (success) {
+            LambdaUpdateWrapper<Article> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Article::getId, articleId)
+                    .setSql("like_count = like_count + 1");
+            articleMapper.update(null, updateWrapper);
+        }
 
-        // 保存点赞记录
-        int insertCount = articleLikeMapper.insert(articleLike);
-        return insertCount > 0;
+        return success;
     }
 
     @Override
@@ -61,7 +77,17 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
 
         // 标记删除点赞记录
         int deleteCount = articleLikeMapper.updateDeletedByArticleIdAndUserId(articleId, userId, true);
-        return deleteCount > 0;
+        boolean success = deleteCount > 0;
+
+        // 更新文章点赞数
+        if (success) {
+            LambdaUpdateWrapper<Article> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Article::getId, articleId)
+                    .setSql("like_count = CASE WHEN like_count > 0 THEN like_count - 1 ELSE 0 END");
+            articleMapper.update(null, updateWrapper);
+        }
+
+        return success;
     }
 
     @Override

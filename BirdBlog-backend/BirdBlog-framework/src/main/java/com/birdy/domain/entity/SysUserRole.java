@@ -17,17 +17,14 @@ import java.time.LocalDateTime;
 @TableName("sys_user_role")
 public class SysUserRole {
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
     /**
-     * 用户ID
+     * 用户ID（联合主键）
      */
     @TableField("user_id")
     private Long userId;
 
     /**
-     * 角色ID
+     * 角色ID（联合主键）
      */
     @TableField("role_id")
     private Long roleId;

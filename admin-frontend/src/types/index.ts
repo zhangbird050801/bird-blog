@@ -257,7 +257,6 @@ export interface PageResult<T = any> {
 export interface Category {
   id: number
   name: string
-  pid?: number | null
   description?: string | null
   status: number
   count?: number

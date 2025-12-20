@@ -46,7 +46,7 @@
         <button 
           v-for="tab in tabs" 
           :key="tab.key"
-          @click="activeTab = tab.key"
+          @click="handleTabChange(tab.key)"
           class="tab-btn"
           :class="{ active: activeTab === tab.key }"
         >

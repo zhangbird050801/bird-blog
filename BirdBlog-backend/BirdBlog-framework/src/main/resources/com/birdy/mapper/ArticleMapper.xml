@@ -79,7 +79,8 @@
             <if test="status != null">
                 AND a.status = #{status}
             </if>
-            AND a.deleted = 0
+            AND a.deleted = false
+            AND (c.id IS NULL OR (c.deleted = false AND c.status = 0))
         </where>
         ORDER BY
             a.is_top DESC,
@@ -142,7 +143,8 @@
         LEFT JOIN bg_category c ON a.category_id = c.id
         WHERE a.id = #{id}
           AND a.status = 0
-          AND a.deleted = 0
+          AND a.deleted = false
+          AND (c.id IS NULL OR (c.deleted = false AND c.status = 0))
     </select>
 
     <!-- 根据 slug 查询文章详情 -->
@@ -166,7 +168,8 @@
         LEFT JOIN bg_category c ON a.category_id = c.id
         WHERE a.slug = #{slug}
           AND a.status = 0
-          AND a.deleted = 0
+          AND a.deleted = false
+          AND (c.id IS NULL OR (c.deleted = false AND c.status = 0))
     </select>
 
     <!-- 增加文章浏览量 -->
@@ -191,7 +194,8 @@
         WHERE a.category_id = #{categoryId}
           AND a.id != #{excludeArticleId}
           AND a.status = 0
-          AND a.deleted = 0
+          AND a.deleted = false
+          AND (c.id IS NULL OR (c.deleted = false AND c.status = 0))
         ORDER BY a.view_count DESC, a.published_time DESC
         LIMIT #{limit}
     </select>
@@ -204,9 +208,11 @@
             a.slug,
             a.thumbnail
         FROM bg_article a
+        LEFT JOIN bg_category c ON a.category_id = c.id
         WHERE a.published_time &lt; #{publishedTime}
           AND a.status = 0
-          AND a.deleted = 0
+          AND a.deleted = false
+          AND (c.id IS NULL OR (c.deleted = false AND c.status = 0))
         ORDER BY a.published_time DESC
         LIMIT 1
     </select>
@@ -219,9 +225,11 @@
             a.slug,
             a.thumbnail
         FROM bg_article a
+        LEFT JOIN bg_category c ON a.category_id = c.id
         WHERE a.published_time &gt; #{publishedTime}
           AND a.status = 0
-          AND a.deleted = 0
+          AND a.deleted = false
+          AND (c.id IS NULL OR (c.deleted = false AND c.status = 0))
         ORDER BY a.published_time ASC
         LIMIT 1
     </select>

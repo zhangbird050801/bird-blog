@@ -16,6 +16,7 @@ import com.birdy.domain.vo.PageResult;
 import com.birdy.enums.HttpCodeEnum;
 import com.birdy.service.LinkService;
 import com.birdy.mapper.LinkMapper;
+import com.birdy.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -78,13 +79,20 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "该网站已申请过友链");
         }
 
-        // 构建申请者信息
-        StringBuilder creatorInfo = new StringBuilder("游客申请");
-        if (StrUtil.isNotBlank(request.getContactName())) {
-            creatorInfo.append(" - ").append(request.getContactName().trim());
-        }
-        if (StrUtil.isNotBlank(request.getContactEmail())) {
-            creatorInfo.append(" (").append(request.getContactEmail().trim()).append(")");
+        // 获取当前登录用户ID（如果已登录）
+        String creatorInfo;
+        try {
+            Long userId = SecurityUtils.getUserId();
+            if (userId != null) {
+                // 已登录用户：使用用户ID
+                creatorInfo = String.valueOf(userId);
+            } else {
+                // 游客：构建游客信息
+                creatorInfo = buildGuestCreatorInfo(request);
+            }
+        } catch (Exception e) {
+            // 未登录或获取用户信息失败：构建游客信息
+            creatorInfo = buildGuestCreatorInfo(request);
         }
 
         // 构建完整描述（包含申请留言）
@@ -111,7 +119,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
         link.setStatus(SysConstants.LINK_STATUS_PENDING);
         
         // 设置创建信息
-        link.setCreator(creatorInfo.toString());
+        link.setCreator(creatorInfo);
         link.setCreateTime(new Date());
         link.setUpdater("system");
         link.setUpdateTime(new Date());
@@ -124,6 +132,20 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
         } else {
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "友链申请提交失败，请稍后重试");
         }
+    }
+
+    /**
+     * 构建游客申请者信息
+     */
+    private String buildGuestCreatorInfo(LinkApplicationRequest request) {
+        StringBuilder creatorInfo = new StringBuilder("游客申请");
+        if (StrUtil.isNotBlank(request.getContactName())) {
+            creatorInfo.append(" - ").append(request.getContactName().trim());
+        }
+        if (StrUtil.isNotBlank(request.getContactEmail())) {
+            creatorInfo.append(" (").append(request.getContactEmail().trim()).append(")");
+        }
+        return creatorInfo.toString();
     }
 
     @Override
@@ -341,18 +363,15 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, Link>
                 return CommonResult.error(HttpCodeEnum.PARAM_ERROR, "请选择要删除的友链");
             }
 
-            // 2. 软删除友链（将deleted字段设为true）
-            for (Long id : ids) {
-                Link link = getById(id);
-                if (link != null) {
-                    link.setDeleted(true);
-                    link.setUpdater("admin");
-                    link.setUpdateTime(new Date());
-                    updateById(link);
-                }
+            // 使用 MyBatis-Plus 的批量逻辑删除方法
+            // @TableLogic 注解会自动将 removeByIds 转换为更新 deleted 字段
+            boolean success = removeByIds(ids);
+            
+            if (success) {
+                return CommonResult.success("删除友链成功");
+            } else {
+                return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "删除友链失败");
             }
-
-            return CommonResult.success("删除友链成功");
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error(HttpCodeEnum.SYSTEM_ERROR, "删除友链失败：" + e.getMessage());

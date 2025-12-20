@@ -16,17 +16,16 @@ import java.time.LocalDateTime;
 @TableName("bg_article_favorite")
 public class ArticleFavorite {
     
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-    
     /**
-     * 文章ID
+     * 文章ID（联合主键）
      */
+    @TableField("article_id")
     private Long articleId;
     
     /**
-     * 用户ID
+     * 用户ID（联合主键）
      */
+    @TableField("user_id")
     private Long userId;
     
     /**

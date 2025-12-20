@@ -149,9 +149,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
             if (category.getStatus() == null) {
                 category.setStatus(SysConstants.CATEGORY_STATUS_ENABLE);
             }
-            if (category.getPid() == null) {
-                category.setPid(null);
-            }
             if (category.getDescription() != null) {
                 category.setDescription(category.getDescription().trim());
             } else {
@@ -210,17 +207,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
                 }
             }
 
-            // 4. 检查父分类设置是否合理（不能选择自己或自己的子分类作为父分类）
-            if (category.getPid() != null && !category.getPid().equals(0L)) {
-                if (category.getPid().equals(category.getId())) {
-                    return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "不能选择自己作为父分类");
-                }
-                // 这里可以添加更复杂的层级检查，但暂时只做基本检查
-            }
-
-            // 5. 更新分类信息
+            // 4. 更新分类信息
             existingCategory.setName(category.getName().trim());
-            existingCategory.setPid(category.getPid());
             existingCategory.setStatus(category.getStatus());
             if (category.getDescription() != null) {
                 existingCategory.setDescription(category.getDescription().trim());
@@ -262,33 +250,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
                     return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
                         String.format("分类【%s】下还有 %d 篇文章，无法删除。请先删除或转移这些文章。", categoryName, articleCount));
                 }
-
-                // 检查是否有子分类
-                LambdaQueryWrapper<Category> childWrapper = new LambdaQueryWrapper<>();
-                childWrapper.eq(Category::getPid, id)
-                           .eq(Category::getDeleted, CATEGORY_NOT_DELETED);
-                long childCount = count(childWrapper);
-
-                if (childCount > 0) {
-                    Category category = getById(id);
-                    String categoryName = category != null ? category.getName() : "未知分类";
-                    return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR,
-                        String.format("分类【%s】下还有 %d 个子分类，无法删除。请先删除子分类。", categoryName, childCount));
-                }
             }
 
-            // 2. 软删除分类（将deleted字段设为true）
-            for (Long id : ids) {
-                Category category = getById(id);
-                if (category != null) {
-                    category.setDeleted(true);
-                    category.setUpdater("admin");
-                    category.setUpdateTime(new java.util.Date());
-                    updateById(category);
-                }
+            boolean success = removeByIds(ids);
+            
+            if (success) {
+                return CommonResult.success("删除分类成功");
+            } else {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除分类失败");
             }
-
-            return CommonResult.success("删除分类成功");
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除分类失败：" + e.getMessage());

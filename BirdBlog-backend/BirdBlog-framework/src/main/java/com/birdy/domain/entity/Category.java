@@ -2,6 +2,7 @@ package com.birdy.domain.entity;
 
 import java.util.Date;
 
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,11 +26,6 @@ public class Category {
      * 分类名
      */
     private String name;
-
-    /**
-     * 父分类ID，NULL表示顶级
-     */
-    private Long pid;
 
     /**
      * 描述
@@ -69,6 +65,7 @@ public class Category {
     /**
      * 是否删除
      */
+    @TableLogic
     private Boolean deleted;
 
 
@@ -86,7 +83,6 @@ public class Category {
         Category other = (Category) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
             && (this.getName() == null ? other.getName() == null : this.getName().equals(other.getName()))
-            && (this.getPid() == null ? other.getPid() == null : this.getPid().equals(other.getPid()))
             && (this.getDescription() == null ? other.getDescription() == null : this.getDescription().equals(other.getDescription()))
             && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
             && (this.getCreator() == null ? other.getCreator() == null : this.getCreator().equals(other.getCreator()))
@@ -102,7 +98,6 @@ public class Category {
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
         result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
-        result = prime * result + ((getPid() == null) ? 0 : getPid().hashCode());
         result = prime * result + ((getDescription() == null) ? 0 : getDescription().hashCode());
         result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
         result = prime * result + ((getCreator() == null) ? 0 : getCreator().hashCode());
@@ -121,7 +116,6 @@ public class Category {
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
         sb.append(", name=").append(name);
-        sb.append(", pid=").append(pid);
         sb.append(", description=").append(description);
         sb.append(", status=").append(status);
         sb.append(", creator=").append(creator);

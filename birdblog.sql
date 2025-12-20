@@ -11,7 +11,7 @@
  Target Server Version : 80036 (8.0.36)
  File Encoding         : 65001
 
- Date: 15/12/2025 19:20:09
+ Date: 20/12/2025 19:49:16
 */
 
 SET NAMES utf8mb4;
@@ -52,7 +52,7 @@ CREATE TABLE `bg_article`  (
   CONSTRAINT `fk_article_author` FOREIGN KEY (`author_id`) REFERENCES `sys_user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `fk_article_category` FOREIGN KEY (`category_id`) REFERENCES `bg_category` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `bg_article_chk_1` CHECK (`status` in (0,1))
-) ENGINE = InnoDB AUTO_INCREMENT = 10044 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 10047 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for bg_article_favorite
@@ -73,7 +73,7 @@ CREATE TABLE `bg_article_favorite`  (
   INDEX `idx_favorite_article_deleted`(`article_id` ASC, `deleted` ASC) USING BTREE,
   CONSTRAINT `fk_favorite_article` FOREIGN KEY (`article_id`) REFERENCES `bg_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_favorite_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章收藏表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章收藏表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for bg_article_like
@@ -93,7 +93,7 @@ CREATE TABLE `bg_article_like`  (
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE,
   CONSTRAINT `fk_like_article` FOREIGN KEY (`article_id`) REFERENCES `bg_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章点赞表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章点赞表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for bg_article_tag
@@ -360,6 +360,86 @@ BEGIN
         published_time = IFNULL(p_publish_time, NOW()),
         update_time = NOW()
     WHERE id = p_article_id AND deleted = b'0';
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Triggers structure for table bg_article
+-- ----------------------------
+DROP TRIGGER IF EXISTS `trg_article_category_after_insert`;
+delimiter ;;
+CREATE TRIGGER `trg_article_category_after_insert` AFTER INSERT ON `bg_article` FOR EACH ROW BEGIN
+    -- 只有当文章状态为已发布(0)且未删除时，才增加分类计数
+    IF NEW.status = 0 AND NEW.deleted = b'0' THEN
+        UPDATE bg_category
+        SET count = count + 1
+        WHERE id = NEW.category_id;
+    END IF;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Triggers structure for table bg_article
+-- ----------------------------
+DROP TRIGGER IF EXISTS `trg_article_category_after_update`;
+delimiter ;;
+CREATE TRIGGER `trg_article_category_after_update` AFTER UPDATE ON `bg_article` FOR EACH ROW BEGIN
+    DECLARE old_published BOOLEAN DEFAULT FALSE;
+    DECLARE new_published BOOLEAN DEFAULT FALSE;
+
+    -- 判断旧状态是否为"已发布且未删除"
+    SET old_published = (OLD.status = 0 AND OLD.deleted = b'0');
+    -- 判断新状态是否为"已发布且未删除"
+    SET new_published = (NEW.status = 0 AND NEW.deleted = b'0');
+
+    -- 场景1：分类未变更，但发布状态变更
+    IF OLD.category_id = NEW.category_id THEN
+        -- 从未发布变为已发布：count +1
+        IF NOT old_published AND new_published THEN
+            UPDATE bg_category
+            SET count = count + 1
+            WHERE id = NEW.category_id;
+            -- 从已发布变为未发布：count -1
+        ELSEIF old_published AND NOT new_published THEN
+            UPDATE bg_category
+            SET count = count - 1
+            WHERE id = OLD.category_id AND count > 0;
+        END IF;
+
+        -- 场景2：分类变更
+    ELSE
+        -- 旧分类：如果原来是已发布状态，count -1
+        IF old_published THEN
+            UPDATE bg_category
+            SET count = count - 1
+            WHERE id = OLD.category_id AND count > 0;
+        END IF;
+
+        -- 新分类：如果现在是已发布状态，count +1
+        IF new_published THEN
+            UPDATE bg_category
+            SET count = count + 1
+            WHERE id = NEW.category_id;
+        END IF;
+    END IF;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Triggers structure for table bg_article
+-- ----------------------------
+DROP TRIGGER IF EXISTS `trg_article_category_after_delete`;
+delimiter ;;
+CREATE TRIGGER `trg_article_category_after_delete` AFTER DELETE ON `bg_article` FOR EACH ROW BEGIN
+    -- 只有当被删除的文章是已发布状态时，才减少分类计数
+    IF OLD.status = 0 AND OLD.deleted = b'0' THEN
+        UPDATE bg_category
+        SET count = count - 1
+        WHERE id = OLD.category_id AND count > 0;
+    END IF;
 END
 ;;
 delimiter ;

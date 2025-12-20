@@ -121,23 +121,6 @@
             show-word-limit
           />
         </el-form-item>
-        <el-form-item label="父分类" prop="pid">
-          <el-select
-            v-model="form.pid"
-            placeholder="请选择父分类（可选）"
-            clearable
-            style="width: 100%"
-          >
-            <el-option label="无（顶级分类）" :value="null" />
-            <el-option
-              v-for="category in topLevelCategories"
-              :key="category.id"
-              :label="category.name"
-              :value="category.id"
-              :disabled="category.id === editingId"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input
             v-model="form.description"
@@ -198,7 +181,6 @@ const queryParams = reactive<CategoryQueryParams>({
 // 表单数据
 const form = reactive<Partial<Category>>({
   name: '',
-  pid: null,
   description: '',
   status: 0
 })
@@ -216,15 +198,6 @@ const rules = {
     { required: true, message: '请选择状态', trigger: 'change' }
   ]
 }
-
-// 计算属性：过滤出顶级分类（pid为null或undefined）
-const topLevelCategories = computed(() => {
-  return categoryList.value.filter(category =>
-    category.pid === null ||
-    category.pid === undefined ||
-    category.pid === 0
-  )
-})
 
 /**
  * 获取分类列表
@@ -311,7 +284,6 @@ const handleDialogClose = () => {
  */
 const resetForm = () => {
   form.name = ''
-  form.pid = null
   form.description = ''
   form.status = 0
   isEdit.value = false
@@ -366,7 +338,6 @@ const handleEdit = (row: Category) => {
 
   // 直接使用表格中的数据填充表单
   form.name = row.name
-  form.pid = row.pid
   form.description = row.description || ''
   form.status = row.status
 

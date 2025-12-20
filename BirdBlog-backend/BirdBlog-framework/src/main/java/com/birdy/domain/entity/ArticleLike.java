@@ -24,19 +24,15 @@ import java.time.LocalDateTime;
 public class ArticleLike {
 
     /**
-     * 点赞记录ID
+     * 文章ID（联合主键）
      */
-    @TableId(type = IdType.AUTO)
-    private Long id;
-
-    /**
-     * 文章ID
-     */
+    @TableField("article_id")
     private Long articleId;
 
     /**
-     * 用户ID
+     * 用户ID（联合主键）
      */
+    @TableField("user_id")
     private Long userId;
 
     /**

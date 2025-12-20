@@ -751,7 +751,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
         Category category = new Category();
         category.setName(name);
-        category.setPid(null);
         category.setDescription(StringUtils.hasText(newCategoryRemark) ? newCategoryRemark.trim() : "");
         category.setStatus(SysConstants.CATEGORY_STATUS_ENABLE);
         category.setCount(0);

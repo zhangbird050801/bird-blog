@@ -34,8 +34,8 @@
         LEFT JOIN bg_article a ON af.article_id = a.id
         LEFT JOIN bg_category c ON a.category_id = c.id
         WHERE af.user_id = #{userId}
-          AND af.deleted = 0
-          AND a.deleted = 0
+          AND af.deleted = false
+          AND a.deleted = false
           AND a.status = 0
         ORDER BY af.create_time DESC
     </select>

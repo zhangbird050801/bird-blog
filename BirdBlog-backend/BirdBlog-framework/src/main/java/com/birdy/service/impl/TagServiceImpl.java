@@ -260,18 +260,15 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
                 }
             }
 
-            // 2. 软删除标签（将deleted字段设为true）
-            for (Long id : ids) {
-                Tag tag = getById(id);
-                if (tag != null) {
-                    tag.setDeleted(true);
-                    tag.setUpdater("admin");
-                    tag.setUpdateTime(new java.util.Date());
-                    updateById(tag);
-                }
+            // 2. 使用 MyBatis-Plus 的批量逻辑删除方法
+            // @TableLogic 注解会自动将 removeByIds 转换为更新 deleted 字段
+            boolean success = removeByIds(ids);
+            
+            if (success) {
+                return CommonResult.success("删除标签成功");
+            } else {
+                return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除标签失败");
             }
-
-            return CommonResult.success("删除标签成功");
         } catch (Exception e) {
             e.printStackTrace();
             return CommonResult.error(com.birdy.enums.HttpCodeEnum.SYSTEM_ERROR, "删除标签失败：" + e.getMessage());

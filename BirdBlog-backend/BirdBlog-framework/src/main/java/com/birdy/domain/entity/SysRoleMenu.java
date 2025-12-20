@@ -17,17 +17,14 @@ import java.time.LocalDateTime;
 @TableName("sys_role_menu")
 public class SysRoleMenu {
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
     /**
-     * 角色ID
+     * 角色ID（联合主键）
      */
     @TableField("role_id")
     private Long roleId;
 
     /**
-     * 菜单ID
+     * 菜单ID（联合主键）
      */
     @TableField("menu_id")
     private Long menuId;

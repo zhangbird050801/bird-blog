@@ -2,6 +2,7 @@ package com.birdy.domain.entity;
 
 import java.util.Date;
 
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -69,6 +70,7 @@ public class Link {
     /**
      * 是否删除
      */
+    @TableLogic
     private Boolean deleted;
 
     @Override
