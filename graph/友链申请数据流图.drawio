@@ -1,0 +1,120 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.2.7">
+  <diagram name="第 1 页" id="47XuLlc2xrtd4s_fzZCJ">
+    <mxGraphModel dx="1066" dy="692" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-12" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=50;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="4a-FmK5iN_Cf4mri2MgN-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-13" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-12" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="新增友链申请信息" vertex="1">
+          <mxGeometry relative="1" x="0.0045" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-1" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;" value="普通用户" vertex="1">
+          <mxGeometry height="80" width="120" x="11" y="196" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-7" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=120;exitDy=50;exitPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="352.1914978027344" y="371" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-9" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="审核请求" vertex="1">
+          <mxGeometry relative="1" x="-0.1839" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-2" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;" value="系统管理员" vertex="1">
+          <mxGeometry height="80" width="120" x="11" y="321" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="审核申请" vertex="1">
+          <mxGeometry height="60" width="120" x="353" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-25" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" target="4a-FmK5iN_Cf4mri2MgN-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-27" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-25" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="查询条件" vertex="1">
+          <mxGeometry relative="1" x="-0.1638" y="-3" as="geometry">
+            <mxPoint x="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="查询状态" vertex="1">
+          <mxGeometry height="60" width="120" x="353" y="238" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-22" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="4a-FmK5iN_Cf4mri2MgN-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-23" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="写入新增申请友链信息" vertex="1">
+          <mxGeometry relative="1" x="-0.4079" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="提交申请" vertex="1">
+          <mxGeometry height="60" width="120" x="353" y="142" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-26" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="469" y="281" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-28" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-26" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="友链信息" vertex="1">
+          <mxGeometry relative="1" x="0.0965" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-29" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="4a-FmK5iN_Cf4mri2MgN-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-30" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-29" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="申请信息" vertex="1">
+          <mxGeometry relative="1" x="0.3653" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="友链信息表" vertex="1">
+          <mxGeometry height="80" width="120" x="671" y="241" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-8" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1.004;entryY=0.855;entryDx=0;entryDy=0;entryPerimeter=0;" target="4a-FmK5iN_Cf4mri2MgN-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-10" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="审核结果" vertex="1">
+          <mxGeometry relative="1" x="0.2007" y="5" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-14" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.55;entryY=-0.011;entryDx=0;entryDy=0;entryPerimeter=0;" target="4a-FmK5iN_Cf4mri2MgN-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-15" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="提交结果" vertex="1">
+          <mxGeometry relative="1" x="0.1082" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-16" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=120;exitDy=50;exitPerimeter=0;entryX=0.034;entryY=0.119;entryDx=0;entryDy=0;entryPerimeter=0;" target="4a-FmK5iN_Cf4mri2MgN-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-18" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="状态查询" vertex="1">
+          <mxGeometry relative="1" x="-0.1343" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-17" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.989;entryY=0.893;entryDx=0;entryDy=0;entryPerimeter=0;" target="4a-FmK5iN_Cf4mri2MgN-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-19" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="审核状态" vertex="1">
+          <mxGeometry relative="1" x="0.1732" y="1" as="geometry">
+            <mxPoint x="7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-31" edge="1" parent="1" source="4a-FmK5iN_Cf4mri2MgN-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0.638;entryY=0.936;entryDx=0;entryDy=0;entryPerimeter=0;" target="4a-FmK5iN_Cf4mri2MgN-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4a-FmK5iN_Cf4mri2MgN-32" connectable="0" parent="4a-FmK5iN_Cf4mri2MgN-31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="更新审核状态" vertex="1">
+          <mxGeometry relative="1" x="-0.4537" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
