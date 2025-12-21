@@ -210,7 +210,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-288" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="是否删除" vertex="1">
-          <mxGeometry height="70.5" width="207" x="1734" y="3993" as="geometry" />
+          <mxGeometry height="70.5" width="207" x="1670" y="3975" as="geometry" />
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-289" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="是否置顶" vertex="1">
           <mxGeometry height="70.5" width="207" x="1045" y="3916" as="geometry" />
@@ -227,10 +227,10 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-293" parent="1" style="whiteSpace=wrap;html=1;rounded=0;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="状态" vertex="1">
-          <mxGeometry height="70.5" width="207" x="2108" y="3893" as="geometry" />
+          <mxGeometry height="70.5" width="207" x="2062" y="3869" as="geometry" />
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-295" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="是否允许评论" vertex="1">
-          <mxGeometry height="70.5" width="207" x="1505" y="4014" as="geometry" />
+          <mxGeometry height="70.5" width="207" x="1457" y="3996" as="geometry" />
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-296" edge="1" parent="1" source="lKDXyXrLV7v5rjbIhkUA-297" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.462;exitY=-0.04;exitDx=0;exitDy=0;endArrow=none;endFill=0;fontSize=30;fontFamily=Comic Sans MS;entryX=0.489;entryY=1.015;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;fontStyle=1;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" target="lKDXyXrLV7v5rjbIhkUA-267">
           <mxGeometry relative="1" as="geometry">
@@ -246,7 +246,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-299" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="浏览量" vertex="1">
-          <mxGeometry height="70.5" width="207" x="1933" y="3957" as="geometry" />
+          <mxGeometry height="70.5" width="207" x="1889" y="3945" as="geometry" />
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-300" edge="1" parent="1" source="lKDXyXrLV7v5rjbIhkUA-305" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;endArrow=none;endFill=0;fontSize=30;fontFamily=Comic Sans MS;entryX=0.489;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;fontStyle=1;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" target="lKDXyXrLV7v5rjbIhkUA-267">
           <mxGeometry relative="1" as="geometry">
@@ -267,7 +267,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-304" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="点赞量" vertex="1">
-          <mxGeometry height="70.5" width="207" x="1281" y="4030" as="geometry" />
+          <mxGeometry height="70.5" width="207" x="1233" y="3993" as="geometry" />
         </mxCell>
         <mxCell id="lKDXyXrLV7v5rjbIhkUA-305" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontFamily=Comic Sans MS;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="发布时间" vertex="1">
           <mxGeometry height="70.5" width="207" x="713" y="3759" as="geometry" />
