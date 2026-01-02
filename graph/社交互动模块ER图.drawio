@@ -430,10 +430,10 @@
           <mxGeometry height="70.5" width="207" x="782" y="2916" as="geometry" />
         </mxCell>
         <mxCell id="KCGTnvS-F2up-s54_4J_-14" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Comic Sans MS;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="创建时间" vertex="1">
-          <mxGeometry height="70.5" width="207" x="1515" y="2671" as="geometry" />
+          <mxGeometry height="70.5" width="207" x="1532" y="2668" as="geometry" />
         </mxCell>
         <mxCell id="KCGTnvS-F2up-s54_4J_-15" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Comic Sans MS;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="更新时间" vertex="1">
-          <mxGeometry height="70.5" width="207" x="1520" y="2600.5" as="geometry" />
+          <mxGeometry height="70.5" width="207" x="1535" y="2577" as="geometry" />
         </mxCell>
         <mxCell id="KCGTnvS-F2up-s54_4J_-16" parent="1" style="whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;fontSize=30;fontStyle=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Comic Sans MS;fontColor=default;labelBackgroundColor=default;strokeWidth=2;" value="是否删除" vertex="1">
           <mxGeometry height="70.5" width="207" x="1538" y="2759" as="geometry" />
